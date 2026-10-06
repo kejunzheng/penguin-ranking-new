@@ -86,6 +86,8 @@ const rankRows = rows => rows.filter(row => row.starGrowth > 0)
 
 const status = readJson(path.join(dataDir, 'status.json'), {});
 const periodStatus = {}, freshness = [];
+const fileUpdatedAt = { ...(status.fileUpdatedAt || {}) }; // 每个榜单文件最近一次真正重算的时间；默认是原站冻结时间
+const FROZEN_AT = '2026-09-05T23:00:01.574Z';
 for (const channel of CHANNELS) for (const [period] of Object.entries(PERIODS)) {
   const file = path.join(dataDir, channel, `${period}.json`);
   const previous = previousRank[`${channel}/${period}`];
@@ -124,11 +126,12 @@ for (const channel of CHANNELS) for (const [period] of Object.entries(PERIODS)) 
       };
     });
     writeJsonIfChanged(file, rows);
+    fileUpdatedAt[`${channel}/${period}`] = now.toISOString();
   }
   freshness.push({
     dataset: `${channel === 'product' ? '开源产品榜' : 'Agent Skills 榜'} · ${{ daily: '日榜', weekly: '周榜', monthly: '月榜' }[period]}`,
     file: `data/${channel}/${period}.json`, source: 'github.com 仓库页面（自采集 Star 快照）', mode: 'live',
-    latest: mature ? now.toISOString() : status.updatedAt || '2026-09-05T23:00:01.574Z',
+    latest: fileUpdatedAt[`${channel}/${period}`] || FROZEN_AT,
     note: mature ? null : `基线积累中：只有 ${comparable.length} 个仓库有约 ${PERIODS[period] / 24} 天前的观测值（需 ≥10），沿用旧榜单`,
   });
 }
@@ -137,6 +140,7 @@ writeJsonIfChanged(path.join(dataDir, 'status.json'), {
   ...status,
   updatedAt: anyUpdated ? now.toISOString() : status.updatedAt,
   lastAttemptAt: now.toISOString(),
+  fileUpdatedAt,
   source: 'github.com repository pages (self-collected star snapshots)',
   mode: 'live',
   periods: Object.fromEntries(Object.entries(periodStatus).map(([period, byChannel]) => [period, {
