@@ -2,12 +2,13 @@
 //
 // 两层数据：
 //   1. 基线：kejunzheng/penguin-model-capability-ranking 仓库的一次性导入（最后采集 2026-09-21，之后不再更新）。
-//      仍作为 15 项「冻结」benchmark 的唯一来源，以及全部模型的元数据与 SKU 归一结果。
-//   2. 实时：每次运行直接抓取上游官方/公开数据源，覆盖 9 项 benchmark：
+//      仍作为 14 项「冻结」benchmark 的唯一来源，以及全部模型的元数据与 SKU 归一结果。
+//   2. 实时：每次运行直接抓取上游官方/公开数据源，覆盖 10 项 benchmark：
 //      - Artificial Analysis 排行榜页面（内嵌数据）：AA 智能指数、AA-LCR、HLE、GPQA Diamond、MMMU-Pro
 //      - Epoch AI 公开数据包：FrontierMath Tier 1-3、SimpleQA Verified
 //      - ARC Prize 官方 evaluations.json：ARC-AGI-2
 //      - LMArena 官方 HuggingFace 数据集：Text Arena Overall
+//      - OSWorld 2.0 官方结果 JSON（v2.1 / full / 500 步）
 //      实时 benchmark 不再使用基线里的旧记录（避免新旧配置混排），历史快照保存在 .data-state/ 供「近一周/月/季」筛选。
 //
 // 抓取失败的数据源沿用上一次成功的快照；从未成功过才退回基线。前台只读取 date / rank / config / source。
@@ -174,11 +175,29 @@ async function fetchLmarena() {
   };
 }
 
+async function fetchOsworld2() {
+  const url = 'https://osworld-v2.xlang.ai/static/data/leaderboard/official-results.json';
+  const payload = await getJson(url);
+  // 沿用上游口径：只取官方默认版本 / 全量数据集 / 默认步数预算，不跨配置平均
+  const version = 'v2.1', scope = 'full', steps = 500; // 官方 default 字段可能是 'all'，这里固定为上游导入时的协议
+  const table = (payload.results || []).filter(row => row.releaseVersion === version && row.datasetScope === scope && row.stepBudget === steps && Number.isFinite(row.binaryAccuracy))
+    .sort((a, b) => b.binaryAccuracy - a.binaryAccuracy);
+  if (!table.length) throw new Error(`OSWorld 2.0 只有 ${table.length} 行`);
+  return {
+    date: String(payload.updatedAt || runDate).slice(0, 10),
+    rows: table.map((row, index) => ({
+      benchmarkId: 'osworld_2', raw: row.reasoning ? `${row.model} (${row.reasoning})` : row.model, rank: index + 1, org: row.modelFamily || null,
+      releaseDate: null, openWeights: null, source: url,
+    })),
+  };
+}
+
 const LIVE_SOURCES = [
   { name: 'Artificial Analysis', benchmarks: ['aa_intelligence_index', 'aa_lcr', 'humanitys_last_exam', 'gpqa_diamond', 'mmmu_pro'], fetch: fetchArtificialAnalysis },
   { name: 'Epoch AI', benchmarks: ['frontiermath', 'simpleqa_verified'], fetch: fetchEpoch },
   { name: 'ARC Prize', benchmarks: ['arc_agi_2'], fetch: fetchArcAgi2 },
   { name: 'LMArena', benchmarks: ['lmarena_text_overall'], fetch: fetchLmarena },
+  { name: 'OSWorld 2.0', benchmarks: ['osworld_2'], fetch: fetchOsworld2 },
 ];
 const LIVE_BENCHMARKS = new Set(LIVE_SOURCES.flatMap(source => source.benchmarks));
 
@@ -349,6 +368,6 @@ for (const benchmark of benchmarks) {
   });
 }
 const newModels = models.filter(model => !eligibleIds.has(model.id)).map(model => `${model.name}(${model.releaseDate})`);
-console.log(`BENCHMARKS_UPDATED generated_at=${output.generated_at} benchmarks=${benchmarks.length} models=${models.length} new_models=${newModels.length}`);
 console.log(`  新增模型（最新 15 个）：${newModels.slice(0, 15).join('、')}`);
+console.log(`BENCHMARKS_UPDATED generated_at=${output.generated_at} benchmarks=${benchmarks.length} models=${models.length} new_models=${newModels.length}`);
 reportFreshness(freshness);

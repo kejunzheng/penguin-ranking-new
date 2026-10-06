@@ -1,0 +1,1758 @@
+{
+ "note": "GitHub 榜候选池与编辑内容（来自 218d434 的原始榜单）。新增仓库需补充 Logo（public/assets/projects/manifest.json）与中英文简介。",
+ "repos": {
+  "DietrichGebert/ponytail": {
+   "channels": [
+    "product"
+   ],
+   "name": "ponytail",
+   "descriptionZh": "Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote.",
+   "categoryZh": "开发工具",
+   "oneLinerZh": "Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote.",
+   "capabilitiesZh": [
+    "为 AI 编程代理提供精简代码规则，减少过度设计和不必要实现"
+   ],
+   "audienceZh": "使用 Claude Code、Cursor 等 AI 编程工具的开发者",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "repositoryId": 1266797999,
+   "fullName": "DietrichGebert/ponytail",
+   "language": "JavaScript",
+   "license": "MIT",
+   "topics": [
+    "agent-skills",
+    "ai-agents",
+    "claude",
+    "claude-code",
+    "claude-code-plugin",
+    "cursor-rules",
+    "developer-tools",
+    "llm",
+    "prompt-engineering",
+    "yagni"
+   ],
+   "pushedAt": "2026-09-04T12:35:29Z",
+   "repoUrl": "https://github.com/DietrichGebert/ponytail",
+   "homepage": "https://ponytail.dev",
+   "descriptionEn": "Makes your AI agent think like the laziest senior dev in the room. The best code is the code you never wrote."
+  },
+  "affaan-m/ECC": {
+   "channels": [
+    "product",
+    "skill"
+   ],
+   "name": "ECC",
+   "descriptionZh": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+   "categoryZh": "MCP",
+   "oneLinerZh": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+   "capabilitiesZh": [
+    "为多种 AI 编程代理提供技能、记忆、安全检查和性能优化配置"
+   ],
+   "audienceZh": "需要统一优化 Claude Code、Codex、Cursor 等代理工作流的开发者",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "repositoryId": 1136590548,
+   "fullName": "affaan-m/ECC",
+   "language": "JavaScript",
+   "license": "MIT",
+   "topics": [
+    "ai-agents",
+    "anthropic",
+    "claude",
+    "claude-code",
+    "developer-tools",
+    "llm",
+    "mcp",
+    "productivity"
+   ],
+   "pushedAt": "2026-09-05T21:47:27Z",
+   "repoUrl": "https://github.com/affaan-m/ECC",
+   "homepage": "https://ecc.tools",
+   "descriptionEn": "The agent harness performance optimization system. Skills, instincts, memory, security, and research-first development for Claude Code, Codex, Opencode, Cursor and beyond.",
+   "skillValidation": "待验证",
+   "securityReview": "待复核",
+   "popularityNote": "Star 增长不等同于能力、质量或安全性。",
+   "permissionNotesZh": "自动发现候选，使用前请按最小权限原则检查代码、依赖和凭据访问范围。"
+  },
+  "Graphify-Labs/graphify": {
+   "channels": [
+    "product",
+    "skill"
+   ],
+   "name": "graphify",
+   "descriptionZh": "Turn any codebase, with its docs, SQL schemas, configs, and PDFs, into a queryable knowledge graph. A /graphify skill for Claude Code, Cursor, Codex, and Gemini CLI: local deterministic AST parsing, every edge explained, no vector store.",
+   "categoryZh": "MCP",
+   "oneLinerZh": "Turn any codebase, with its docs, SQL schemas, configs, and PDFs, into a queryable knowledge graph. A /graphify skill for Claude Code, Cursor, Codex, and Gemini CLI: local deterministic AST parsing, every edge explained, no vector store.",
+   "capabilitiesZh": [
+    "把代码、文档、数据库结构和配置解析为可查询的知识图谱"
+   ],
+   "audienceZh": "需要理解大型代码库、追踪依赖关系的研发团队",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "repositoryId": 1200597263,
+   "fullName": "Graphify-Labs/graphify",
+   "language": "Python",
+   "license": "Apache-2.0",
+   "topics": [
+    "ai-agents",
+    "antigravity",
+    "ast",
+    "claude-code",
+    "code-analysis",
+    "code-search",
+    "codex",
+    "cursor",
+    "developer-tools",
+    "gemini",
+    "graphrag",
+    "knowledge-graph",
+    "leiden",
+    "llm",
+    "mcp",
+    "openclaw",
+    "rag",
+    "skills",
+    "tree-sitter"
+   ],
+   "pushedAt": "2026-09-05T21:19:43Z",
+   "repoUrl": "https://github.com/Graphify-Labs/graphify",
+   "homepage": "https://www.graphify.com",
+   "descriptionEn": "Turn any codebase, with its docs, SQL schemas, configs, and PDFs, into a queryable knowledge graph. A /graphify skill for Claude Code, Cursor, Codex, and Gemini CLI: local deterministic AST parsing, every edge explained, no vector store.",
+   "skillValidation": "待验证",
+   "securityReview": "待复核",
+   "popularityNote": "Star 增长不等同于能力、质量或安全性。",
+   "permissionNotesZh": "自动发现候选，使用前请按最小权限原则检查代码、依赖和凭据访问范围。"
+  },
+  "rtk-ai/rtk": {
+   "channels": [
+    "product"
+   ],
+   "name": "rtk",
+   "descriptionZh": "CLI proxy that reduces LLM token consumption by 60-90% on common dev commands. Single Rust binary, zero dependencies",
+   "categoryZh": "开发工具",
+   "oneLinerZh": "CLI proxy that reduces LLM token consumption by 60-90% on common dev commands. Single Rust binary, zero dependencies",
+   "capabilitiesZh": [
+    "压缩常用开发命令的输出，减少 AI 编程代理读取的 Token"
+   ],
+   "audienceZh": "关注 AI 编程成本和上下文利用率的命令行开发者",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "repositoryId": 1139971460,
+   "fullName": "rtk-ai/rtk",
+   "language": "Rust",
+   "license": "Apache-2.0",
+   "topics": [
+    "agentic-coding",
+    "ai-coding",
+    "anthropic",
+    "claude-code",
+    "cli",
+    "command-line-tool",
+    "cost-reduction",
+    "developer-tools",
+    "llm",
+    "open-source",
+    "productivity",
+    "rust",
+    "token-optimization"
+   ],
+   "pushedAt": "2026-09-05T00:00:59Z",
+   "repoUrl": "https://github.com/rtk-ai/rtk",
+   "homepage": "https://www.rtk-ai.app",
+   "descriptionEn": "CLI proxy that reduces LLM token consumption by 60-90% on common dev commands. Single Rust binary, zero dependencies"
+  },
+  "awesome-selfhosted/awesome-selfhosted": {
+   "channels": [
+    "product"
+   ],
+   "name": "awesome-selfhosted",
+   "descriptionZh": "A list of Free Software network services and web applications which can be hosted on your own servers",
+   "categoryZh": "开源产品",
+   "oneLinerZh": "A list of Free Software network services and web applications which can be hosted on your own servers",
+   "capabilitiesZh": [
+    "按类别检索可自行部署的开源网络服务和 Web 应用"
+   ],
+   "audienceZh": "寻找自托管软件方案的开发者、运维人员和技术团队",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "repositoryId": 36633370,
+   "fullName": "awesome-selfhosted/awesome-selfhosted",
+   "language": "",
+   "license": "NOASSERTION",
+   "topics": [
+    "awesome",
+    "awesome-list",
+    "cloud",
+    "free-software",
+    "hosting",
+    "privacy",
+    "self-hosted",
+    "selfhosted"
+   ],
+   "pushedAt": "2026-09-05T10:51:19Z",
+   "repoUrl": "https://github.com/awesome-selfhosted/awesome-selfhosted",
+   "homepage": "https://awesome-selfhosted.net/",
+   "descriptionEn": "A list of Free Software network services and web applications which can be hosted on your own servers"
+  },
+  "n8n-io/n8n": {
+   "channels": [
+    "product",
+    "skill"
+   ],
+   "name": "n8n",
+   "descriptionZh": "Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.",
+   "categoryZh": "MCP",
+   "oneLinerZh": "Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.",
+   "capabilitiesZh": [
+    "用可视化节点连接应用、API 和 AI 服务，自动执行跨系统工作流"
+   ],
+   "audienceZh": "需要搭建业务自动化流程的产品、研发和运营团队",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "repositoryId": 193215554,
+   "fullName": "n8n-io/n8n",
+   "language": "TypeScript",
+   "license": "NOASSERTION",
+   "topics": [
+    "ai",
+    "apis",
+    "automation",
+    "cli",
+    "data-flow",
+    "development",
+    "integration-framework",
+    "integrations",
+    "ipaas",
+    "low-code",
+    "low-code-platform",
+    "mcp",
+    "mcp-client",
+    "mcp-server",
+    "n8n",
+    "no-code",
+    "self-hosted",
+    "typescript",
+    "workflow",
+    "workflow-automation"
+   ],
+   "pushedAt": "2026-09-05T21:53:43Z",
+   "repoUrl": "https://github.com/n8n-io/n8n",
+   "homepage": "https://n8n.io",
+   "descriptionEn": "Fair-code workflow automation platform with native AI capabilities. Combine visual building with custom code, self-host or cloud, 400+ integrations.",
+   "skillValidation": "待验证",
+   "securityReview": "待复核",
+   "popularityNote": "Star 增长不等同于能力、质量或安全性。",
+   "permissionNotesZh": "自动发现候选，使用前请按最小权限原则检查代码、依赖和凭据访问范围。"
+  },
+  "open-webui/open-webui": {
+   "channels": [
+    "product",
+    "skill"
+   ],
+   "name": "open-webui",
+   "descriptionZh": "User-friendly AI Interface (Supports Ollama, OpenAI API, ...)",
+   "categoryZh": "MCP",
+   "oneLinerZh": "User-friendly AI Interface (Supports Ollama, OpenAI API, ...)",
+   "capabilitiesZh": [
+    "为 Ollama、OpenAI 兼容模型等提供统一的网页聊天与模型管理界面"
+   ],
+   "audienceZh": "需要私有化使用和管理大模型的个人、开发者及团队",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "repositoryId": 701547123,
+   "fullName": "open-webui/open-webui",
+   "language": "Python",
+   "license": "NOASSERTION",
+   "topics": [
+    "ai",
+    "llm",
+    "llm-ui",
+    "llm-webui",
+    "llms",
+    "mcp",
+    "ollama",
+    "ollama-webui",
+    "open-webui",
+    "openai",
+    "openapi",
+    "rag",
+    "self-hosted",
+    "ui",
+    "webui"
+   ],
+   "pushedAt": "2026-09-05T03:34:34Z",
+   "repoUrl": "https://github.com/open-webui/open-webui",
+   "homepage": "https://openwebui.com",
+   "descriptionEn": "User-friendly AI Interface (Supports Ollama, OpenAI API, ...)",
+   "skillValidation": "待验证",
+   "securityReview": "待复核",
+   "popularityNote": "Star 增长不等同于能力、质量或安全性。",
+   "permissionNotesZh": "自动发现候选，使用前请按最小权限原则检查代码、依赖和凭据访问范围。"
+  },
+  "rustdesk/rustdesk": {
+   "channels": [
+    "product"
+   ],
+   "name": "RustDesk",
+   "descriptionZh": "支持自建中继服务器的跨平台远程桌面应用。",
+   "categoryZh": "效率/协作",
+   "oneLinerZh": "用自己掌控的服务器远程连接电脑。",
+   "capabilitiesZh": [
+    "跨平台远程控制",
+    "文件与剪贴板同步",
+    "自建中继服务"
+   ],
+   "audienceZh": "个人、技术支持和企业 IT",
+   "useModeZh": [
+    "桌面",
+    "移动端"
+   ],
+   "difficultyZh": "开箱即用",
+   "chineseSupportZh": "支持简体中文",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "已通过 GitHub 官方仓库状态与近期活跃度核验；正式使用前仍应结合许可证、部署和数据权限评估。",
+   "repositoryId": 299354207,
+   "fullName": "rustdesk/rustdesk",
+   "language": "Rust",
+   "license": "AGPL-3.0",
+   "topics": [
+    "android",
+    "anydesk",
+    "dart",
+    "flatpak",
+    "flutter",
+    "flutter-apps",
+    "ios",
+    "linux",
+    "macos",
+    "p2p",
+    "rdp",
+    "remote-control",
+    "remote-desktop",
+    "rust",
+    "rust-lang",
+    "teamviewer",
+    "vnc",
+    "wayland",
+    "windows"
+   ],
+   "pushedAt": "2026-09-05T16:25:26Z",
+   "repoUrl": "https://github.com/rustdesk/rustdesk",
+   "homepage": "https://rustdesk.com",
+   "descriptionEn": "A cross-platform remote desktop application with self-hosted relay servers."
+  },
+  "OpenHands/OpenHands": {
+   "channels": [
+    "product",
+    "skill"
+   ],
+   "name": "OpenHands",
+   "descriptionZh": "可在代码仓库中执行开发任务的开放式软件工程 Agent 平台。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "让软件工程 Agent 在隔离工作区中阅读、修改并运行代码。",
+   "capabilitiesZh": [
+    "理解代码仓库与任务",
+    "编辑文件并执行终端命令",
+    "通过沙箱完成开发流程"
+   ],
+   "audienceZh": "希望自动化研发任务的工程团队",
+   "useModeZh": [
+    "网页",
+    "Docker",
+    "Agent"
+   ],
+   "difficultyZh": "需部署",
+   "chineseSupportZh": "可用中文描述任务",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "适合受控环境下处理代码任务，合并前仍需人工审查差异和测试结果。",
+   "repositoryId": 771302083,
+   "fullName": "OpenHands/OpenHands",
+   "language": "TypeScript",
+   "license": "MIT",
+   "topics": [
+    "agent",
+    "artificial-intelligence",
+    "chatgpt",
+    "claude-ai",
+    "cli",
+    "developer-tools",
+    "gpt",
+    "llm",
+    "openai"
+   ],
+   "pushedAt": "2026-09-05T21:32:55Z",
+   "repoUrl": "https://github.com/OpenHands/OpenHands",
+   "homepage": "https://openhands.dev",
+   "descriptionEn": "An open software-engineering agent platform that carries out development tasks in code repositories.",
+   "skillValidation": "演示通过",
+   "securityReview": "基础项已复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "triggerZh": "提交代码修复、实现或仓库分析任务时触发",
+   "inputZh": "代码仓库、任务说明与运行环境",
+   "outputZh": "代码变更、执行日志和任务总结",
+   "compatibleAgents": [
+    "OpenHands"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "可执行代码和命令；应使用沙箱、最小凭据，并禁止直接操作生产环境。"
+  },
+  "localsend/localsend": {
+   "channels": [
+    "product"
+   ],
+   "name": "LocalSend",
+   "descriptionZh": "无需云端和账号的局域网跨平台文件传输工具。",
+   "categoryZh": "效率/协作",
+   "oneLinerZh": "让手机和电脑像 AirDrop 一样互传文件。",
+   "capabilitiesZh": [
+    "发现局域网设备",
+    "跨平台传输",
+    "加密点对点连接"
+   ],
+   "audienceZh": "个人和多设备用户",
+   "useModeZh": [
+    "桌面",
+    "移动端"
+   ],
+   "difficultyZh": "开箱即用",
+   "chineseSupportZh": "支持简体中文",
+   "selfHostable": false,
+   "directExperience": true,
+   "editorNoteZh": "已通过 GitHub 官方仓库状态与近期活跃度核验；正式使用前仍应结合许可证、部署和数据权限评估。",
+   "repositoryId": 578822531,
+   "fullName": "localsend/localsend",
+   "language": "Dart",
+   "license": "Apache-2.0",
+   "topics": [
+    "dart",
+    "file-sharing",
+    "flutter",
+    "flutter-apps"
+   ],
+   "pushedAt": "2026-08-31T10:03:40Z",
+   "repoUrl": "https://github.com/localsend/localsend",
+   "homepage": "https://localsend.org",
+   "descriptionEn": "Cross-platform file sharing over a local network, without cloud services or accounts."
+  },
+  "immich-app/immich": {
+   "channels": [
+    "product"
+   ],
+   "name": "Immich",
+   "descriptionZh": "用于照片和视频备份、浏览、搜索的自托管应用。",
+   "categoryZh": "效率/协作",
+   "oneLinerZh": "在自己的服务器上搭建云相册。",
+   "capabilitiesZh": [
+    "手机自动备份",
+    "相册与时间线",
+    "智能搜索照片"
+   ],
+   "audienceZh": "家庭用户和摄影爱好者",
+   "useModeZh": [
+    "网页",
+    "移动端",
+    "Docker"
+   ],
+   "difficultyZh": "需部署",
+   "chineseSupportZh": "支持简体中文",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "已通过 GitHub 官方仓库状态与近期活跃度核验；正式使用前仍应结合许可证、部署和数据权限评估。",
+   "repositoryId": 455229168,
+   "fullName": "immich-app/immich",
+   "language": "TypeScript",
+   "license": "AGPL-3.0",
+   "topics": [
+    "backup-tool",
+    "flutter",
+    "google-photos",
+    "google-photos-alternative",
+    "javascript",
+    "mobile-app",
+    "nestjs",
+    "nodejs",
+    "photo-gallery",
+    "photos",
+    "photos-management",
+    "self-hosted",
+    "svelte",
+    "sveltekit",
+    "typescript",
+    "videos"
+   ],
+   "pushedAt": "2026-09-05T20:24:56Z",
+   "repoUrl": "https://github.com/immich-app/immich",
+   "homepage": "https://immich.app",
+   "descriptionEn": "A self-hosted application for backing up, browsing and searching photos and videos."
+  },
+  "makeplane/plane": {
+   "channels": [
+    "product"
+   ],
+   "name": "Plane",
+   "descriptionZh": "面向产品团队的开源项目管理工具，可管理事项、周期和产品路线图。",
+   "categoryZh": "效率/协作",
+   "oneLinerZh": "开源的项目管理平台，用事项、周期和路线图推进产品。",
+   "capabilitiesZh": [
+    "管理事项与迭代周期",
+    "规划模块和产品路线图",
+    "提供团队协作视图"
+   ],
+   "audienceZh": "产品、研发和设计团队",
+   "useModeZh": [
+    "网页",
+    "Docker"
+   ],
+   "difficultyZh": "需部署",
+   "chineseSupportZh": "界面有中文翻译支持",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "功能覆盖产品研发流程，自托管前需评估升级、备份和邮件服务配置。",
+   "repositoryId": 568098118,
+   "fullName": "makeplane/plane",
+   "language": "TypeScript",
+   "license": "AGPL-3.0",
+   "topics": [
+    "boards",
+    "bug-tracker",
+    "django",
+    "docker",
+    "gantt",
+    "issue-tracker",
+    "jira",
+    "jira-alternative",
+    "kanban",
+    "linear",
+    "postgresql",
+    "product-management",
+    "project-management",
+    "project-planning",
+    "python",
+    "react",
+    "redis",
+    "typescipt",
+    "vite",
+    "work-management"
+   ],
+   "pushedAt": "2026-09-04T19:20:22Z",
+   "repoUrl": "https://github.com/makeplane/plane",
+   "homepage": "http://plane.so",
+   "descriptionEn": "Open-source project management for product teams, including issues, cycles and roadmaps."
+  },
+  "twentyhq/twenty": {
+   "channels": [
+    "product"
+   ],
+   "name": "Twenty",
+   "descriptionZh": "现代化开源 CRM，强调可定制数据模型与清晰的团队工作流。",
+   "categoryZh": "效率/协作",
+   "oneLinerZh": "可自定义数据结构和流程的现代开源 CRM。",
+   "capabilitiesZh": [
+    "管理联系人与公司",
+    "定制对象和字段",
+    "构建销售协作流程"
+   ],
+   "audienceZh": "销售团队、创业公司和 CRM 开发者",
+   "useModeZh": [
+    "网页",
+    "Docker"
+   ],
+   "difficultyZh": "需部署",
+   "chineseSupportZh": "中文界面支持有限",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "强调可扩展的数据模型，适合有自定义需求且能维护部署的团队。",
+   "repositoryId": 572984571,
+   "fullName": "twentyhq/twenty",
+   "language": "TypeScript",
+   "license": "NOASSERTION",
+   "topics": [
+    "crm",
+    "crm-system",
+    "customer",
+    "good-first-issue",
+    "graphql",
+    "hacktoberfest",
+    "javascript",
+    "marketing",
+    "monorepo",
+    "nestjs",
+    "open-source",
+    "postgresql",
+    "react",
+    "reactjs",
+    "sales",
+    "typescript",
+    "web"
+   ],
+   "pushedAt": "2026-09-05T22:12:25Z",
+   "repoUrl": "https://github.com/twentyhq/twenty",
+   "homepage": "https://twenty.com",
+   "descriptionEn": "An open-source CRM with customizable data models and clear team workflows."
+  },
+  "penpot/penpot": {
+   "channels": [
+    "product"
+   ],
+   "name": "Penpot",
+   "descriptionZh": "面向跨职能团队的开源设计与原型平台，基于开放 Web 标准。",
+   "categoryZh": "设计工具",
+   "oneLinerZh": "让设计师和开发者在开放格式上协作设计与原型。",
+   "capabilitiesZh": [
+    "制作界面设计与交互原型",
+    "共享组件和设计规范",
+    "基于 Web 标准交付开发"
+   ],
+   "audienceZh": "产品设计师、前端开发者与设计系统团队",
+   "useModeZh": [
+    "网页",
+    "Docker"
+   ],
+   "difficultyZh": "开箱即用",
+   "chineseSupportZh": "界面支持中文",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "无需安装即可体验；自托管适合重视设计资产控制的组织。",
+   "repositoryId": 48769241,
+   "fullName": "penpot/penpot",
+   "language": "Clojure",
+   "license": "MPL-2.0",
+   "topics": [
+    "clojure",
+    "clojurescript",
+    "design",
+    "prototyping",
+    "ui",
+    "ux-design",
+    "ux-experience"
+   ],
+   "pushedAt": "2026-09-04T11:49:40Z",
+   "repoUrl": "https://github.com/penpot/penpot",
+   "homepage": "https://penpot.app",
+   "descriptionEn": "An open-source design and prototyping platform built on open web standards."
+  },
+  "calcom/cal.diy": {
+   "channels": [
+    "product"
+   ],
+   "name": "Cal.com",
+   "descriptionZh": "开放的日程安排基础设施，支持团队预约与丰富的集成能力。",
+   "categoryZh": "效率/协作",
+   "oneLinerZh": "用可配置预约页协调个人与团队日程。",
+   "capabilitiesZh": [
+    "创建预约链接与可用时段",
+    "支持团队轮询和集体预约",
+    "连接日历与第三方服务"
+   ],
+   "audienceZh": "顾问、销售、招聘与客户成功团队",
+   "useModeZh": [
+    "网页",
+    "Docker"
+   ],
+   "difficultyZh": "开箱即用",
+   "chineseSupportZh": "界面有中文翻译",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "托管版可直接使用，自托管时需配置日历、邮件和身份认证集成。",
+   "repositoryId": 350360184,
+   "fullName": "calcom/cal.diy",
+   "language": "TypeScript",
+   "license": "MIT",
+   "topics": [
+    "next-auth",
+    "nextjs",
+    "open-source",
+    "postgresql",
+    "prisma",
+    "t3-stack",
+    "tailwindcss",
+    "trpc",
+    "turborepo",
+    "typescript",
+    "zod"
+   ],
+   "pushedAt": "2026-09-04T10:10:06Z",
+   "repoUrl": "https://github.com/calcom/cal.diy",
+   "homepage": "https://cal.diy",
+   "descriptionEn": "Open scheduling infrastructure for team bookings and integrations."
+  },
+  "usebruno/bruno": {
+   "channels": [
+    "product"
+   ],
+   "name": "Bruno",
+   "descriptionZh": "本地优先的开源 API 客户端，以纯文本集合支持 Git 协作。",
+   "categoryZh": "开发工具",
+   "oneLinerZh": "把 API 请求保存成文本文件，和代码一起用 Git 管理。",
+   "capabilitiesZh": [
+    "本地调试 REST 与 GraphQL",
+    "纯文本保存请求集合",
+    "通过 Git 协作和审查变更"
+   ],
+   "audienceZh": "重视本地数据与版本管理的 API 团队",
+   "useModeZh": [
+    "桌面",
+    "CLI"
+   ],
+   "difficultyZh": "开箱即用",
+   "chineseSupportZh": "界面支持中文程度有限",
+   "selfHostable": false,
+   "directExperience": true,
+   "editorNoteZh": "本地优先与纯文本集合是核心特点，适合替代云端同步型 API 客户端。",
+   "repositoryId": 542284380,
+   "fullName": "usebruno/bruno",
+   "language": "JavaScript",
+   "license": "MIT",
+   "topics": [
+    "api-client",
+    "api-testing",
+    "automation",
+    "developer-tools",
+    "git",
+    "graphql-client",
+    "http-client",
+    "javascript",
+    "openapi",
+    "openapi3",
+    "opensource",
+    "rest-api",
+    "testing",
+    "testing-tools"
+   ],
+   "pushedAt": "2026-09-05T03:56:25Z",
+   "repoUrl": "https://github.com/usebruno/bruno",
+   "homepage": "https://www.usebruno.com/",
+   "descriptionEn": "A local-first, open-source API client with plain-text collections for Git collaboration."
+  },
+  "outline/outline": {
+   "channels": [
+    "product"
+   ],
+   "name": "Outline",
+   "descriptionZh": "强调协作体验的团队知识库，提供实时编辑、搜索与权限管理。",
+   "categoryZh": "效率/协作",
+   "oneLinerZh": "把团队文档集中成可搜索、可控权限的知识库。",
+   "capabilitiesZh": [
+    "实时协作文档编辑",
+    "组织集合与全文搜索",
+    "设置成员和访客权限"
+   ],
+   "audienceZh": "需要沉淀制度、项目和产品知识的团队",
+   "useModeZh": [
+    "网页",
+    "Docker"
+   ],
+   "difficultyZh": "需部署",
+   "chineseSupportZh": "界面支持中文",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "编辑体验成熟，部署版需要外部存储、认证和数据库等基础设施。",
+   "repositoryId": 59435364,
+   "fullName": "outline/outline",
+   "language": "TypeScript",
+   "license": "NOASSERTION",
+   "topics": [
+    "docker",
+    "javascript",
+    "mobx",
+    "nodejs",
+    "react",
+    "slack",
+    "wiki"
+   ],
+   "pushedAt": "2026-09-05T22:40:30Z",
+   "repoUrl": "https://github.com/outline/outline",
+   "homepage": "https://www.getoutline.com",
+   "descriptionEn": "A collaborative team knowledge base with live editing, search and access management."
+  },
+  "nocodb/nocodb": {
+   "channels": [
+    "product"
+   ],
+   "name": "NocoDB",
+   "descriptionZh": "将数据库转换为易用协作界面的开源无代码平台。",
+   "categoryZh": "数据工具",
+   "oneLinerZh": "把现有数据库变成类似在线表格的协作界面。",
+   "capabilitiesZh": [
+    "可视化浏览和编辑数据库",
+    "创建视图、表单与关联",
+    "通过 API 和自动化连接流程"
+   ],
+   "audienceZh": "运营、数据团队和低代码开发者",
+   "useModeZh": [
+    "网页",
+    "Docker"
+   ],
+   "difficultyZh": "需部署",
+   "chineseSupportZh": "界面支持中文",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "适合让非技术成员协作管理结构化数据，但仍需严格控制数据库权限。",
+   "repositoryId": 108761645,
+   "fullName": "nocodb/nocodb",
+   "language": "TypeScript",
+   "license": "NOASSERTION",
+   "topics": [
+    "airtable",
+    "airtable-alternative",
+    "automatic-api",
+    "hacktoberfest",
+    "low-code",
+    "no-code",
+    "no-code-database",
+    "no-code-platform",
+    "postgresql",
+    "rest-api",
+    "restful-api",
+    "spreadsheet",
+    "sqlite",
+    "swagger"
+   ],
+   "pushedAt": "2026-09-05T22:21:55Z",
+   "repoUrl": "https://github.com/nocodb/nocodb",
+   "homepage": "https://nocodb.com",
+   "descriptionEn": "An open-source no-code platform that turns databases into collaborative interfaces."
+  },
+  "hoppscotch/hoppscotch": {
+   "channels": [
+    "product"
+   ],
+   "name": "Hoppscotch",
+   "descriptionZh": "轻量、开源的 API 开发生态，覆盖 REST、GraphQL 与实时协议调试。",
+   "categoryZh": "开发工具",
+   "oneLinerZh": "在浏览器里快速发送和调试多种 API 请求。",
+   "capabilitiesZh": [
+    "调试 REST 与 GraphQL API",
+    "管理请求集合与环境变量",
+    "支持 WebSocket 等实时协议"
+   ],
+   "audienceZh": "前后端开发者与接口测试人员",
+   "useModeZh": [
+    "网页",
+    "桌面"
+   ],
+   "difficultyZh": "开箱即用",
+   "chineseSupportZh": "界面支持中文",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "打开网页即可体验，适合轻量调试；敏感接口建议使用自托管版本。",
+   "repositoryId": 203587744,
+   "fullName": "hoppscotch/hoppscotch",
+   "language": "TypeScript",
+   "license": "MIT",
+   "topics": [
+    "api",
+    "api-client",
+    "api-rest",
+    "api-testing",
+    "developer-tools",
+    "graphql",
+    "http",
+    "http-client",
+    "pwa",
+    "rest",
+    "rest-api",
+    "spa",
+    "testing",
+    "testing-tools",
+    "tools",
+    "vue",
+    "vuejs",
+    "websocket"
+   ],
+   "pushedAt": "2026-08-31T14:40:50Z",
+   "repoUrl": "https://github.com/hoppscotch/hoppscotch",
+   "homepage": "https://hoppscotch.io",
+   "descriptionEn": "An open-source API development toolkit for REST, GraphQL and real-time protocols."
+  },
+  "appsmithorg/appsmith": {
+   "channels": [
+    "product"
+   ],
+   "name": "Appsmith",
+   "descriptionZh": "面向内部工具开发的低代码平台，支持数据源连接与可视化界面搭建。",
+   "categoryZh": "开发工具",
+   "oneLinerZh": "把数据库和 API 快速搭成可用的内部业务工具。",
+   "capabilitiesZh": [
+    "连接数据库与 REST/GraphQL API",
+    "拖拽搭建管理后台",
+    "用 JavaScript 定制业务逻辑"
+   ],
+   "audienceZh": "需要快速交付内部系统的开发与运营团队",
+   "useModeZh": [
+    "网页",
+    "Docker"
+   ],
+   "difficultyZh": "需部署",
+   "chineseSupportZh": "界面与文档有一定中文社区资源",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "适合后台、审批台和数据看板；正式使用前需规划权限与数据源安全。",
+   "repositoryId": 275993885,
+   "fullName": "appsmithorg/appsmith",
+   "language": "TypeScript",
+   "license": "Apache-2.0",
+   "topics": [
+    "admin-dashboard",
+    "admin-panels",
+    "app-builder",
+    "automation",
+    "crud",
+    "custom-internal",
+    "developer-tools",
+    "gui",
+    "gui-application",
+    "hacktoberfest",
+    "internal-tools",
+    "java",
+    "javascript",
+    "low-code",
+    "low-code-framework",
+    "react",
+    "self-hosted",
+    "typescript",
+    "webdevelopment",
+    "workflows"
+   ],
+   "pushedAt": "2026-09-04T17:45:23Z",
+   "repoUrl": "https://github.com/appsmithorg/appsmith",
+   "homepage": "https://www.appsmith.com",
+   "descriptionEn": "A low-code platform for internal tools, with data connectors and a visual interface builder."
+  },
+  "NousResearch/hermes-agent": {
+   "channels": [
+    "skill"
+   ],
+   "name": "hermes-agent",
+   "descriptionZh": "The agent that grows with you",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "The agent that grows with you",
+   "capabilitiesZh": [
+    "运行具备记忆、工具调用和持续学习能力的个人 AI Agent"
+   ],
+   "audienceZh": "希望构建可长期使用、可扩展个人代理的开发者",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "skillValidation": "待验证",
+   "securityReview": "待复核",
+   "popularityNote": "Star 增长不等同于能力、质量或安全性。",
+   "permissionNotesZh": "自动发现候选，使用前请按最小权限原则检查代码、依赖和凭据访问范围。",
+   "repositoryId": 1024554267,
+   "fullName": "NousResearch/hermes-agent",
+   "language": "Python",
+   "license": "MIT",
+   "topics": [
+    "ai",
+    "ai-agent",
+    "ai-agents",
+    "anthropic",
+    "chatgpt",
+    "claude",
+    "claude-code",
+    "codex",
+    "hermes",
+    "hermes-agent",
+    "llm",
+    "nous-research",
+    "openai"
+   ],
+   "pushedAt": "2026-09-05T21:01:36Z",
+   "repoUrl": "https://github.com/NousResearch/hermes-agent",
+   "homepage": "https://hermes-agent.nousresearch.com",
+   "descriptionEn": "The agent that grows with you"
+  },
+  "anthropics/skills": {
+   "channels": [
+    "skill"
+   ],
+   "name": "Anthropic Skills",
+   "descriptionZh": "Anthropic 官方 Agent Skills 公共仓库。",
+   "skillValidation": "仓库与文档已核验",
+   "securityReview": "待安装前深度复核",
+   "popularityNote": "仓库热度仅反映 Star 增长，不等同于能力、质量或安全性。",
+   "categoryZh": "Agent Skill",
+   "oneLinerZh": "用标准技能包为 Agent 增加文档、设计和开发能力。",
+   "capabilitiesZh": [
+    "提供可复用 Agent 能力",
+    "支持工具或流程组合",
+    "具备公开安装与开发文档"
+   ],
+   "audienceZh": "Agent、MCP 与 AI 应用开发者",
+   "useModeZh": [
+    "Python/TypeScript",
+    "CLI",
+    "Agent 工具"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "可处理中文任务，文档主要为英文",
+   "selfHostable": true,
+   "directExperience": false,
+   "editorNoteZh": "已核验官方仓库状态和近期活跃度；启用前应审查代码、依赖、网络访问和写操作权限。",
+   "triggerZh": "Agent 需要对应工具、协议或专业流程时触发",
+   "inputZh": "任务目标、工具配置、模型与最小必要凭据",
+   "outputZh": "结构化工具结果、执行状态或任务产物",
+   "compatibleAgents": [
+    "支持 MCP 的 Agent",
+    "自定义 Python/TypeScript Agent"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "可能访问网络、文件或第三方账号；应使用最小权限并对高影响动作人工确认。",
+   "repositoryId": 1061953414,
+   "fullName": "anthropics/skills",
+   "language": "Python",
+   "license": "",
+   "topics": [
+    "agent-skills"
+   ],
+   "pushedAt": "2026-09-03T16:37:14Z",
+   "repoUrl": "https://github.com/anthropics/skills",
+   "homepage": "",
+   "descriptionEn": "The official public repository of Agent Skills from Anthropic."
+  },
+  "punkpeye/awesome-mcp-servers": {
+   "channels": [
+    "skill"
+   ],
+   "name": "Awesome MCP Servers",
+   "descriptionZh": "社区维护的 MCP Server 分类目录。",
+   "skillValidation": "仓库与文档已核验",
+   "securityReview": "待安装前深度复核",
+   "popularityNote": "仓库热度仅反映 Star 增长，不等同于能力、质量或安全性。",
+   "categoryZh": "Skill 合集",
+   "oneLinerZh": "发现可接入 Agent 的 MCP 服务。",
+   "capabilitiesZh": [
+    "提供可复用 Agent 能力",
+    "支持工具或流程组合",
+    "具备公开安装与开发文档"
+   ],
+   "audienceZh": "Agent、MCP 与 AI 应用开发者",
+   "useModeZh": [
+    "Python/TypeScript",
+    "CLI",
+    "Agent 工具"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "可处理中文任务，文档主要为英文",
+   "selfHostable": true,
+   "directExperience": false,
+   "editorNoteZh": "已核验官方仓库状态和近期活跃度；启用前应审查代码、依赖、网络访问和写操作权限。",
+   "triggerZh": "Agent 需要对应工具、协议或专业流程时触发",
+   "inputZh": "任务目标、工具配置、模型与最小必要凭据",
+   "outputZh": "结构化工具结果、执行状态或任务产物",
+   "compatibleAgents": [
+    "支持 MCP 的 Agent",
+    "自定义 Python/TypeScript Agent"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "可能访问网络、文件或第三方账号；应使用最小权限并对高影响动作人工确认。",
+   "repositoryId": 896335270,
+   "fullName": "punkpeye/awesome-mcp-servers",
+   "language": "",
+   "license": "MIT",
+   "topics": [
+    "ai",
+    "mcp"
+   ],
+   "pushedAt": "2026-09-01T07:26:30Z",
+   "repoUrl": "https://github.com/punkpeye/awesome-mcp-servers",
+   "homepage": "https://glama.ai/mcp/servers",
+   "descriptionEn": "A community-maintained directory of MCP servers."
+  },
+  "farion1231/cc-switch": {
+   "channels": [
+    "skill"
+   ],
+   "name": "cc-switch",
+   "descriptionZh": "A cross-platform desktop All-in-One assistant for Claude Code, Codex, OpenCode, OpenClaw, Grok Build & Hermes Agent. Only official website: ccswitch.io",
+   "categoryZh": "MCP",
+   "oneLinerZh": "A cross-platform desktop All-in-One assistant for Claude Code, Codex, OpenCode, OpenClaw, Grok Build & Hermes Agent. Only official website: ccswitch.io",
+   "capabilitiesZh": [
+    "在桌面端统一管理多个 AI 编程助手的配置、模型和服务商"
+   ],
+   "audienceZh": "同时使用 Claude Code、Codex、OpenCode 等工具的开发者",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "skillValidation": "待验证",
+   "securityReview": "待复核",
+   "popularityNote": "Star 增长不等同于能力、质量或安全性。",
+   "permissionNotesZh": "自动发现候选，使用前请按最小权限原则检查代码、依赖和凭据访问范围。",
+   "repositoryId": 1031912724,
+   "fullName": "farion1231/cc-switch",
+   "language": "Rust",
+   "license": "MIT",
+   "topics": [
+    "ai-tools",
+    "claude-code",
+    "codex",
+    "desktop-app",
+    "grok",
+    "grokbuild",
+    "hermes",
+    "hermes-agent",
+    "mcp",
+    "open-source",
+    "openclaw",
+    "openclaw-ui",
+    "opencode",
+    "pi",
+    "provider-management",
+    "rust",
+    "skills",
+    "skills-management",
+    "tauri",
+    "wsl-support"
+   ],
+   "pushedAt": "2026-09-05T15:29:06Z",
+   "repoUrl": "https://github.com/farion1231/cc-switch",
+   "homepage": "https://ccswitch.io",
+   "descriptionEn": "A cross-platform desktop All-in-One assistant for Claude Code, Codex, OpenCode, OpenClaw, Grok Build & Hermes Agent. Only official website: ccswitch.io"
+  },
+  "browser-use/browser-use": {
+   "channels": [
+    "skill"
+   ],
+   "name": "Browser Use",
+   "descriptionZh": "让 AI Agent 通过结构化浏览器控制完成网页任务。",
+   "skillValidation": "演示通过",
+   "securityReview": "基础项已复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "让 Agent 读取网页并执行点击、输入和提取等浏览器任务。",
+   "capabilitiesZh": [
+    "把网页状态转成 Agent 可理解结构",
+    "自动点击、输入和导航",
+    "结合模型完成多步骤网页任务"
+   ],
+   "audienceZh": "构建浏览器自动化 Agent 的 Python 开发者",
+   "useModeZh": [
+    "Python",
+    "CLI",
+    "Agent Skill"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文任务可由所接模型处理",
+   "selfHostable": true,
+   "directExperience": false,
+   "editorNoteZh": "能力强但会操作真实网页，建议在隔离环境中限制站点和凭据。",
+   "triggerZh": "需要让 Agent 浏览、检索或操作网页时触发",
+   "inputZh": "任务目标、浏览器配置与模型凭据",
+   "outputZh": "网页操作结果、提取数据或执行状态",
+   "compatibleAgents": [
+    "LangChain",
+    "自定义 Python Agent"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "可访问网页并执行交互；登录态、下载和提交动作需人工确认。",
+   "repositoryId": 881458615,
+   "fullName": "browser-use/browser-use",
+   "language": "Python",
+   "license": "MIT",
+   "topics": [
+    "ai-agents",
+    "ai-tools",
+    "browser-automation",
+    "browser-use",
+    "llm",
+    "playwright",
+    "python"
+   ],
+   "pushedAt": "2026-09-05T17:28:29Z",
+   "repoUrl": "https://github.com/browser-use/browser-use",
+   "homepage": "https://browser-use.com",
+   "descriptionEn": "Structured browser control that lets AI agents complete tasks on the web."
+  },
+  "koala73/worldmonitor": {
+   "channels": [
+    "skill"
+   ],
+   "name": "worldmonitor",
+   "descriptionZh": "Real-time global intelligence dashboard. AI-powered news aggregation, geopolitical monitoring, and infrastructure tracking in a unified situational awareness interface",
+   "categoryZh": "MCP",
+   "oneLinerZh": "Real-time global intelligence dashboard. AI-powered news aggregation, geopolitical monitoring, and infrastructure tracking in a unified situational awareness interface",
+   "capabilitiesZh": [
+    "聚合新闻、地缘事件和基础设施信息，提供全球态势监测看板"
+   ],
+   "audienceZh": "需要持续跟踪全球事件和风险信号的研究及分析人员",
+   "useModeZh": [
+    "GitHub"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "中文支持以仓库说明为准",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "由 GitHub Search API 自动发现，尚未完成人工功能与安全复核。",
+   "skillValidation": "待验证",
+   "securityReview": "待复核",
+   "popularityNote": "Star 增长不等同于能力、质量或安全性。",
+   "permissionNotesZh": "自动发现候选，使用前请按最小权限原则检查代码、依赖和凭据访问范围。",
+   "repositoryId": 1130564872,
+   "fullName": "koala73/worldmonitor",
+   "language": "TypeScript",
+   "license": "AGPL-3.0",
+   "topics": [
+    "agent",
+    "ai",
+    "dashboard",
+    "geopolitics",
+    "mcp",
+    "mcp-server",
+    "monitoring",
+    "news",
+    "opensource",
+    "osint",
+    "palantir",
+    "situation"
+   ],
+   "pushedAt": "2026-09-05T20:19:33Z",
+   "repoUrl": "https://github.com/koala73/worldmonitor",
+   "homepage": "https://worldmonitor.app",
+   "descriptionEn": "Real-time global intelligence dashboard. AI-powered news aggregation, geopolitical monitoring, and infrastructure tracking in a unified situational awareness interface"
+  },
+  "langgenius/dify": {
+   "channels": [
+    "skill"
+   ],
+   "name": "Dify",
+   "descriptionZh": "面向生成式 AI 应用与 Agent 工作流的开源开发平台。",
+   "skillValidation": "演示待验证",
+   "securityReview": "待深度复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "用可视化界面搭建、发布和运营大模型应用与工作流。",
+   "capabilitiesZh": [
+    "编排提示词与 Agent 工作流",
+    "接入知识库和多种模型",
+    "发布 API 与 Web 应用"
+   ],
+   "audienceZh": "AI 产品经理、运营与应用开发团队",
+   "useModeZh": [
+    "网页",
+    "Docker",
+    "API"
+   ],
+   "difficultyZh": "需部署",
+   "chineseSupportZh": "界面与社区中文支持较好",
+   "selfHostable": true,
+   "directExperience": true,
+   "editorNoteZh": "上手门槛较低，适合快速验证 AI 应用；生产部署需关注模型密钥和数据治理。",
+   "triggerZh": "需要构建对话、工作流或知识库应用时触发",
+   "inputZh": "用户输入、知识库、变量与模型配置",
+   "outputZh": "对话回复、结构化结果或 API 响应",
+   "compatibleAgents": [
+    "Dify",
+    "API 客户端"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "工作流可调用代码和外部工具；发布前需审查密钥、数据流向与工具权限。",
+   "repositoryId": 626805178,
+   "fullName": "langgenius/dify",
+   "language": "TypeScript",
+   "license": "NOASSERTION",
+   "topics": [
+    "agent",
+    "agentic-ai",
+    "agentic-framework",
+    "agentic-workflow",
+    "ai",
+    "automation",
+    "claude",
+    "deepseek",
+    "genai",
+    "gpt",
+    "llm",
+    "low-code",
+    "mcp",
+    "nextjs",
+    "no-code",
+    "openai",
+    "python",
+    "skills",
+    "workflow"
+   ],
+   "pushedAt": "2026-09-05T14:52:04Z",
+   "repoUrl": "https://github.com/langgenius/dify",
+   "homepage": "https://dify.ai",
+   "descriptionEn": "An open-source platform for building generative AI applications and agent workflows."
+  },
+  "langchain-ai/langgraph": {
+   "channels": [
+    "skill"
+   ],
+   "name": "LangGraph",
+   "descriptionZh": "以图结构构建可控、有状态 Agent 工作流的库。",
+   "skillValidation": "演示待验证",
+   "securityReview": "待深度复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "用状态图构建可暂停、可恢复、可控循环的 Agent。",
+   "capabilitiesZh": [
+    "定义节点、边和共享状态",
+    "实现循环、分支与人工介入",
+    "持久化并恢复长流程"
+   ],
+   "audienceZh": "需要精细控制 Agent 状态的 Python/JS 开发者",
+   "useModeZh": [
+    "Python",
+    "TypeScript",
+    "Agent 框架"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "支持中文提示词，文档以英文为主",
+   "selfHostable": true,
+   "directExperience": false,
+   "editorNoteZh": "适合复杂有状态流程，设计图结构和状态持久化需要工程经验。",
+   "triggerZh": "任务需要多步状态、循环或人工审批时触发",
+   "inputZh": "初始状态、节点逻辑、工具与模型",
+   "outputZh": "最终状态、流式事件和检查点",
+   "compatibleAgents": [
+    "LangChain",
+    "自定义 Agent"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "框架本身不决定权限；风险取决于节点中接入的工具和代码。",
+   "repositoryId": 676672661,
+   "fullName": "langchain-ai/langgraph",
+   "language": "Python",
+   "license": "MIT",
+   "topics": [
+    "agents",
+    "ai",
+    "ai-agents",
+    "chatgpt",
+    "deepagents",
+    "enterprise",
+    "framework",
+    "gemini",
+    "generative-ai",
+    "langchain",
+    "langgraph",
+    "llm",
+    "multiagent",
+    "open-source",
+    "openai",
+    "pydantic",
+    "python",
+    "rag"
+   ],
+   "pushedAt": "2026-09-03T15:23:28Z",
+   "repoUrl": "https://github.com/langchain-ai/langgraph",
+   "homepage": "https://docs.langchain.com/oss/python/langgraph/",
+   "descriptionEn": "A library for building controllable, stateful agent workflows as graphs."
+  },
+  "crewAIInc/crewAI": {
+   "channels": [
+    "skill"
+   ],
+   "name": "CrewAI",
+   "descriptionZh": "用于编排角色化协作 AI Agent 的轻量框架。",
+   "skillValidation": "演示通过",
+   "securityReview": "待深度复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "把多个有角色分工的 Agent 编排成协作流程。",
+   "capabilitiesZh": [
+    "定义 Agent 角色与任务",
+    "顺序或分层编排协作",
+    "接入工具、知识和模型"
+   ],
+   "audienceZh": "开发多 Agent 业务流程的 Python 团队",
+   "useModeZh": [
+    "Python",
+    "CLI",
+    "Agent 框架"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "支持中文提示词，效果取决于模型",
+   "selfHostable": true,
+   "directExperience": false,
+   "editorNoteZh": "角色化抽象直观，复杂流程仍需处理状态、成本和失败恢复。",
+   "triggerZh": "任务适合由多个角色分工协作时触发",
+   "inputZh": "角色、任务、工具、知识与模型配置",
+   "outputZh": "各任务结果及最终流程输出",
+   "compatibleAgents": [
+    "CrewAI"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "工具可能访问外部系统；需约束每个 Agent 的工具和委派范围。",
+   "repositoryId": 710601088,
+   "fullName": "crewAIInc/crewAI",
+   "language": "Python",
+   "license": "MIT",
+   "topics": [
+    "agents",
+    "ai",
+    "ai-agents",
+    "aiagentframework",
+    "llms"
+   ],
+   "pushedAt": "2026-09-04T20:26:09Z",
+   "repoUrl": "https://github.com/crewAIInc/crewAI",
+   "homepage": "https://crewai.com",
+   "descriptionEn": "A lightweight framework for orchestrating collaborative, role-based AI agents."
+  },
+  "modelcontextprotocol/servers": {
+   "channels": [
+    "skill"
+   ],
+   "name": "MCP Servers",
+   "descriptionZh": "Model Context Protocol 官方参考服务器集合与实现示例。",
+   "skillValidation": "演示通过",
+   "securityReview": "基础项已复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "用参考 MCP Server 把文件、数据源和工具接入 Agent。",
+   "capabilitiesZh": [
+    "提供 MCP 协议参考实现",
+    "连接本地或远程数据源",
+    "演示工具、资源与提示词能力"
+   ],
+   "audienceZh": "MCP 客户端开发者与 Agent 集成团队",
+   "useModeZh": [
+    "CLI",
+    "MCP Server",
+    "Agent Skill"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "取决于具体 Server 与客户端",
+   "selfHostable": true,
+   "directExperience": false,
+   "editorNoteZh": "这是参考服务器集合而非单一成品，启用前应逐个核对权限和维护状态。",
+   "triggerZh": "Agent 需要调用某类外部资源或工具时配置",
+   "inputZh": "MCP 客户端请求、环境变量和服务参数",
+   "outputZh": "结构化工具结果或资源内容",
+   "compatibleAgents": [
+    "Claude Desktop",
+    "VS Code",
+    "支持 MCP 的 Agent"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "不同 Server 权限差异很大；仅授予任务必需的目录、账号和网络范围。",
+   "repositoryId": 890668799,
+   "fullName": "modelcontextprotocol/servers",
+   "language": "TypeScript",
+   "license": "NOASSERTION",
+   "topics": [],
+   "pushedAt": "2026-09-03T01:42:26Z",
+   "repoUrl": "https://github.com/modelcontextprotocol/servers",
+   "homepage": "https://modelcontextprotocol.io",
+   "descriptionEn": "Official reference servers and implementation examples for Model Context Protocol."
+  },
+  "microsoft/autogen": {
+   "channels": [
+    "skill"
+   ],
+   "name": "AutoGen",
+   "descriptionZh": "用于构建多 Agent 应用的事件驱动编程框架。",
+   "skillValidation": "演示待验证",
+   "securityReview": "待深度复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "用消息和事件驱动方式构建单 Agent 或多 Agent 应用。",
+   "capabilitiesZh": [
+    "定义可对话的 Agent",
+    "编排多 Agent 消息协作",
+    "接入模型、工具与运行时"
+   ],
+   "audienceZh": "研究和开发多 Agent 系统的工程师",
+   "useModeZh": [
+    "Python",
+    ".NET",
+    "Agent 框架"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "支持中文对话，文档以英文为主",
+   "selfHostable": true,
+   "directExperience": false,
+   "editorNoteZh": "框架灵活，生产使用需自行设计终止条件、可观测性和权限边界。",
+   "triggerZh": "任务需要多个 Agent 对话或事件协同时触发",
+   "inputZh": "消息、Agent 配置、工具和模型",
+   "outputZh": "对话事件、工具结果与任务输出",
+   "compatibleAgents": [
+    "AutoGen",
+    "自定义 Agent"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "Agent 可调用代码执行器和工具；必须限制轮次、运行环境和外部访问。",
+   "repositoryId": 680120071,
+   "fullName": "microsoft/autogen",
+   "language": "Python",
+   "license": "CC-BY-4.0",
+   "topics": [
+    "agentic",
+    "agentic-agi",
+    "agents",
+    "ai",
+    "autogen",
+    "autogen-ecosystem",
+    "chatgpt",
+    "framework",
+    "llm-agent",
+    "llm-framework"
+   ],
+   "pushedAt": "2026-04-15T11:59:09Z",
+   "repoUrl": "https://github.com/microsoft/autogen",
+   "homepage": "https://microsoft.github.io/autogen/",
+   "descriptionEn": "An event-driven programming framework for multi-agent applications."
+  },
+  "ComposioHQ/composio": {
+   "channels": [
+    "skill"
+   ],
+   "name": "Composio",
+   "descriptionZh": "为 AI Agent 提供工具连接、认证与动作编排能力。",
+   "skillValidation": "演示待验证",
+   "securityReview": "待深度复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "为 Agent 统一连接第三方应用、认证并执行动作。",
+   "capabilitiesZh": [
+    "集成多种 SaaS 工具",
+    "管理 OAuth 等授权连接",
+    "向 Agent 暴露结构化动作"
+   ],
+   "audienceZh": "需要快速接入外部应用的 Agent 开发者",
+   "useModeZh": [
+    "Python",
+    "TypeScript",
+    "Agent 工具"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "可处理中文参数，文档以英文为主",
+   "selfHostable": false,
+   "directExperience": false,
+   "editorNoteZh": "减少工具接入工作量，但动作会触达真实账号，必须细分授权范围。",
+   "triggerZh": "Agent 需要读取或操作第三方应用时触发",
+   "inputZh": "用户授权、工具选择和结构化参数",
+   "outputZh": "第三方服务数据或动作执行结果",
+   "compatibleAgents": [
+    "LangChain",
+    "CrewAI",
+    "OpenAI Agents"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "涉及外部账号授权和写操作；高影响动作应在执行前再次确认。",
+   "repositoryId": 762304524,
+   "fullName": "ComposioHQ/composio",
+   "language": "TypeScript",
+   "license": "MIT",
+   "topics": [
+    "agentic-ai",
+    "agents",
+    "ai",
+    "ai-agents",
+    "aiagents",
+    "developer-tools",
+    "function-calling",
+    "gpt-4",
+    "javascript",
+    "js",
+    "llm",
+    "llmops",
+    "mcp",
+    "python",
+    "remote-mcp-server",
+    "sse",
+    "typescript"
+   ],
+   "pushedAt": "2026-09-05T15:03:54Z",
+   "repoUrl": "https://github.com/ComposioHQ/composio",
+   "homepage": "https://docs.composio.dev",
+   "descriptionEn": "Tool integrations, authentication and action orchestration for AI agents."
+  },
+  "AgentOps-AI/agentops": {
+   "channels": [
+    "skill"
+   ],
+   "name": "AgentOps",
+   "descriptionZh": "提供 Agent 可观测性、评估与会话回放能力。",
+   "skillValidation": "演示待验证",
+   "securityReview": "待深度复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "记录和分析 Agent 会话，帮助定位成本、错误与行为问题。",
+   "capabilitiesZh": [
+    "追踪 Agent 会话与事件",
+    "查看成本、延迟和错误",
+    "回放并评估运行表现"
+   ],
+   "audienceZh": "运营和调试线上 Agent 的研发团队",
+   "useModeZh": [
+    "Python SDK",
+    "TypeScript SDK",
+    "网页"
+   ],
+   "difficultyZh": "需编程",
+   "chineseSupportZh": "可记录中文内容，控制台以英文为主",
+   "selfHostable": false,
+   "directExperience": true,
+   "editorNoteZh": "接入成本较低，但遥测可能含提示词和业务数据，需先完成隐私评估。",
+   "triggerZh": "需要观察、评估或排查 Agent 运行时触发",
+   "inputZh": "SDK 埋点、会话事件与评估配置",
+   "outputZh": "追踪记录、指标、回放和分析结果",
+   "compatibleAgents": [
+    "CrewAI",
+    "LangChain",
+    "AutoGen",
+    "自定义 Agent"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "会上传运行遥测；接入前需脱敏并确认数据保留与访问控制。",
+   "repositoryId": 679017521,
+   "fullName": "AgentOps-AI/agentops",
+   "language": "Python",
+   "license": "MIT",
+   "topics": [
+    "agent",
+    "agentops",
+    "agents-sdk",
+    "ai",
+    "anthropic",
+    "autogen",
+    "cost-estimation",
+    "crewai",
+    "evals",
+    "evaluation-metrics",
+    "groq",
+    "langchain",
+    "llm",
+    "mistral",
+    "ollama",
+    "openai",
+    "openai-agents"
+   ],
+   "pushedAt": "2026-06-25T08:25:03Z",
+   "repoUrl": "https://github.com/AgentOps-AI/agentops",
+   "homepage": "https://agentops.ai",
+   "descriptionEn": "Observability, evaluation and session replay for AI agents."
+  },
+  "TransformerOptimus/SuperAGI": {
+   "channels": [
+    "skill"
+   ],
+   "name": "SuperAGI",
+   "descriptionZh": "面向自主 Agent 的开发、运行与管理框架。",
+   "skillValidation": "演示待验证",
+   "securityReview": "待深度复核",
+   "popularityNote": "仓库热度来自演示 Star 增长值，不等同于 Skill 的能力、质量或安全性。",
+   "categoryZh": "AI/Agent",
+   "oneLinerZh": "用于创建、运行和观察自主 Agent 的开源框架。",
+   "capabilitiesZh": [
+    "配置 Agent 目标与工具",
+    "运行多步自主任务",
+    "查看执行轨迹和资源"
+   ],
+   "audienceZh": "探索自主 Agent 工作流的开发者",
+   "useModeZh": [
+    "网页",
+    "Docker",
+    "Agent 框架"
+   ],
+   "difficultyZh": "需部署",
+   "chineseSupportZh": "可输入中文任务，文档以英文为主",
+   "selfHostable": true,
+   "directExperience": false,
+   "editorNoteZh": "更适合实验和研究，使用前应确认项目活跃度与依赖兼容性。",
+   "triggerZh": "需要实验自主规划和工具调用时触发",
+   "inputZh": "目标、约束、模型和工具配置",
+   "outputZh": "执行轨迹、工具结果与最终回复",
+   "compatibleAgents": [
+    "SuperAGI"
+   ],
+   "requiresNetwork": true,
+   "executesScripts": true,
+   "permissionNotesZh": "可长期自主执行工具；应设置预算、步数、沙箱及人工停止机制。",
+   "repositoryId": 640182997,
+   "fullName": "TransformerOptimus/SuperAGI",
+   "language": "Python",
+   "license": "MIT",
+   "topics": [
+    "agents",
+    "agi",
+    "ai",
+    "artificial-general-intelligence",
+    "artificial-intelligence",
+    "autonomous-agents",
+    "gpt-4",
+    "hacktoberfest",
+    "llm",
+    "llmops",
+    "nextjs",
+    "openai",
+    "pinecone",
+    "python",
+    "superagi"
+   ],
+   "pushedAt": "2025-01-22T22:14:07Z",
+   "repoUrl": "https://github.com/TransformerOptimus/SuperAGI",
+   "homepage": "https://superagi.com/",
+   "descriptionEn": "A framework for developing, running and managing autonomous agents."
+  }
+ }
+}

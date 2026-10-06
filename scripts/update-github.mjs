@@ -20,20 +20,19 @@ const seed = readJson(path.join(repoRoot, 'scripts', 'data', 'github-star-seed.j
 const statePath = stateFile('github-stars.json');
 const state = readJson(statePath, { repos: {} });
 
-// 候选池：现有榜单中出现过的仓库 + 种子仓库；编辑字段取最近一次出现的行
+// 候选池与编辑字段：固定来自 scripts/data/github-candidates.json（榜单文件只保留前 10，不能作为候选池来源）
 const templates = new Map(), channelsOf = new Map(), previousRank = {};
+for (const [fullName, row] of Object.entries(readJson(path.join(repoRoot, 'scripts', 'data', 'github-candidates.json'), { repos: {} }).repos)) {
+  const { channels, ...template } = row;
+  templates.set(fullName.toLowerCase(), { ...template, fullName });
+  channelsOf.set(fullName.toLowerCase(), new Set(channels));
+}
 for (const channel of CHANNELS) for (const period of Object.keys(PERIODS)) {
   const rows = readJson(path.join(dataDir, channel, `${period}.json`), []);
   previousRank[`${channel}/${period}`] = new Map(rows.map(row => [row.fullName.toLowerCase(), row]));
-  for (const row of rows) {
-    const key = row.fullName.toLowerCase();
-    templates.set(key, { ...templates.get(key), ...row });
-    channelsOf.set(key, new Set([...(channelsOf.get(key) || []), channel]));
-  }
 }
 for (const [fullName, meta] of Object.entries(seed.repos)) {
   const key = fullName.toLowerCase();
-  channelsOf.set(key, new Set([...(channelsOf.get(key) || []), ...meta.channels.filter(channel => CHANNELS.includes(channel))]));
   const points = (state.repos[key] ??= { fullName, points: [] }).points;
   const seen = new Set(points.map(point => point[0]));
   for (const point of meta.points) if (!seen.has(point[0])) points.push(point);
