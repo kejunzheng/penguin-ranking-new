@@ -78,9 +78,7 @@ const models=eligibleSkus.map(sku=>{
   if(!record)continue;
   (records[record.benchmark_id]??=[]).push({
    date:snapshotDate(record),
-   runDate:record.run_date,
    rank:record.rank,
-   score:record.score,
    source:record.source_url,
    config:sku.record_configurations[recordId]||'标准/未注明',
   });
@@ -96,8 +94,15 @@ const mergedModels=models.map(model=>{
  recentById.delete(model.id);
  return {...model,...recent,records:{...model.records,...recent.records}};
 });
+// 精简输出：前台只读取 date / rank / config / source。
+// - 删除 runDate、score（前台未使用；原始分数仍可在上游仓库查询）；
+// - source 与该 benchmark 的 official_url 相同时省略，前台本就以 official_url 兜底（result.source||benchmark.official_url）。
+const officialUrlById=new Map(benchmarks.map(benchmark=>[benchmark.id,benchmark.official_url]));
+const compactRecords=model=>({...model,records:Object.fromEntries(Object.entries(model.records).map(([benchmarkId,entries])=>[benchmarkId,entries.map(({runDate,score,...entry})=>entry.source&&entry.source===officialUrlById.get(benchmarkId)?(({source,...rest})=>rest)(entry):entry)]))});
 const generatedAt=[benchmarkPayload.generated_at,verifiedRecent.generated_at].sort().at(-1);
-const output={schema_version:'1.0',generated_at:generatedAt,source_repository:'https://github.com/kejunzheng/penguin-model-capability-ranking',source_page:'https://kejunzheng.github.io/penguin-model-capability-ranking/',benchmarks,models:[...mergedModels,...recentById.values()]};
+const output={schema_version:'1.0',generated_at:generatedAt,source_repository:'https://github.com/kejunzheng/penguin-model-capability-ranking',source_page:'https://kejunzheng.github.io/penguin-model-capability-ranking/',benchmarks,models:[...mergedModels,...recentById.values()].map(compactRecords)};
+// 定时任务保护：上游异常时直接失败，保留旧快照。
+if(benchmarks.length<10||output.models.length<100)throw new Error(`Benchmark 数据过少：benchmarks=${benchmarks.length} models=${output.models.length}`);
 const target=new URL('../public/data/benchmarks.json',import.meta.url);
 let unchanged=false;
 try {

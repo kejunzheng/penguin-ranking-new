@@ -59,6 +59,16 @@ npm run update:benchmarks
 npm run update:skillhub
 ```
 
+每日自动更新（定时任务入口）：
+
+```sh
+npm run update:daily -- --out ../penguin-index-cdn
+```
+
+依次执行：本地依赖检查 → 抓取 benchmarks / SkillHub → 数据测试（失败回滚）→ 生产构建 → 把 `dist/client` 原子发布到 `<out>/site`，并写入 `<out>/manifest.json`。单个数据源失败时保留旧数据；构建失败时不替换已发布版本。
+
+抓取输出只保留前台实际读取的字段：`benchmarks.json` 不再输出 `score`、`runDate`，与榜单官方地址相同的 `source` 省略；`skillhub.json` 只保留 `id/name/description/category/downloads/stars/source/icon_url`，简介截断到 200 字符，输出不缩进。
+
 更新脚本依赖相应上游公开数据。更新后必须重新运行完整测试和生产构建，再提交更新后的 `public/data` 文件。
 
 主要数据文件：
