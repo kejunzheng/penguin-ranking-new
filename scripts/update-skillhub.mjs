@@ -1,4 +1,5 @@
 import {writeFile} from 'node:fs/promises';
+import {reportFreshness} from './lib/net.mjs';
 
 const api='https://api.skillhub.cn';
 const headers={'user-agent':'PenguinIndex/1.0 (+https://yonge6.github.io/penguin-index/)'};
@@ -33,3 +34,4 @@ if(trending.length<50||downloads.length<500)throw new Error(`SkillHub 返回数�
 const output={schema_version:1,generated_at:new Date().toISOString(),source_url:'https://skillhub.cn/skills',rules:{trending_limit:100,downloads_limit:1000},trending,downloads:downloads.slice(0,1000)};
 await writeFile(new URL('../public/data/skillhub.json',import.meta.url),JSON.stringify(output));
 console.log(`SKILLHUB_UPDATED trending=${output.trending.length} downloads=${output.downloads.length} generated_at=${output.generated_at}`);
+reportFreshness([{dataset:'SkillHub 榜',file:'data/skillhub.json',source:'https://api.skillhub.cn',mode:'live',latest:output.generated_at}]);

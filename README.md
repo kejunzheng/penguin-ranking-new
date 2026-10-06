@@ -59,15 +59,25 @@ npm run update:benchmarks
 npm run update:skillhub
 ```
 
-每日自动更新（定时任务入口）：
+每日自动更新（定时任务入口，北京时间 09:00 / 00:00）：
 
 ```sh
 npm run update:daily -- --out ../penguin-index-cdn
 ```
 
-依次执行：本地依赖检查 → 抓取 benchmarks / SkillHub → 数据测试（失败回滚）→ 生产构建 → 把 `dist/client` 原子发布到 `<out>/site`，并写入 `<out>/manifest.json`。单个数据源失败时保留旧数据；构建失败时不替换已发布版本。
+依次执行：本地依赖检查 → 全部抓取 → 数据测试（失败回滚）→ 生产构建 → 把 `dist/client` 原子发布到 `<out>/site`，并写入 `<out>/manifest.json` 与数据新鲜度报告 `<out>/freshness.md`。单个数据源失败时保留旧数据；构建失败时不替换已发布版本。
 
-抓取输出只保留前台实际读取的字段：`benchmarks.json` 不再输出 `score`、`runDate`，与榜单官方地址相同的 `source` 省略；`skillhub.json` 只保留 `id/name/description/category/downloads/stars/source/icon_url`，简介截断到 200 字符，输出不缩进。
+| 脚本 | 数据 | 来源 |
+|---|---|---|
+| `update-models.mjs` | 模型调用榜、国内价格 | 原站 CDN `frontend-data.json`（多节点取最新） |
+| `update-global-prices.mjs` | 全球价格 | OpenRouter Models API |
+| `update-benchmarks.mjs` | 模型评测榜 | 实时：Artificial Analysis、Epoch AI、ARC Prize、LMArena（9 项）；其余 15 项沿用上游仓库导入快照 |
+| `update-skillhub.mjs` | SkillHub 榜 | SkillHub 公开 API |
+| `update-github.mjs` | 开源产品榜、Agent Skills 榜 | github.com 仓库页面 Star 自采集，按 24h / 7d / 30d 基线计算净增长 |
+
+抓取历史（评测快照、GitHub Star 观测点）保存在 `.data-state/`，不入库但必须持久保存。
+
+抓取输出只保留前台实际读取的字段：`benchmarks.json` 不输出 `score`、`runDate`，与榜单官方地址相同的 `source` 省略；`skillhub.json` 只保留 `id/name/description/category/downloads/stars/source/icon_url`，简介截断到 200 字符，输出不缩进。
 
 更新脚本依赖相应上游公开数据。更新后必须重新运行完整测试和生产构建，再提交更新后的 `public/data` 文件。
 

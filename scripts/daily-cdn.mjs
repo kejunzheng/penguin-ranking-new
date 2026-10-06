@@ -38,7 +38,7 @@ function run(command, args, { allowFail = false } = {}) {
   log('$', command, args.join(' '));
   const result = spawnSync(command, args, { cwd: repo, encoding: 'utf8', env: { ...process.env, CI: '1' }, maxBuffer: 64 * 1024 * 1024 });
   const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
-  if (output) console.log(output.split('\n').slice(-15).join('\n'));
+  if (output) console.log(output.split('\n').filter(line => !line.startsWith('FRESHNESS ')).slice(-15).join('\n'));
   if (result.status !== 0 && !allowFail) throw new Error(`${command} ${args.join(' ')} 失败（exit ${result.status}）`);
   return { ok: result.status === 0, output };
 }
@@ -54,7 +54,7 @@ if (fs.existsSync(lock) && Date.now() - fs.statSync(lock).mtimeMs < 2 * 3600 * 1
 }
 fs.writeFileSync(lock, String(process.pid));
 
-const summary = { fetch: {}, tests: null, build: null };
+const summary = { fetch: {}, freshness: [], tests: null, build: null };
 const backup = path.join(out, '.data-backup');
 try {
   // 1. 依赖
@@ -69,9 +69,20 @@ try {
   if (!skipFetch) {
     fs.rmSync(backup, { recursive: true, force: true });
     fs.cpSync(dataDir, backup, { recursive: true });
-    for (const [name, script] of [['benchmarks', 'scripts/update-benchmarks.mjs'], ['skillhub', 'scripts/update-skillhub.mjs']]) {
+    // 顺序有依赖：global-prices 使用 models.json 中的汇率。
+    for (const [name, script] of [
+      ['models', 'scripts/update-models.mjs'],
+      ['global-prices', 'scripts/update-global-prices.mjs'],
+      ['benchmarks', 'scripts/update-benchmarks.mjs'],
+      ['skillhub', 'scripts/update-skillhub.mjs'],
+      ['github', 'scripts/update-github.mjs'],
+    ]) {
       const result = run('node', [script], { allowFail: true });
-      summary.fetch[name] = result.ok ? (result.output.split('\n').at(-1) || 'ok') : `失败，保留旧数据：${result.output.split('\n').at(-1) || ''}`;
+      const lines = result.output.split('\n');
+      for (const line of lines) if (line.startsWith('FRESHNESS ')) summary.freshness.push(...JSON.parse(line.slice(10)));
+      const message = lines.filter(line => !line.startsWith('FRESHNESS ') && line.trim()).at(-1) || '';
+      summary.fetch[name] = result.ok ? message || 'ok' : `失败，保留旧数据：${message}`;
+      if (!result.ok) summary.freshness.push({ dataset: name, mode: 'failed', note: message });
     }
 
     // 3. 校验
@@ -114,10 +125,21 @@ try {
   const manifest = { publishedAt: new Date().toISOString(), startedAt: startedAt.toISOString(), entry: 'site/index.html', ...summary, files };
   fs.writeFileSync(path.join(out, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
+  // 新鲜度报告：哪些数据已更新到最新、哪些停在旧快照
+  const stale = item => item.mode !== 'live' || item.note;
+  const reportLines = [
+    `# Penguin Index 数据新鲜度报告`, '', `生成时间：${manifest.publishedAt}`, '',
+    '| 数据 | 方式 | 数据最新时间 | 说明 |', '|---|---|---|---|',
+    ...summary.freshness.map(item => `| ${item.dataset} | ${{ live: '自动抓取', frozen: '冻结快照', failed: '抓取失败' }[item.mode] || item.mode} | ${String(item.latest || '—').slice(0, 16).replace('T', ' ')} | ${item.note || (item.models ? `${item.models} 个模型` : '')} |`),
+    '', `需要关注：${summary.freshness.filter(stale).length} 项未能更新到最新。`,
+  ];
+  fs.writeFileSync(path.join(out, 'freshness.md'), reportLines.join('\n') + '\n');
+
   const total = Object.values(files).reduce((sum, item) => sum + item.bytes, 0);
   console.log('\n=== Penguin Index 每日更新完成 ===');
   for (const [name, status] of Object.entries(summary.fetch)) console.log(`${name}: ${status}`);
   console.log(`数据校验: ${summary.tests ?? '跳过'}；构建: ok；数据总量: ${(total / 1024).toFixed(0)} KB`);
+  console.log(`未更新到最新的数据: ${summary.freshness.filter(item => item.mode !== 'live' || item.note).length} 项（详见 freshness.md）`);
   console.log(`发布目录: ${site}`);
 } catch (error) {
   if (fs.existsSync(backup)) {

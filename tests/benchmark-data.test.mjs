@@ -35,7 +35,9 @@ test('bundled benchmark data has 24 benchmarks and current ranked models',()=>{
  assert.ok(filterBenchmarkModels(resolved,{type:'all',region:'all',coverage:'all'}).length>200);
  assert.ok(resolved.some(model=>model.region==='china'));
  assert.ok(resolved.some(model=>model.type==='open'));
- const latest=resolved.find(model=>model.id==='gpt-6-1-sol-high');
- assert.equal(latest?.releaseDate,'2026-09-29');
- assert.equal(latest?.results.aa_intelligence_index?.rank,17);
+ // 实时抓取后，近 45 天发布的新模型应已带有 AA 智能指数名次（不再依赖手工补录的固定名次）。
+ const recentCutoff=new Date(Date.parse(data.generated_at)-45*864e5).toISOString().slice(0,10);
+ const recent=resolved.filter(model=>(model.releaseDate||'')>=recentCutoff&&model.results.aa_intelligence_index?.rank);
+ assert.ok(recent.length>=3,'recent models carry live AA ranks');
+ assert.equal(new Set(data.models.map(model=>model.id)).size,data.models.length,'model ids are unique');
 });

@@ -10,7 +10,10 @@
     "update:benchmarks": "node scripts/update-benchmarks.mjs",
     "update:skillhub": "node scripts/update-skillhub.mjs",
     "test:sites": "node --test tests/sites-worker.test.mjs",
-    "update:daily": "node scripts/daily-cdn.mjs"
+    "update:daily": "node scripts/daily-cdn.mjs",
+    "update:models": "node scripts/update-models.mjs",
+    "update:global-prices": "node scripts/update-global-prices.mjs",
+    "update:github": "node scripts/update-github.mjs"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",
