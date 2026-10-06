@@ -71,7 +71,7 @@ npm run update:daily -- --out ../penguin-index-cdn
 |---|---|---|
 | `update-models.mjs` | 模型调用榜、国内价格 | 原站 CDN `frontend-data.json`（多节点取最新） |
 | `update-global-prices.mjs` | 全球价格 | OpenRouter Models API |
-| `update-benchmarks.mjs` | 模型评测榜 | 实时：Artificial Analysis、Epoch AI、ARC Prize、LMArena（9 项）；其余 15 项沿用上游仓库导入快照 |
+| `update-benchmarks.mjs` | 模型评测榜 | 全部 24 项实时抓取：Artificial Analysis、Epoch AI、ARC Prize、LMArena、OSWorld 2.0，以及 `scripts/lib/benchmark-sources.mjs` 中的 14 个官方源（SWE-bench、LiveBench、LiveCodeBench、Aider、MMLU-Pro、MathVista、VideoMMMU、Terminal-Bench、BFCL、GAIA、OSWorld、AndroidWorld、RULER、LongBench v2） |
 | `update-skillhub.mjs` | SkillHub 榜 | SkillHub 公开 API |
 | `update-github.mjs` | 开源产品榜、Agent Skills 榜 | github.com 仓库页面 Star 自采集，按 24h / 7d / 30d 基线计算净增长 |
 

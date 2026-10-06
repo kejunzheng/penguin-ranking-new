@@ -3,18 +3,19 @@
 // 两层数据：
 //   1. 基线：kejunzheng/penguin-model-capability-ranking 仓库的一次性导入（最后采集 2026-09-21，之后不再更新）。
 //      仍作为 14 项「冻结」benchmark 的唯一来源，以及全部模型的元数据与 SKU 归一结果。
-//   2. 实时：每次运行直接抓取上游官方/公开数据源，覆盖 10 项 benchmark：
+//   2. 实时：每次运行直接抓取全部 24 项 benchmark 的官方/公开数据源：
 //      - Artificial Analysis 排行榜页面（内嵌数据）：AA 智能指数、AA-LCR、HLE、GPQA Diamond、MMMU-Pro
 //      - Epoch AI 公开数据包：FrontierMath Tier 1-3、SimpleQA Verified
-//      - ARC Prize 官方 evaluations.json：ARC-AGI-2
-//      - LMArena 官方 HuggingFace 数据集：Text Arena Overall
-//      - OSWorld 2.0 官方结果 JSON（v2.1 / full / 500 步）
+//      - ARC Prize、LMArena、OSWorld 2.0
+//      - 其余 14 项见 scripts/lib/benchmark-sources.mjs（口径逐一移植自上游导入脚本）
 //      实时 benchmark 不再使用基线里的旧记录（避免新旧配置混排），历史快照保存在 .data-state/ 供「近一周/月/季」筛选。
+//      同一数据源内容未变化时不新增快照，记录日期即该版本数据首次被抓到的日期。
 //
 // 抓取失败的数据源沿用上一次成功的快照；从未成功过才退回基线。前台只读取 date / rank / config / source。
 import path from 'node:path';
 import { dataDir, getBuffer, getJson, getText, readJson, reportFreshness, stateFile, today, writeJsonIfChanged } from './lib/net.mjs';
 import { parseCsv, readZip } from './lib/formats.mjs';
+import { OFFICIAL_SOURCES } from './lib/benchmark-sources.mjs';
 
 const UPSTREAM = 'https://raw.githubusercontent.com/kejunzheng/penguin-model-capability-ranking/main/data';
 const STANDARD = '标准/未注明';
@@ -24,10 +25,10 @@ const HISTORY_OFFSETS = [7, 30, 90]; // 与前台「近一周 / 近一月 / 近�
 const runDate = today();
 
 // ---------- 名称归一（移植自上游 scripts/build_model_skus.py，保证与基线 SKU 的 id 一致） ----------
-const CONFIG_WORDS = /\b(?:non[- ]?reasoning|reasoning|thinking|adaptive|effort|fallback|high|low|medium|max|xhigh|auto)\b/i;
+const CONFIG_WORDS = /\b(?:non[- ]?reasoning|reasoning|thinking|adaptive|effort|fallback|high|low|medium|max|xhigh|auto|none)\b/i;
 const SLUG_EFFORT = /\s+(xhigh|high|medium|low|max|minimal|thinking|non[- ]?reasoning|reasoning|adaptive|unknown|default)$/i;
 export function extractSku(rawName) {
-  let text = String(rawName || '').trim();
+  let text = String(rawName || '').replace(/[🥇🥈🥉🤖]|🖼️?/gu, '').trim();
   const configuration = [];
   const slugStyle = /^[a-z0-9_.-]+$/i.test(text) && /[-_]/.test(text);
   if (slugStyle) {
@@ -137,7 +138,7 @@ async function fetchArcAgi2() {
     getJson('https://arcprize.org/media/data/models.json'),
   ]);
   const modelById = new Map(models.map(model => [model.id, model]));
-  const table = evaluations.filter(row => row.datasetId === 'v2_Semi_Private' && row.display !== false && Number.isFinite(Number(row.score)))
+  const table = evaluations.filter(row => row.datasetId === 'v2_Semi_Private' && row.display !== false && row.modelId !== '2025_human_panel' && Number.isFinite(Number(row.score)))
     .sort((a, b) => Number(b.score) - Number(a.score));
   if (table.length < 20) throw new Error(`ARC-AGI-2 只有 ${table.length} 行`);
   return {
@@ -198,6 +199,7 @@ const LIVE_SOURCES = [
   { name: 'ARC Prize', benchmarks: ['arc_agi_2'], fetch: fetchArcAgi2 },
   { name: 'LMArena', benchmarks: ['lmarena_text_overall'], fetch: fetchLmarena },
   { name: 'OSWorld 2.0', benchmarks: ['osworld_2'], fetch: fetchOsworld2 },
+  ...OFFICIAL_SOURCES,
 ];
 const LIVE_BENCHMARKS = new Set(LIVE_SOURCES.flatMap(source => source.benchmarks));
 
@@ -222,10 +224,21 @@ const stripSuffix = key => key.replace(/-(?:20\d{6}|\d{4})$/, '').replace(/-(?:i
 const indexBy = transform => { const map = new Map(); for (const id of eligibleIds) { const key = transform(id); map.set(key, map.has(key) ? null : id); } return map; };
 const looseStripped = indexBy(id => looseKey(stripSuffix(id))), flatStripped = indexBy(id => stripSuffix(id).replace(/-/g, ''));
 const toEligible = id => eligibleIds.has(id) ? id : looseStripped.get(looseKey(stripSuffix(id))) || flatStripped.get(stripSuffix(id).replace(/-/g, '')) || null;
+const TRAILING_EFFORT = /\s+(xhigh|high|medium|low|max|minimal|none)(?:\s+effort)?$/i;
 function resolveModelId(raw) {
   const parsed = extractSku(raw);
   const direct = skuByRawName.get(raw) || parsed.key;
-  return { ...parsed, id: toEligible(direct) || toEligible(parsed.key) || direct };
+  const id = toEligible(direct) || toEligible(parsed.key);
+  if (id) return { ...parsed, id };
+  // 兜底：名称末尾不带括号的推理强度（如 “Grok 4.6 xHigh”“Claude Fable 5.1 Max Effort”）。
+  // 只有去掉后能命中已入选模型才采用，避免把 “Qwen 3 Max” 这类产品名误拆。
+  const effort = parsed.display.match(TRAILING_EFFORT);
+  if (effort) {
+    const stripped = extractSku(parsed.display.slice(0, effort.index));
+    const matched = toEligible(stripped.key);
+    if (matched) return { ...stripped, id: matched, config: parsed.config === STANDARD ? effort[0].trim() : `${parsed.config}；${effort[0].trim()}` };
+  }
+  return { ...parsed, id: direct };
 }
 
 // 历史状态：{ snapshots: { benchmarkId: { date: [[modelId, rank, config, source]] } }, models: { id: meta } }
@@ -235,7 +248,7 @@ const freshness = [];
 const sourceStatus = new Map();
 for (const source of LIVE_SOURCES) {
   try {
-    const { date, rows, note } = await source.fetch();
+    const { date, rows, note, dataDate = date } = await source.fetch();
     const grouped = new Map(source.benchmarks.map(id => [id, []]));
     for (const row of rows) {
       const { id, config, display } = resolveModelId(row.raw);
@@ -253,10 +266,15 @@ for (const source of LIVE_SOURCES) {
     }
     for (const [benchmarkId, entries] of grouped) {
       if (!entries.length) continue;
-      (history.snapshots[benchmarkId] ??= {})[date] = entries;
+      const byDate = (history.snapshots[benchmarkId] ??= {});
+      const previousDate = Object.keys(byDate).filter(day => day < date).sort().at(-1);
+      // 数据源内容与上一份快照完全相同时不重复保存（冻结的数据源每天都会抓到同样的内容）
+      if (previousDate && JSON.stringify(byDate[previousDate]) === JSON.stringify(entries)) delete byDate[date];
+      else byDate[date] = entries;
     }
-    sourceStatus.set(source.name, { ok: true, date, note });
-    console.log(`  ${source.name}: ok date=${date} rows=${rows.length}`);
+    sourceStatus.set(source.name, { ok: true, date, note, dataDate });
+    (history.sourceDates ??= {})[source.name] = dataDate ?? null;
+    console.log(`  ${source.name}: ok date=${date} source_latest=${dataDate ?? '未知'} rows=${rows.length}`);
   } catch (error) {
     sourceStatus.set(source.name, { ok: false, error: error.message });
     console.log(`  ${source.name}: 失败，沿用上次快照（${error.message}）`);
@@ -352,19 +370,25 @@ writeJsonIfChanged(stateFile('benchmark-history.json'), history);
 const target = path.join(dataDir, 'benchmarks.json');
 writeJsonIfChanged(target, output);
 
+const STALE_DAYS = 45;
+const staleBefore = new Date(Date.now() - STALE_DAYS * 864e5).toISOString().slice(0, 10);
 for (const benchmark of benchmarks) {
   const source = LIVE_SOURCES.find(item => item.benchmarks.includes(benchmark.id));
   const status = source && sourceStatus.get(source.name);
+  const sourceLatest = source ? history.sourceDates?.[source.name] : null;
+  let note = null;
+  if (!source) note = '无自动数据源，停在上游导入时的快照';
+  else if (!status?.ok) note = liveFromState.has(benchmark.id) ? `本次抓取失败，沿用上次快照：${status?.error}` : `抓取失败且无历史快照，退回基线：${status?.error}`;
+  else if (sourceLatest === null) note = '已接入；数据源未标注更新日期（维护者 README 表格），无法判断是否最新';
+  else if (sourceLatest && sourceLatest < staleBefore) note = `已接入；数据源自身最新条目为 ${sourceLatest}，上游近 ${STALE_DAYS} 天未更新`;
   freshness.push({
     dataset: `模型评测榜 · ${benchmark.display_name}`,
     benchmark: benchmark.id,
     source: source ? source.name : '上游仓库一次性导入（kejunzheng/penguin-model-capability-ranking）',
     mode: source ? 'live' : 'frozen',
-    latest: benchmark.latest_date,
+    latest: sourceLatest || benchmark.latest_date,
     models: benchmark.model_count,
-    note: !source ? '无自动数据源，停在上游导入时的快照'
-      : status?.ok ? null
-      : liveFromState.has(benchmark.id) ? `本次抓取失败，沿用上次快照：${status?.error}` : `抓取失败且无历史快照，退回基线：${status?.error}`,
+    note,
   });
 }
 const newModels = models.filter(model => !eligibleIds.has(model.id)).map(model => `${model.name}(${model.releaseDate})`);

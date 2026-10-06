@@ -32,6 +32,11 @@ export function readZip(buffer, wanted) {
 
 /** RFC 4180 CSV → 对象数组（首行为表头）。 */
 export function parseCsv(text) {
+  const [header, ...body] = parseCsvRows(text);
+  return (body || []).map(values => Object.fromEntries((header || []).map((key, index) => [key, values[index] ?? ''])));
+}
+/** RFC 4180 CSV → 二维数组（支持引号内换行），过滤全空行。 */
+export function parseCsvRows(text) {
   const rows = [];
   let row = [], field = '', quoted = false;
   for (let i = 0; i < text.length; i++) {
@@ -47,6 +52,26 @@ export function parseCsv(text) {
     } else field += char;
   }
   if (field || row.length) { row.push(field); rows.push(row); }
-  const [header, ...body] = rows.filter(item => item.some(value => value !== ''));
-  return body.map(values => Object.fromEntries(header.map((key, index) => [key, values[index] ?? ''])));
+  return rows.filter(item => item.some(value => value !== ''));
 }
+
+/** 读取 xlsx 第一个工作表 → 二维数组（共享字符串、行内字符串、数字；不处理公式与样式）。 */
+export function readXlsxRows(buffer) {
+  const files = readZip(buffer, ['xl/sharedStrings.xml', 'xl/worksheets/sheet1.xml']);
+  const decode = text => text.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (_, code) => String.fromCodePoint(Number(code))).replace(/&amp;/g, '&');
+  const shared = [...(files.get('sharedStrings.xml')?.toString() || '').matchAll(/<si>([\s\S]*?)<\/si>/g)]
+    .map(match => decode([...match[1].matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map(item => item[1]).join('')));
+  const sheet = files.get('sheet1.xml')?.toString() || '';
+  const column = ref => [...ref.replace(/\d+/g, '')].reduce((sum, char) => sum * 26 + char.charCodeAt(0) - 64, 0) - 1;
+  return [...sheet.matchAll(/<row[^>]*>([\s\S]*?)<\/row>/g)].map(row => {
+    const values = [];
+    for (const cell of row[1].matchAll(/<c r="([A-Z]+\d+)"([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+      const type = cell[2].match(/t="(\w+)"/)?.[1], body = cell[3] || '';
+      const raw = body.match(/<v>([\s\S]*?)<\/v>/)?.[1];
+      values[column(cell[1])] = type === 's' ? shared[Number(raw)] ?? '' : type === 'inlineStr' ? decode(body.replace(/<[^>]+>/g, '')) : raw != null ? decode(raw) : '';
+    }
+    return Array.from(values, value => value ?? '');
+  });
+}
+/** Excel 日期序列号 → YYYY-MM-DD */
+export const excelDate = serial => Number.isFinite(Number(serial)) && Number(serial) > 20000 ? new Date(Date.UTC(1899, 11, 30) + Number(serial) * 864e5).toISOString().slice(0, 10) : null;
