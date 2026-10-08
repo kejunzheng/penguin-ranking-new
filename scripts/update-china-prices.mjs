@@ -10,7 +10,7 @@
 // 抓取失败的厂商保留上一次的数据，并在新鲜度报告中注明。零一万物官网已无价格页，沿用原站快照。
 import path from 'node:path';
 import { CHINA_PRICE_SOURCES, TEXT_ONLY, fetchChinaPrices } from './lib/china-price-sources.mjs';
-import { dataDir, readJson, reportFreshness, stateFile, writeJsonIfChanged } from './lib/net.mjs';
+import { dataDir, getJson, readJson, reportFreshness, stateFile, writeJsonIfChanged } from './lib/net.mjs';
 
 const target = path.join(dataDir, 'models.json');
 const statePath = stateFile('china-prices.json');
@@ -122,6 +122,38 @@ for (const [index, provider] of providers.entries()) {
   report.push({ provider, status: healthy ? 'verified' : 'unmatched', url, checked_at: now.toISOString(), rows: rows.length, matched: matched.size, added, delisted });
 }
 
+// 2.5 自动收录的新模型补充资料：官方定价页不含工具调用 / 视觉 / 开放权重信息，从 OpenRouter 模型目录补齐。
+//     只填空字段、不覆盖已有值；OpenRouter 不可用时跳过（不影响价格）。
+let enriched = 0;
+const needsMeta = [...models.values()].filter(model => model.auto_added && [model.supports_tools, model.supports_vision, model.is_open_source, model.context_length].some(value => value == null));
+if (needsMeta.length) {
+  try {
+    const catalog = (await getJson('https://openrouter.ai/api/v1/models', { timeout: 60000, retries: 2 })).data || [];
+    const metaKey = text => key(text).replace(/\./g, '');
+    const byName = new Map();
+    for (const item of catalog) {
+      if (/:/.test(item.id.split('/')[1] || '')) continue; // 跳过 :batch / :free 等变体
+      for (const name of [item.id.split('/')[1], String(item.name).replace(/^[^:]+:\s*/, '')]) if (!byName.has(metaKey(name))) byName.set(metaKey(name), item);
+    }
+    for (const model of needsMeta) {
+      const item = byName.get(metaKey(model.slug)) || byName.get(metaKey(model.name));
+      if (!item) continue;
+      const before = JSON.stringify([model.supports_tools, model.supports_vision, model.is_open_source, model.context_length]);
+      model.supports_tools ??= (item.supported_parameters || []).includes('tools');
+      model.supports_vision ??= (item.architecture?.input_modalities || []).includes('image');
+      if (model.is_open_source == null && item.hugging_face_id) model.is_open_source = true; // 无 HF 仓库不能断定闭源，保持未知
+      model.context_length ??= item.context_length || null;
+      if (JSON.stringify([model.supports_tools, model.supports_vision, model.is_open_source, model.context_length]) !== before) {
+        model.metadata_source = `https://openrouter.ai/${item.id}`;
+        touched.add(model.slug);
+        enriched++;
+      }
+    }
+  } catch (error) {
+    warnings.push(`OpenRouter 模型资料补充失败：${error.message}`);
+  }
+}
+
 // 3. 写回
 for (const slug of touched) state.models[slug] = models.get(slug);
 state.sources = Object.fromEntries(report.map(item => [item.provider, item]));
@@ -147,7 +179,7 @@ const changed = writeJsonIfChanged(target, data);
 const failed = report.filter(item => item.status !== 'verified');
 for (const item of report) console.log(`  ${item.provider.padEnd(9)} ${item.status}${item.status === 'failed' ? ` ${item.error}` : ` rows=${item.rows} matched=${item.matched} added=${item.added.length} delisted=${item.delisted.length}`}`);
 for (const warning of warnings) console.log(`  警告 ${warning}`);
-console.log(`CHINA_PRICES_${changed ? 'UPDATED' : 'UNCHANGED'} providers=${ok.length}/${providers.length} models=${merged.length} active=${activeDates.length} updated_at=${data.prices.updated_at}`);
+console.log(`CHINA_PRICES_${changed ? 'UPDATED' : 'UNCHANGED'} providers=${ok.length}/${providers.length} models=${merged.length} active=${activeDates.length} enriched=${enriched} updated_at=${data.prices.updated_at}`);
 reportFreshness([{
   dataset: '国内模型价格（厂商官方定价页）', file: 'data/models.json#prices', source: '各厂商官方定价页', mode: 'live',
   latest: ok.length ? now.toISOString() : prices.updated_at, models: activeDates.length,
