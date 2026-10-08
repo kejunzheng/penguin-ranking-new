@@ -2,7 +2,7 @@
 //
 // 两层数据：
 //   1. 基线：kejunzheng/penguin-model-capability-ranking 仓库的一次性导入（最后采集 2026-09-21，之后不再更新）。
-//      仍作为 14 项「冻结」benchmark 的唯一来源，以及全部模型的元数据与 SKU 归一结果。
+//      作为模型元数据、SKU 归一与抓取失败时的兜底来源。
 //   2. 实时：每次运行直接抓取全部 24 项 benchmark 的官方/公开数据源：
 //      - Artificial Analysis 排行榜页面（内嵌数据）：AA 智能指数、AA-LCR、HLE、GPQA Diamond、MMMU-Pro
 //      - Epoch AI 公开数据包：FrontierMath Tier 1-3、SimpleQA Verified
@@ -15,6 +15,7 @@
 import path from 'node:path';
 import { dataDir, getBuffer, getJson, getText, readJson, reportFreshness, stateFile, today, writeJsonIfChanged } from './lib/net.mjs';
 import { parseCsv, readZip } from './lib/formats.mjs';
+import { CODING_REPLACEMENTS } from './lib/coding-benchmarks.mjs';
 import { OFFICIAL_SOURCES } from './lib/benchmark-sources.mjs';
 
 const UPSTREAM = 'https://raw.githubusercontent.com/kejunzheng/penguin-model-capability-ranking/main/data';
@@ -205,6 +206,12 @@ const LIVE_BENCHMARKS = new Set(LIVE_SOURCES.flatMap(source => source.benchmarks
 
 // ---------- 主流程 ----------
 const { benchmarkPayload, skus, records: upstreamRecords, snapshots } = await upstreamBaseline();
+// 在原 Coding 列位置替换基准，移除旧记录而非仅修改显示名称。
+benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.map(benchmark => {
+  const replacement = CODING_REPLACEMENTS[benchmark.id];
+  return replacement ? { ...benchmark, ...replacement, update_mode: 'result_addition', ingestion_status: 'live' } : benchmark;
+});
+const activeBenchmarkIds = new Set(benchmarkPayload.benchmarks.map(benchmark => benchmark.id));
 const recordsById = new Map(upstreamRecords.map(record => [record.record_id, record]));
 const snapshotsById = new Map(snapshots.map(snapshot => [snapshot.snapshot_id, snapshot]));
 const snapshotDate = record => snapshotsById.get(record.snapshot_id)?.snapshot_at?.slice(0, 10) || record.run_date || null;
@@ -252,7 +259,7 @@ for (const source of LIVE_SOURCES) {
     const grouped = new Map(source.benchmarks.map(id => [id, []]));
     for (const row of rows) {
       const { id, config, display } = resolveModelId(row.raw);
-      grouped.get(row.benchmarkId)?.push([id, row.rank, config, row.source]);
+      grouped.get(row.benchmarkId)?.push([id, row.rank, row.config || config, row.source]);
       const meta = history.models[id] || {};
       const releaseDate = row.releaseDate && /^\d{4}-\d{2}-\d{2}$/.test(row.releaseDate) ? row.releaseDate : null;
       history.models[id] = {
@@ -318,7 +325,7 @@ for (const benchmarkId of LIVE_BENCHMARKS) {
 for (const sku of skus) {
   for (const recordId of sku.record_ids) {
     const record = recordsById.get(recordId);
-    if (!record || (LIVE_BENCHMARKS.has(record.benchmark_id) && liveFromState.has(record.benchmark_id))) continue;
+    if (!record || !activeBenchmarkIds.has(record.benchmark_id) || (LIVE_BENCHMARKS.has(record.benchmark_id) && liveFromState.has(record.benchmark_id))) continue;
     addRecord(sku.sku_id, record.benchmark_id, { date: snapshotDate(record), rank: record.rank, source: record.source_url, config: sku.record_configurations[recordId] || STANDARD });
   }
 }
@@ -379,7 +386,7 @@ for (const benchmark of benchmarks) {
   let note = null;
   if (!source) note = '无自动数据源，停在上游导入时的快照';
   else if (!status?.ok) note = liveFromState.has(benchmark.id) ? `本次抓取失败，沿用上次快照：${status?.error}` : `抓取失败且无历史快照，退回基线：${status?.error}`;
-  else if (sourceLatest === null) note = '已接入；数据源未标注更新日期（维护者 README 表格），无法判断是否最新';
+  else if (sourceLatest === null) note = '已接入；数据源未标注更新日期，无法判断是否最新';
   else if (sourceLatest && sourceLatest < staleBefore) note = `已接入；数据源自身最新条目为 ${sourceLatest}，上游近 ${STALE_DAYS} 天未更新`;
   freshness.push({
     dataset: `模型评测榜 · ${benchmark.display_name}`,

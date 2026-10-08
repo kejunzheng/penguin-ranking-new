@@ -11,8 +11,8 @@ const evidence={
  aa_intelligence_index:['独立第三方汇总多项标准化评测的综合指数。','避免单一厂商或题库决定结论，观察能力广度与均衡性。','持续维护','独立第三方评测','指数版本、子项权重与模型模式'],
  livebench_overall:['以持续更新的新题评测多项通用能力。','动态题目机制降低训练污染，验证前沿模型的真实泛化。','版本制','官方题集 release','release 版本、任务集与 metric'],
  swe_bench_verified:['真实 GitHub issue、代码库与测试验证。','工程修复而非玩具题，是代码 Agent 最具现实意义的硬指标。','结果新增时更新','官方任务集与公开结果','agent harness、patch policy 与 run date'],
- livecodebench:['持续收集竞赛新题，测试算法与代码正确性。','比经典旧题更抗污染，检验实时 coding 推理。','滚动题窗','官方题集与公开结果','题目时间窗、pass@k 与采样设置'],
- aider_polyglot:['在既有项目中跨语言编辑代码并验证修改。','真实开发更多是改对已有代码，而非从零生成片段。','结果新增时更新','Aider 官方榜单','Aider 版本、编辑格式与反馈轮次'],
+ deepswe:['原创长周期软件工程任务。','观察代码 Agent 的真实工程能力。','结果新增时更新','Datacurve 官方 v1.1 榜单','pass@1、mini-swe-agent、推理强度与最高分配置'],
+ frontiercode:['评估代码修改是否达到维护者合入标准。','结合正确性、测试、风格与修改范围。','结果新增时更新','Cognition 官方 1.1 榜单','Main 子集、new_score、Agent 与最高分配置'],
  mmlu_pro:['跨学科、多选项的专业知识与推理。','在传统 MMLU 趋于饱和后提高难度并保留广覆盖。','结果新增时更新','官方题集与公开结果','CoT、tools、few-shot 与 run date'],
  gpqa_diamond:['研究生级物理、化学、生物专业问答。','补足广泛知识，考察硬科学深度和专业门槛。','结果新增时更新','官方题集与公开结果','Diamond 子集、closed-book 与 tools'],
  simpleqa_verified:['短答案事实准确性与幻觉控制。','直接检验说得像真的但事实错误这一常见风险。','低频汇总','验证结果聚合','版本、核验规则与具体指标'],
@@ -33,15 +33,15 @@ const evidence={
  aa_lcr:['独立第三方的长上下文推理评测。','提供学术榜单之外的第三方交叉验证。','持续维护','Artificial Analysis','版本、thinking level 与 no-tools 口径']
 };
 const englishSummary={
- lmarena_text_overall:'Anonymous head-to-head user preference for open-ended conversation.',aa_intelligence_index:'A third-party composite index across standardized evaluations.',livebench_overall:'Continuously refreshed tasks for general capability.',swe_bench_verified:'Real GitHub issues resolved and verified by repository tests.',livecodebench:'Fresh programming problems that test algorithmic correctness.',aider_polyglot:'Cross-language code editing in existing projects.',mmlu_pro:'Professional knowledge and reasoning across academic fields.',gpqa_diamond:'Graduate-level physics, chemistry and biology questions.',simpleqa_verified:'Short-answer factual accuracy and hallucination control.',humanitys_last_exam:'Expert-level questions across many domains.',frontiermath:'Research-level mathematics with exact grading.',arc_agi_2:'Abstract rule induction from a few examples.',mmmu_pro:'Multidisciplinary reasoning over images and diagrams.',mathvista:'Mathematical reasoning over charts and scientific images.',videommmu:'Knowledge and temporal reasoning in video.',terminal_bench_4:'Verifiable multi-step work in a terminal.',bfcl_v4:'Function selection, parameters and multi-tool reliability.',gaia:'General agent tasks combining search, files and tools.',osworld:'GUI work in real operating systems and desktop apps.',osworld_2:'Long, cross-app workflows in dynamic environments.',androidworld:'Real tasks in Android apps and emulators.',ruler:'Retrieval and multi-hop tracking over long contexts.',longbench_v2:'Deep understanding of long documents and multi-document inputs.',aa_lcr:'Independent third-party long-context reasoning evaluation.'
+ lmarena_text_overall:'Anonymous head-to-head user preference for open-ended conversation.',aa_intelligence_index:'A third-party composite index across standardized evaluations.',livebench_overall:'Continuously refreshed tasks for general capability.',swe_bench_verified:'Real GitHub issues resolved and verified by repository tests.',deepswe:'Original long-horizon engineering tasks; v1.1 pass@1, best configuration per model.',frontiercode:'Maintainer-defined mergeability; v1.1 Main new_score, best configuration per model.',mmlu_pro:'Professional knowledge and reasoning across academic fields.',gpqa_diamond:'Graduate-level physics, chemistry and biology questions.',simpleqa_verified:'Short-answer factual accuracy and hallucination control.',humanitys_last_exam:'Expert-level questions across many domains.',frontiermath:'Research-level mathematics with exact grading.',arc_agi_2:'Abstract rule induction from a few examples.',mmmu_pro:'Multidisciplinary reasoning over images and diagrams.',mathvista:'Mathematical reasoning over charts and scientific images.',videommmu:'Knowledge and temporal reasoning in video.',terminal_bench_4:'Verifiable multi-step work in a terminal.',bfcl_v4:'Function selection, parameters and multi-tool reliability.',gaia:'General agent tasks combining search, files and tools.',osworld:'GUI work in real operating systems and desktop apps.',osworld_2:'Long, cross-app workflows in dynamic environments.',androidworld:'Real tasks in Android apps and emulators.',ruler:'Retrieval and multi-hop tracking over long contexts.',longbench_v2:'Deep understanding of long documents and multi-document inputs.',aa_lcr:'Independent third-party long-context reasoning evaluation.'
 };
 const benchmarkTags={
  lmarena_text_overall:{zh:['对话偏好','人类评测','综合'],en:['Preference','Human eval','Overall']},
  aa_intelligence_index:{zh:['综合能力','第三方评测','能力广度'],en:['Overall','Third-party','Breadth']},
  livebench_overall:{zh:['通用能力','动态题集','抗污染'],en:['General','Fresh tasks','Contamination resistant']},
  swe_bench_verified:{zh:['代码修复','软件工程','Agent'],en:['Code repair','Software engineering','Agent']},
- livecodebench:{zh:['算法编程','代码正确性','新题'],en:['Algorithms','Correctness','Fresh tasks']},
- aider_polyglot:{zh:['代码编辑','多语言','软件工程'],en:['Code editing','Polyglot','Software engineering']},
+ deepswe:{zh:['软件工程','长周期任务','Agent'],en:['Software engineering','Long horizon','Agent']},
+ frontiercode:{zh:['代码质量','可合入性','软件工程'],en:['Code quality','Mergeability','Software engineering']},
  mmlu_pro:{zh:['专业知识','多学科','推理'],en:['Knowledge','Multidisciplinary','Reasoning']},
  gpqa_diamond:{zh:['科学知识','专家问答','推理'],en:['Science','Expert QA','Reasoning']},
  simpleqa_verified:{zh:['事实准确','幻觉控制','短答案'],en:['Factuality','Hallucination','Short answer']},

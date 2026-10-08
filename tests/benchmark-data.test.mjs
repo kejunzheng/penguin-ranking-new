@@ -31,6 +31,10 @@ test('bundled benchmark data has 24 benchmarks and current ranked models',()=>{
  assert.ok(data.benchmarks.every(item=>/^\d{4}-\d{2}-\d{2}$/.test(item.latest_date)),'every benchmark exposes its source snapshot date');
  assert.ok(data.models.length>=300);
  const ids=data.benchmarks.map(item=>item.id);
+ assert.ok(ids.includes('deepswe')&&ids.includes('frontiercode'));
+ assert.ok(!ids.includes('livecodebench')&&!ids.includes('aider_polyglot'));
+ for(const id of ['deepswe','frontiercode'])assert.ok(data.benchmarks.find(item=>item.id===id).model_count>=5,`${id} has live ranked models`);
+ assert.ok(data.models.every(model=>!model.records.livecodebench&&!model.records.aider_polyglot),'retired scores do not contribute to coverage');
  const resolved=data.models.map(model=>resolveBenchmarkModel(model,ids,data.generated_at.slice(0,10)));
  assert.ok(filterBenchmarkModels(resolved,{type:'all',region:'all',coverage:'all'}).length>200);
  assert.ok(resolved.some(model=>model.region==='china'));

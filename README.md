@@ -72,7 +72,7 @@ npm run update:daily -- --out ../penguin-index-cdn
 | `update-models.mjs` | 模型调用榜（及原站国内价格兜底） | 原站 CDN `frontend-data.json`（多节点取最新） |
 | `update-china-prices.mjs` | 国内模型价格 | 10 家厂商官方定价页（`scripts/lib/china-price-sources.mjs`）：DeepSeek、智谱、阿里云百炼、Kimi、MiniMax、百度千帆、腾讯混元 / TokenHub、火山方舟、百川、阶跃星辰；价格历史保存在 `.data-state/china-prices.json`，官网不再列出的模型自动标记 legacy，新模型自动收录。零一万物已不再收录 |
 | `update-global-prices.mjs` | 全球价格 | OpenRouter Models API |
-| `update-benchmarks.mjs` | 模型评测榜 | 全部 24 项实时抓取：Artificial Analysis、Epoch AI、ARC Prize、LMArena、OSWorld 2.0，以及 `scripts/lib/benchmark-sources.mjs` 中的 14 个官方源（SWE-bench、LiveBench、LiveCodeBench、Aider、MMLU-Pro、MathVista、VideoMMMU、Terminal-Bench、BFCL、GAIA、OSWorld、AndroidWorld、RULER、LongBench v2） |
+| `update-benchmarks.mjs` | 模型评测榜 | 全部 24 项实时抓取：Artificial Analysis、Epoch AI、ARC Prize、LMArena、OSWorld 2.0，以及 `scripts/lib/benchmark-sources.mjs` 中的 14 个官方源（SWE-bench、LiveBench、DeepSWE、FrontierCode、MMLU-Pro、MathVista、VideoMMMU、Terminal-Bench、BFCL、GAIA、OSWorld、AndroidWorld、RULER、LongBench v2） |
 | `update-skillhub.mjs` | SkillHub 榜 | SkillHub 公开 API |
 | `update-github.mjs` | 开源产品榜、Agent Skills 榜 | github.com 仓库页面 Star 自采集，按 24h / 7d / 30d 基线计算净增长 |
 
@@ -111,3 +111,5 @@ npm run update:daily -- --out ../penguin-index-cdn
 - 仓库根目录目前未声明统一的开源许可证。项目源代码的著作权、交付范围和后续使用权应以双方合同或交付确认单为准；第三方依赖与素材继续适用各自许可证。
 
 完整交付方式、验收清单和接管步骤见 [DELIVERY.md](./DELIVERY.md)。
+
+评测榜 Coding 两列使用 DeepSWE v1.1（官方 pass@1）和 FrontierCode 1.1（Main 子集 new_score），按每模型最高分配置排名，保留 Agent 和推理强度；取代 LiveCodeBench、Aider Polyglot，旧成绩不参与当前覆盖率与比较。数据直接读取 Datacurve 和 Cognition 官方榜单 JSON。

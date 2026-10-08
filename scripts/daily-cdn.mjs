@@ -87,7 +87,7 @@ try {
     }
 
     // 3. 校验
-    const tests = run('node', ['--test', 'tests/data.test.mjs', 'tests/benchmark-data.test.mjs'], { allowFail: true });
+    const tests = run('node', ['--test', 'tests/data.test.mjs', 'tests/benchmark-data.test.mjs', 'tests/coding-benchmarks.test.mjs'], { allowFail: true });
     summary.tests = tests.ok ? 'passed' : 'failed';
     if (!tests.ok) {
       log('数据校验失败，回滚 public/data');

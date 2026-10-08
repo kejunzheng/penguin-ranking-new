@@ -1,3 +1,4 @@
+import { fetchDeepSwe, fetchFrontierCode } from './coding-benchmarks.mjs';
 // 模型评测榜：除 AA / Epoch / ARC / LMArena / OSWorld 2.0 之外的 13 个官方数据源。
 // 口径（筛选条件、排序方式、原始名称字段）逐一移植自上游 kejunzheng/penguin-model-capability-ranking 的导入脚本，
 // 只把「读本地冻结文件」改为「每次在线拉取」。每个函数返回：
@@ -75,44 +76,6 @@ export async function fetchLivebench() {
       });
     }),
   };
-}
-
-// LiveCodeBench：官方站点数据文件；每个模型取全部题目 pass@1 的均值
-export async function fetchLivecodebench() {
-  const url = 'https://raw.githubusercontent.com/LiveCodeBench/livecodebench.github.io/main/src/mocks/performances_generation.json';
-  const source = await getJson(url, { timeout: 120000 });
-  const meta = new Map(source.models.map(item => [item.model_name, item]));
-  const grouped = new Map();
-  for (const item of source.performances) {
-    const value = number(item['pass@1']);
-    if (value == null) continue;
-    const entry = grouped.get(item.model) || { sum: 0, count: 0 };
-    entry.sum += value; entry.count++;
-    grouped.set(item.model, entry);
-  }
-  const table = ensure([...grouped].map(([model, { sum, count }]) => ({ model, score: sum / count })).sort((a, b) => b.score - a.score), 3, 'LiveCodeBench');
-  const isoFromMs = value => value ? new Date(Number(value)).toISOString().slice(0, 10) : null;
-  return {
-    date: today(), dataDate: maxDate(source.performances.map(item => isoFromMs(item.date))),
-    rows: table.map((item, index) => {
-      const info = meta.get(item.model) || [...meta.values()].find(model => model.model_repr === item.model) || {};
-      return row('livecodebench', url, info.model_repr || item.model, index + 1, { releaseDate: isoFromMs(info.release_date) });
-    }),
-  };
-}
-
-// Aider Polyglot：维护者 YAML；排除多模型组合（含 “+”）
-export async function fetchAider() {
-  const url = 'https://raw.githubusercontent.com/Aider-AI/aider/main/aider/website/_data/polyglot_leaderboard.yml';
-  const blocks = [];
-  let current = null;
-  for (let line of (await getText(url)).split('\n')) {
-    if (line.startsWith('- ')) { if (current) blocks.push(current); current = {}; line = line.slice(2); }
-    if (current && line.includes(':')) { const index = line.indexOf(':'); current[line.slice(0, index).trim()] = line.slice(index + 1).trim().replace(/^"|"$/g, ''); }
-  }
-  if (current) blocks.push(current);
-  const table = ensure(ranked(blocks.filter(item => !String(item.model || '').includes('+')), item => number(item.pass_rate_2)), 20, 'Aider Polyglot');
-  return { date: today(), dataDate: maxDate(table.map(item => item.date)), rows: table.map((item, index) => row('aider_polyglot', url, item.model, index + 1)) };
 }
 
 // MMLU-Pro：TIGER-Lab 官方提交数据集
@@ -294,8 +257,8 @@ export async function fetchAndroidworld() {
 export const OFFICIAL_SOURCES = [
   { name: 'SWE-bench', benchmarks: ['swe_bench_verified'], fetch: fetchSwebench },
   { name: 'LiveBench', benchmarks: ['livebench_overall'], fetch: fetchLivebench },
-  { name: 'LiveCodeBench', benchmarks: ['livecodebench'], fetch: fetchLivecodebench },
-  { name: 'Aider Polyglot', benchmarks: ['aider_polyglot'], fetch: fetchAider },
+  { name: 'DeepSWE', benchmarks: ['deepswe'], fetch: fetchDeepSwe },
+  { name: 'FrontierCode', benchmarks: ['frontiercode'], fetch: fetchFrontierCode },
   { name: 'MMLU-Pro', benchmarks: ['mmlu_pro'], fetch: fetchMmluPro },
   { name: 'MathVista', benchmarks: ['mathvista'], fetch: fetchMathvista },
   { name: 'VideoMMMU', benchmarks: ['videommmu'], fetch: fetchVideommmu },
