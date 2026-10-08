@@ -75,3 +75,71 @@ export function readXlsxRows(buffer) {
 }
 /** Excel 日期序列号 → YYYY-MM-DD */
 export const excelDate = serial => Number.isFinite(Number(serial)) && Number(serial) > 20000 ? new Date(Date.UTC(1899, 11, 30) + Number(serial) * 864e5).toISOString().slice(0, 10) : null;
+
+// ---- 表格解析（厂商定价页）：HTML / MDX 中的 <table> 与 Markdown 管道表格，展开 rowspan/colspan 为二维文本网格 ----
+const decode = text => text.replace(/&nbsp;|&#160;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+export const cellText = html => decode(String(html).replace(/<br\s*\/?>/gi, ' ').replace(/<\/?[A-Za-z!][^>]*>/g, ' ')).replace(/\\([<>\-_*|[\]()])/g, '$1').replace(/\s+/g, ' ').trim();
+
+function expandSpans(rows) {
+  const grid = [], pending = []; // pending[col] = { text, left }
+  for (const cells of rows) {
+    const row = [];
+    let col = 0;
+    const fillPending = () => { while (pending[col]?.left > 0) { row[col] = pending[col].text; pending[col].left--; col++; } };
+    for (const cell of cells) {
+      fillPending();
+      for (let span = 0; span < cell.colspan; span++, col++) {
+        row[col] = cell.text;
+        if (cell.rowspan > 1) pending[col] = { text: cell.text, left: cell.rowspan - 1 };
+      }
+    }
+    fillPending();
+    while (pending.length > row.length && pending.slice(row.length).some(item => item?.left > 0)) { col = row.length; if (pending[col]?.left > 0) { row[col] = pending[col].text; pending[col].left--; } else row[col] = ''; }
+    grid.push(Array.from(row, value => value ?? ''));
+  }
+  return grid;
+}
+
+/** 返回 [{ grid, before }]：grid 为展开后的二维文本，before 为表格前最近的标题文字（用于区分章节）。 */
+export function extractTables(source) {
+  const text = String(source).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, '').replace(/\\</g, '&lt;');
+  const tables = [];
+  const headingAt = index => {
+    const head = text.slice(Math.max(0, index - 20000), index);
+    const matches = [...head.matchAll(/^#{1,4} +(.+)$|<h[1-4][^>]*>([\s\S]*?)<\/h[1-4]>/gim)];
+    const last = matches.at(-1);
+    return last ? cellText(last[1] || last[2]) : '';
+  };
+  for (const match of text.matchAll(/<table[\s\S]*?<\/table>/gi)) {
+    const rows = (match[0].match(/<tr[\s\S]*?<\/tr>/gi) || []).map(tr => (tr.match(/<t[hd][\s>][\s\S]*?<\/t[hd]>/gi) || []).map(cell => ({
+      text: cellText(cell),
+      rowspan: Number(cell.match(/^<t[hd][^>]*rowspan=["{]?(\d+)/i)?.[1] || 1),
+      colspan: Number(cell.match(/^<t[hd][^>]*colspan=["{]?(\d+)/i)?.[1] || 1),
+    })));
+    if (rows.length) tables.push({ grid: expandSpans(rows), before: headingAt(match.index), index: match.index });
+  }
+  // Markdown 管道表格：空的首列单元格视为与上一行合并（火山方舟文档的写法）
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    if (!/^\s*\|/.test(lines[i]) || !/^\s*\|?\s*:?-{3,}/.test(lines[i + 1] || '')) continue;
+    const split = line => line.trim().replace(/^\||\|$/g, '').split(/(?<!\\)\|/).map(cellText);
+    const grid = [split(lines[i])];
+    let j = i + 2;
+    for (; j < lines.length && /^\s*\|/.test(lines[j]); j++) {
+      const row = split(lines[j]);
+      const previous = grid.at(-1);
+      if (grid.length > 1 && row[0] === '') row[0] = previous[0];
+      grid.push(row);
+    }
+    const index = lines.slice(0, i).join('\n').length;
+    tables.push({ grid, before: headingAt(index), index });
+    i = j;
+  }
+  // MDX <DocTable columns={[{ title: ".." }]} rows={[[..], ..]} />（Kimi 文档）
+  for (const match of text.matchAll(/<DocTable[\s\S]*?columns=\{\[([\s\S]*?)\]\}[\s\S]*?rows=\{\[([\s\S]*?)\]\}\s*\/>/g)) {
+    const header = [...match[1].matchAll(/title:\s*"([^"]*)"/g)].map(item => item[1]);
+    const rows = [...match[2].matchAll(/\[([^\[\]]*)\]/g)].map(item => [...item[1].matchAll(/"((?:[^"\\]|\\.)*)"/g)].map(cell => cellText(cell[1])));
+    tables.push({ grid: [header, ...rows], before: headingAt(match.index), index: match.index });
+  }
+  return tables.sort((a, b) => a.index - b.index);
+}

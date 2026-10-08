@@ -69,7 +69,8 @@ npm run update:daily -- --out ../penguin-index-cdn
 
 | 脚本 | 数据 | 来源 |
 |---|---|---|
-| `update-models.mjs` | 模型调用榜、国内价格 | 原站 CDN `frontend-data.json`（多节点取最新） |
+| `update-models.mjs` | 模型调用榜（及原站国内价格兜底） | 原站 CDN `frontend-data.json`（多节点取最新） |
+| `update-china-prices.mjs` | 国内模型价格 | 10 家厂商官方定价页（`scripts/lib/china-price-sources.mjs`）：DeepSeek、智谱、阿里云百炼、Kimi、MiniMax、百度千帆、腾讯混元 / TokenHub、火山方舟、百川、阶跃星辰；价格历史保存在 `.data-state/china-prices.json`，官网不再列出的模型自动标记 legacy，新模型自动收录。零一万物官网无价格页，沿用原站快照 |
 | `update-global-prices.mjs` | 全球价格 | OpenRouter Models API |
 | `update-benchmarks.mjs` | 模型评测榜 | 全部 24 项实时抓取：Artificial Analysis、Epoch AI、ARC Prize、LMArena、OSWorld 2.0，以及 `scripts/lib/benchmark-sources.mjs` 中的 14 个官方源（SWE-bench、LiveBench、LiveCodeBench、Aider、MMLU-Pro、MathVista、VideoMMMU、Terminal-Bench、BFCL、GAIA、OSWorld、AndroidWorld、RULER、LongBench v2） |
 | `update-skillhub.mjs` | SkillHub 榜 | SkillHub 公开 API |

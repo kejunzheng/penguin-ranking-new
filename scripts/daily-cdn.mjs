@@ -69,9 +69,10 @@ try {
   if (!skipFetch) {
     fs.rmSync(backup, { recursive: true, force: true });
     fs.cpSync(dataDir, backup, { recursive: true });
-    // 顺序有依赖：global-prices 使用 models.json 中的汇率。
+    // 顺序有依赖：china-prices 叠加在 models.json 之上；global-prices 使用 models.json 中的汇率。
     for (const [name, script] of [
       ['models', 'scripts/update-models.mjs'],
+      ['china-prices', 'scripts/update-china-prices.mjs'],
       ['global-prices', 'scripts/update-global-prices.mjs'],
       ['benchmarks', 'scripts/update-benchmarks.mjs'],
       ['skillhub', 'scripts/update-skillhub.mjs'],

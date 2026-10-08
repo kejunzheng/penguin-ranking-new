@@ -1,5 +1,6 @@
 // 模型调用榜（OpenRouter 周调用量趋势）+ 国内模型价格 → public/data/models.json
 // 数据源与原站一致：腾讯 CDN 上的 frontend-data.json，结构与本站 models.json 完全相同，校验后原样写入（不缩进）。
+// 其中的国内价格自 2026-08-18 起停更，由随后运行的 update-china-prices.mjs 用厂商官方定价页覆盖。
 import path from 'node:path';
 import { dataDir, getJson, getJsonViaCurl, readJson, reportFreshness, writeJsonIfChanged } from './lib/net.mjs';
 
@@ -33,6 +34,4 @@ const priceDate = prices.models.map(model => model.latest?.date).filter(Boolean)
 console.log(`MODELS_${changed ? 'UPDATED' : 'UNCHANGED'} usage_updated_at=${trends.updated_at} china_price_date=${priceDate} weeks=${trends.weeks.length} price_models=${prices.models.length}`);
 reportFreshness([
   { dataset: '模型调用榜（OpenRouter 调用量）', file: 'data/models.json#trends', source: SOURCE, mode: 'live', latest: trends.updated_at },
-  { dataset: '国内模型价格', file: 'data/models.json#prices', source: SOURCE, mode: 'live', latest: priceDate,
-    note: '数据源本身的国内价格停留在该日期，上游未更新时本站也无法更新' },
 ]);
