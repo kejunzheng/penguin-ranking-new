@@ -247,7 +247,9 @@ export async function fetchGaia() {
   const base = 'https://datasets-server.huggingface.co/rows?dataset=gaia-benchmark/results_public&config=2023&split=test';
   const items = [];
   for (let offset = 0; offset < 5000; offset += 100) {
-    const page = await getJson(`${base}&offset=${offset}&length=100`, { timeout: 90000 });
+    // 约 38 页顺序翻页：任一页失败会让整个榜单作废，因此加大重试并在页间稍作间隔，避免触发 HF 限流
+    if (offset) await new Promise(resolve => setTimeout(resolve, 300));
+    const page = await getJson(`${base}&offset=${offset}&length=100`, { timeout: 90000, retries: 5 });
     const rows = (page.rows || []).map(item => item.row);
     items.push(...rows);
     if (rows.length < 100) break;
