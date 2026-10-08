@@ -7,7 +7,7 @@
 //   3. 某厂商解析健康（匹配到 ≥2 个已有模型）时：官网不再列出的在售模型标记为 legacy（前台隐藏，历史保留），
 //      官网新出现的文本模型自动收录（日期快照版本除外）；
 //   4. 价格较上次变化超过 10 倍视为解析异常，跳过该模型。
-// 抓取失败的厂商保留上一次的数据，并在新鲜度报告中注明。零一万物官网已无价格页，沿用原站快照。
+// 抓取失败的厂商保留上一次的数据，并在新鲜度报告中注明。零一万物已不再收录。
 import path from 'node:path';
 import { CHINA_PRICE_SOURCES, TEXT_ONLY, fetchChinaPrices } from './lib/china-price-sources.mjs';
 import { dataDir, getJson, readJson, reportFreshness, stateFile, writeJsonIfChanged } from './lib/net.mjs';
@@ -32,8 +32,12 @@ function mergeHistory(...lists) {
 }
 
 // 1. 原站数据 + 本站已采集数据
+// 不再收录的厂商（关注度低且官网已无价格页）：原站数据中仍有，这里直接剔除
+const EXCLUDED_PROVIDERS = new Set(['yi']);
+prices.models = prices.models.filter(model => !EXCLUDED_PROVIDERS.has(model.provider));
 const models = new Map(prices.models.map(model => [model.slug, model]));
 for (const [slug, saved] of Object.entries(state.models)) {
+  if (EXCLUDED_PROVIDERS.has(saved.provider)) continue;
   const upstream = models.get(slug);
   if (!upstream) { models.set(slug, saved); continue; }
   const latest = (upstream.latest?.date || '') > (saved.latest?.date || '') ? upstream.latest : saved.latest; // 原站恢复更新时以较新的为准

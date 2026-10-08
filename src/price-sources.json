@@ -146,17 +146,6 @@
           "type": "official"
         }
       ]
-    },
-    "yi": {
-      "websiteUrl": "https://platform.lingyiwanwu.com/",
-      "platforms": [
-        {
-          "name": "零一万物开放平台",
-          "nameEn": "01.AI Platform",
-          "url": "https://platform.lingyiwanwu.com/",
-          "type": "official"
-        }
-      ]
     }
   },
   "releaseDates": {
