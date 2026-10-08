@@ -42,8 +42,9 @@ const candidates = [...channelsOf.keys()].filter(key => templates.has(key));
 function parseRepoPage(html) {
   const number = value => value == null ? null : Number(String(value).replace(/,/g, ''));
   return {
-    stars: number(html.match(/aria-label="(\d+) users? starred this repository"/)?.[1]),
-    forks: number(html.match(/id="repo-network-counter"[^>]*title="([\d,]+)"/)?.[1]),
+    // 2026-10 起 GitHub 仓库页改为内嵌 JSON（stargazerCount / forksCount），旧版 aria-label 写法保留兜底
+    stars: number(html.match(/"stargazerCount":(\d+)/)?.[1] ?? html.match(/aria-label="(\d+) users? starred this repository"/)?.[1]),
+    forks: number(html.match(/"forksCount":(\d+)/)?.[1] ?? html.match(/id="repo-network-counter"[^>]*title="([\d,]+)"/)?.[1]),
   };
 }
 async function mapLimit(items, limit, task) {
