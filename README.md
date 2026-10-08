@@ -71,7 +71,7 @@ npm run update:daily -- --out ../penguin-index-cdn
 |---|---|---|
 | `update-models.mjs` | 模型调用榜（及原站国内价格兜底） | 原站 CDN `frontend-data.json`（多节点取最新） |
 | `update-china-prices.mjs` | 国内模型价格 | 10 家厂商官方定价页（`scripts/lib/china-price-sources.mjs`）：DeepSeek、智谱、阿里云百炼、Kimi、MiniMax、百度千帆、腾讯混元 / TokenHub、火山方舟、百川、阶跃星辰；价格历史保存在 `.data-state/china-prices.json`，官网不再列出的模型自动标记 legacy，新模型自动收录。零一万物已不再收录 |
-| `update-global-prices.mjs` | 全球价格 | OpenRouter Models API |
+| `update-global-prices.mjs` | 全球价格 | 厂商第一方官方定价页与公开价格接口；国内复用当日官网核验数据 |
 | `update-benchmarks.mjs` | 模型评测榜 | 全部 24 项实时抓取：Artificial Analysis、Epoch AI、ARC Prize、LMArena、OSWorld 2.0，以及 `scripts/lib/benchmark-sources.mjs` 中的 14 个官方源（SWE-bench、LiveBench、DeepSWE、FrontierCode、MMLU-Pro、MathVista、VideoMMMU、Terminal-Bench、BFCL、GAIA、OSWorld、AndroidWorld、RULER、LongBench v2） |
 | `update-skillhub.mjs` | SkillHub 榜 | SkillHub 公开 API |
 | `update-github.mjs` | 开源产品榜、Agent Skills 榜 | github.com 仓库页面 Star 自采集，按 24h / 7d / 30d 基线计算净增长 |
@@ -86,7 +86,7 @@ npm run update:daily -- --out ../penguin-index-cdn
 
 - `public/data/benchmarks.json`：模型评测数据，当前生成于 2026-10-05。
 - `public/data/models.json`：模型调用与原始价格快照，当前生成于 2026-09-07。
-- `public/data/global-prices.json`：OpenRouter 全球价格快照，当前更新于 2026-09-09。
+- `public/data/global-prices.json`：厂商官网价格快照（每百万文本 Token），包含原计价币种、计费档位、原币种历史、官网链接及每个厂商的核验状态。抓取失败保留该厂商上次官网价格和核验日期；没有官网报价时不以渠道报价替代。
 - `public/data/product/*`、`public/data/skill/*`：GitHub 开源产品和 Agent Skills 快照。
 - `public/data/skillhub.json`：SkillHub 榜单，当前生成于 2026-10-05。
 
