@@ -4,7 +4,7 @@
  *
  * 流程：
  *   1. 依赖：node_modules 缺失或 package-lock.json 变化时执行 `npm ci`（仅安装到仓库本地）。
- *   2. 抓取：依次运行 scripts/update-benchmarks.mjs、scripts/update-skillhub.mjs；单个数据源失败不影响其他数据源。
+ *   2. 抓取：调用量→国内价格→全球价格、评测、SkillHub、GitHub 四组并行；单个数据源失败不影响其他数据源。
  *   3. 校验：运行数据测试；失败则把 public/data 回滚到本次运行前的版本。
  *   4. 构建：`npm run build`，产物为 dist/client（index.html + assets + data）。
  *   5. 发布：把 dist/client 原子替换到 <out>/site，并写入 <out>/manifest.json。
@@ -16,7 +16,7 @@
  *
  * 退出码：抓取部分失败但其余流程完成时返回 0，并在输出中注明；构建/发布失败返回 1。
  */
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,13 +34,30 @@ const dataDir = path.join(repo, 'public', 'data');
 const startedAt = new Date();
 const log = (...items) => console.log(`[${new Date().toISOString()}]`, ...items);
 
+const printOutput = output => {
+  if (output) console.log(output.split('\n').filter(line => !line.startsWith('FRESHNESS ')).slice(-15).join('\n'));
+};
+
 function run(command, args, { allowFail = false } = {}) {
   log('$', command, args.join(' '));
   const result = spawnSync(command, args, { cwd: repo, encoding: 'utf8', env: { ...process.env, CI: '1' }, maxBuffer: 64 * 1024 * 1024 });
   const output = `${result.stdout || ''}${result.stderr || ''}`.trim();
-  if (output) console.log(output.split('\n').filter(line => !line.startsWith('FRESHNESS ')).slice(-15).join('\n'));
+  printOutput(output);
   if (result.status !== 0 && !allowFail) throw new Error(`${command} ${args.join(' ')} 失败（exit ${result.status}）`);
   return { ok: result.status === 0, output };
+}
+
+// 异步执行一个抓取脚本，输出先缓存，结束后由调用方按固定顺序打印，避免并行时日志交错。
+function runAsync(script) {
+  return new Promise(resolve => {
+    const start = Date.now();
+    const child = spawn(process.execPath, [script], { cwd: repo, env: { ...process.env, CI: '1' } });
+    let output = '';
+    child.stdout.on('data', chunk => { output += chunk; });
+    child.stderr.on('data', chunk => { output += chunk; });
+    child.on('error', error => { output += `\n${error.message}`; });
+    child.on('close', code => resolve({ ok: code === 0, output: output.trim(), seconds: (Date.now() - start) / 1000 }));
+  });
 }
 
 const sha256 = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
@@ -69,16 +86,23 @@ try {
   if (!skipFetch) {
     fs.rmSync(backup, { recursive: true, force: true });
     fs.cpSync(dataDir, backup, { recursive: true });
-    // 顺序有依赖：china-prices 叠加在 models.json 之上；global-prices 使用 models.json 中的汇率。
-    for (const [name, script] of [
-      ['models', 'scripts/update-models.mjs'],
-      ['china-prices', 'scripts/update-china-prices.mjs'],
-      ['global-prices', 'scripts/update-global-prices.mjs'],
-      ['benchmarks', 'scripts/update-benchmarks.mjs'],
-      ['skillhub', 'scripts/update-skillhub.mjs'],
-      ['github', 'scripts/update-github.mjs'],
-    ]) {
-      const result = run('node', [script], { allowFail: true });
+    // 分组并行：组内顺序有依赖（china-prices 叠加在 models.json 之上；global-prices 使用 models.json 中的汇率），
+    // 组与组之间读写的文件互不重叠，可以同时执行。总耗时由最慢的一组决定。
+    const groups = [
+      [['models', 'scripts/update-models.mjs'], ['china-prices', 'scripts/update-china-prices.mjs'], ['global-prices', 'scripts/update-global-prices.mjs']],
+      [['benchmarks', 'scripts/update-benchmarks.mjs']],
+      [['skillhub', 'scripts/update-skillhub.mjs']],
+      [['github', 'scripts/update-github.mjs']],
+    ];
+    log('并行抓取：', groups.map(group => group.map(([name]) => name).join(' → ')).join(' | '));
+    const results = new Map();
+    await Promise.all(groups.map(async group => {
+      for (const [name, script] of group) results.set(name, await runAsync(script));
+    }));
+    for (const [name, script] of groups.flat()) {
+      const result = results.get(name);
+      log('$ node', script, `(${result.seconds.toFixed(1)}s${result.ok ? '' : '，失败'})`);
+      printOutput(result.output);
       const lines = result.output.split('\n');
       for (const line of lines) if (line.startsWith('FRESHNESS ')) summary.freshness.push(...JSON.parse(line.slice(10)));
       const message = lines.filter(line => !line.startsWith('FRESHNESS ') && line.trim()).at(-1) || '';

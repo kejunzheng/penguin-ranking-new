@@ -58,7 +58,7 @@ async function mapLimit(items, limit, task) {
 
 const failures = [];
 const current = new Map();
-await mapLimit(candidates, 4, async key => {
+await mapLimit(candidates, 6, async key => {
   const fullName = templates.get(key).fullName;
   try {
     const info = parseRepoPage(await getText(`https://github.com/${fullName}`, { timeout: 30000, headers: { accept: 'text/html' } }));

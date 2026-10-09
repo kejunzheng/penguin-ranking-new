@@ -205,17 +205,36 @@ export async function fetchTerminalBench() {
   };
 }
 
-// GAIA：官方公开结果数据集（HF datasets-server，2023 test）
-export async function fetchGaia() {
+// GAIA：官方公开结果数据集（gaia-benchmark/results_public，2023 test）
+// 优先直接下载仓库里的单个 parquet 文件（约 170 KB，一次请求、约 2 秒）；
+// 失败时退回 datasets-server 逐页读取（约 39 页、约 50 秒，且容易触发 HF 429 限流）。
+const GAIA_PARQUET = 'https://huggingface.co/datasets/gaia-benchmark/results_public/resolve/main/2023/test-00000-of-00001.parquet';
+async function gaiaRowsFromParquet() {
+  const { parquetReadObjects } = await import('hyparquet');
+  const buffer = await getBuffer(GAIA_PARQUET, { timeout: 90000, retries: 3 });
+  const file = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
+  return parquetReadObjects({ file, columns: ['model', 'organisation', 'score', 'date'] });
+}
+async function gaiaRowsFromPages() {
   const base = 'https://datasets-server.huggingface.co/rows?dataset=gaia-benchmark/results_public&config=2023&split=test';
   const items = [];
   for (let offset = 0; offset < 5000; offset += 100) {
-    // 约 38 页顺序翻页：任一页失败会让整个榜单作废，因此加大重试并在页间稍作间隔，避免触发 HF 限流
+    // 顺序翻页：任一页失败会让整个榜单作废，因此加大重试并在页间稍作间隔，避免触发 HF 限流
     if (offset) await new Promise(resolve => setTimeout(resolve, 300));
     const page = await getJson(`${base}&offset=${offset}&length=100`, { timeout: 90000, retries: 5 });
     const rows = (page.rows || []).map(item => item.row);
     items.push(...rows);
     if (rows.length < 100) break;
+  }
+  return items;
+}
+export async function fetchGaia() {
+  let items;
+  try {
+    items = await gaiaRowsFromParquet();
+  } catch (error) {
+    console.log(`  GAIA: parquet 读取失败，改用逐页读取（${error.message}）`);
+    items = await gaiaRowsFromPages();
   }
   const table = ensure(ranked(items.filter(item => item.model), item => item.score), 20, 'GAIA');
   return {

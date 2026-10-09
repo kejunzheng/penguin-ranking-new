@@ -203,6 +203,9 @@ const LIVE_SOURCES = [
   ...OFFICIAL_SOURCES,
 ];
 const LIVE_BENCHMARKS = new Set(LIVE_SOURCES.flatMap(source => source.benchmarks));
+// 所有数据源与基线同时发起抓取（各源互不依赖，原先串行约 95 秒，并发后约 5 秒）；
+// 结果仍在下方按 LIVE_SOURCES 的固定顺序逐个合并，保证输出与串行抓取完全一致。
+const fetchedSources = LIVE_SOURCES.map(source => source.fetch().then(value => ({ value }), error => ({ error })));
 
 // ---------- 主流程 ----------
 const { benchmarkPayload, skus, records: upstreamRecords, snapshots } = await upstreamBaseline();
@@ -253,9 +256,11 @@ const historyPath = stateFile('benchmark-history.json');
 const history = readJson(historyPath, { snapshots: {}, models: {} });
 const freshness = [];
 const sourceStatus = new Map();
-for (const source of LIVE_SOURCES) {
+for (const [index, source] of LIVE_SOURCES.entries()) {
   try {
-    const { date, rows, note, dataDate = date } = await source.fetch();
+    const fetched = await fetchedSources[index];
+    if (fetched.error) throw fetched.error;
+    const { date, rows, note, dataDate = date } = fetched.value;
     const grouped = new Map(source.benchmarks.map(id => [id, []]));
     for (const row of rows) {
       const { id, config, display } = resolveModelId(row.raw);

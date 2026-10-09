@@ -67,6 +67,8 @@ npm run update:daily -- --out ../penguin-index-cdn
 
 依次执行：本地依赖检查 → 全部抓取 → 数据测试（失败回滚）→ 生产构建 → 把 `dist/client` 原子发布到 `<out>/site`，并写入 `<out>/manifest.json` 与数据新鲜度报告 `<out>/freshness.md`。单个数据源失败时保留旧数据；构建失败时不替换已发布版本。
 
+抓取分四组并行：调用量 → 国内价格 → 全球价格（组内有依赖，顺序执行）、评测、SkillHub、GitHub。评测榜的 19 个数据源同样并发抓取，GAIA 直接读取官方数据集的 parquet 文件，不再逐页翻取。整次运行约 30～40 秒，控制在定时任务平台的 60 秒超时以内。
+
 | 脚本 | 数据 | 来源 |
 |---|---|---|
 | `update-models.mjs` | 模型调用榜（及原站国内价格兜底） | 原站 CDN `frontend-data.json`（多节点取最新） |
