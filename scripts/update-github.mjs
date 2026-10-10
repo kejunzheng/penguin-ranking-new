@@ -1,11 +1,13 @@
 // 开源产品榜 / Agent Skills 榜（GitHub Star 净增长）→ public/data/{product,skill}/{daily,weekly,monthly}.json + status.json
 //
 // 原站的榜单数据冻结在 2026-09-05，且没有可直接订阅的上游。这里改为自采集：
-//   - 每次运行读取候选仓库的 github.com 页面，记录精确 Star 数（GitHub REST API 匿名额度在共享出口 IP 上经常耗尽）；
+//   - 每次运行记录候选仓库的精确 Star 数：配置了 GITHUB_TOKEN 时走 GraphQL API，否则 / 失败时读取 github.com 仓库页面
+//     （匿名 API 额度在共享出口 IP 上经常耗尽，所以不用匿名 API）；
 //   - 观测点保存在 .data-state/github-stars.json（需持久保存），初始基线来自原站公开的观测点 scripts/data/github-star-seed.json；
 //   - 净增长 = 当前 Star − 约 24h / 7d / 30d 前的观测值；某周期基线不足 10 个可比仓库时保留旧榜单文件，不输出残缺榜单。
 // 候选池与编辑内容（中文简介、能力标签等）沿用现有榜单文件，新仓库需人工补充 Logo 与简介后再加入候选池。
 // DSH 频道已不在前台展示，不再更新（文件保留以兼容旧链接）。
+import fs from 'node:fs';
 import path from 'node:path';
 import { dataDir, getText, readJson, repoRoot, reportFreshness, stateFile, writeJsonIfChanged } from './lib/net.mjs';
 
@@ -56,20 +58,71 @@ async function mapLimit(items, limit, task) {
   return results;
 }
 
+// GitHub token：环境变量 GITHUB_TOKEN，或仓库根目录的 .env.github（GITHUB_TOKEN=...，已被 .gitignore 的 .env* 忽略，
+// 且 Vite 只在 mode=github 时才会读取该文件，不会进入前端构建）。只需公开仓库只读权限。
+function readToken() {
+  if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN.trim();
+  try {
+    const line = fs.readFileSync(path.join(repoRoot, '.env.github'), 'utf8').split('\n').find(item => item.startsWith('GITHUB_TOKEN='));
+    return line ? line.slice('GITHUB_TOKEN='.length).trim() || null : null;
+  } catch { return null; }
+}
+
+// 有 token 时用 GraphQL 一次读取全部候选仓库（50 个一批，每批消耗 1 点额度，约 2 秒），
+// 不受仓库页改版影响。token 失效 / 额度耗尽 / 个别仓库缺失时，这些仓库退回网页抓取。
+async function fetchViaApi(token, keys) {
+  const result = new Map();
+  for (let start = 0; start < keys.length; start += 50) {
+    const batch = keys.slice(start, start + 50);
+    const fields = batch.map((key, index) => {
+      const [owner, name] = templates.get(key).fullName.split('/');
+      return `r${index}: repository(owner: ${JSON.stringify(owner)}, name: ${JSON.stringify(name)}) { stargazerCount forkCount }`;
+    }).join('\n');
+    const response = await fetch('https://api.github.com/graphql', {
+      method: 'POST', signal: AbortSignal.timeout(30000),
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', 'user-agent': 'PenguinIndex/1.0' },
+      body: JSON.stringify({ query: `query {\n${fields}\n}` }),
+    });
+    // 只报告状态码，不回显响应头或请求内容，避免 token 进入日志
+    if (!response.ok) throw new Error(`GitHub API HTTP ${response.status}`);
+    const payload = await response.json();
+    if (!payload.data) throw new Error(`GitHub API 返回错误：${payload.errors?.[0]?.type || 'unknown'}`);
+    batch.forEach((key, index) => {
+      const repo = payload.data[`r${index}`];
+      if (repo && Number.isFinite(repo.stargazerCount)) result.set(key, { stars: repo.stargazerCount, forks: repo.forkCount ?? null });
+    });
+  }
+  return result;
+}
+
 const failures = [];
 const current = new Map();
-await mapLimit(candidates, 6, async key => {
+const record = (key, info) => {
+  current.set(key, info);
+  const entry = (state.repos[key] ??= { fullName: templates.get(key).fullName, points: [] });
+  entry.points.push([now.toISOString(), info.stars]);
+};
+const token = readToken();
+let viaApi = 0;
+if (token) {
+  try {
+    for (const [key, info] of await fetchViaApi(token, candidates)) { record(key, info); viaApi++; }
+  } catch (error) {
+    console.log(`  GitHub API 不可用，改用网页抓取（${error.message}）`);
+  }
+}
+await mapLimit(candidates.filter(key => !current.has(key)), 6, async key => {
   const fullName = templates.get(key).fullName;
   try {
     const info = parseRepoPage(await getText(`https://github.com/${fullName}`, { timeout: 30000, headers: { accept: 'text/html' } }));
     if (!Number.isFinite(info.stars)) throw new Error('页面中未找到 Star 数');
-    current.set(key, info);
-    const entry = (state.repos[key] ??= { fullName, points: [] });
-    entry.points.push([now.toISOString(), info.stars]);
+    record(key, info);
   } catch (error) {
     failures.push(`${fullName}: ${error.message}`);
   }
 });
+const viaPage = current.size - viaApi;
+const sourceLabel = viaApi && viaPage ? 'GitHub API + 仓库页面' : viaApi ? 'GitHub API' : 'github.com 仓库页面';
 const keepFrom = nowMs - KEEP_DAYS * 864e5;
 for (const entry of Object.values(state.repos)) {
   entry.points = entry.points.filter(point => Date.parse(point[0]) >= keepFrom).sort((a, b) => Date.parse(a[0]) - Date.parse(b[0]));
@@ -131,7 +184,7 @@ for (const channel of CHANNELS) for (const [period] of Object.entries(PERIODS)) 
   }
   freshness.push({
     dataset: `${channel === 'product' ? '开源产品榜' : 'Agent Skills 榜'} · ${{ daily: '日榜', weekly: '周榜', monthly: '月榜' }[period]}`,
-    file: `data/${channel}/${period}.json`, source: 'github.com 仓库页面（自采集 Star 快照）', mode: 'live',
+    file: `data/${channel}/${period}.json`, source: `${sourceLabel}（自采集 Star 快照）`, mode: 'live',
     latest: fileUpdatedAt[`${channel}/${period}`] || FROZEN_AT,
     note: mature ? null : `基线积累中：只有 ${comparable.length} 个仓库有约 ${PERIODS[period] / 24} 天前的观测值（需 ≥10），沿用旧榜单`,
   });
@@ -142,7 +195,7 @@ writeJsonIfChanged(path.join(dataDir, 'status.json'), {
   updatedAt: anyUpdated ? now.toISOString() : status.updatedAt,
   lastAttemptAt: now.toISOString(),
   fileUpdatedAt,
-  source: 'github.com repository pages (self-collected star snapshots)',
+  source: `${viaApi ? (viaPage ? 'GitHub GraphQL API + repository pages' : 'GitHub GraphQL API') : 'github.com repository pages'} (self-collected star snapshots)`,
   mode: 'live',
   periods: Object.fromEntries(Object.entries(periodStatus).map(([period, byChannel]) => [period, {
     mature: Object.values(byChannel).every(value => value.mature),
@@ -151,6 +204,6 @@ writeJsonIfChanged(path.join(dataDir, 'status.json'), {
   }])),
   failures: failures.slice(0, 20),
 });
-console.log(`GITHUB_${anyUpdated ? 'UPDATED' : 'BASELINE_PENDING'} repos=${current.size}/${candidates.length} failures=${failures.length} ` +
+console.log(`GITHUB_${anyUpdated ? 'UPDATED' : 'BASELINE_PENDING'} repos=${current.size}/${candidates.length} api=${viaApi} page=${viaPage} failures=${failures.length} ` +
   Object.entries(periodStatus).map(([period, byChannel]) => `${period}=${Object.entries(byChannel).map(([channel, value]) => `${channel}:${value.mature ? 'ok' : `pending(${value.comparable})`}`).join('/')}`).join(' '));
 reportFreshness(freshness);
