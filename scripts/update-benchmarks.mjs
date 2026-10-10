@@ -231,9 +231,13 @@ US_CREATORS.forEach(org => { if (!countryByOrg.has(org.toLowerCase())) countryBy
 
 // 去掉日期/版本后缀与连字符差异后再与已入选模型比对（如 claude-haiku-4-5-20251001 → claude-4-5-haiku，qwen-3-6-plus → qwen3-6-plus）。
 const stripSuffix = key => key.replace(/-(?:20\d{6}|\d{4})$/, '').replace(/-(?:instruct|chat)$/, '');
-const indexBy = transform => { const map = new Map(); for (const id of eligibleIds) { const key = transform(id); map.set(key, map.has(key) ? null : id); } return map; };
+// 名称兜底匹配的候选：基线入选模型 + 上一次已上榜的模型。基线截止 2026-09-21，只用基线会让之后新上榜的模型
+// （如 Claude Sonnet 5.5）在其他数据源里的变体名（claude-sonnet-5-5-xhigh-effort）全部匹配失败。
+// 只影响“能否对上已有模型”，入选规则不变。
+const matchableIds = new Set([...eligibleIds, ...(readJson(path.join(dataDir, 'benchmarks.json'))?.models || []).map(model => model.id)]);
+const indexBy = transform => { const map = new Map(); for (const id of matchableIds) { const key = transform(id); map.set(key, map.has(key) ? null : id); } return map; };
 const looseStripped = indexBy(id => looseKey(stripSuffix(id))), flatStripped = indexBy(id => stripSuffix(id).replace(/-/g, ''));
-const toEligible = id => eligibleIds.has(id) ? id : looseStripped.get(looseKey(stripSuffix(id))) || flatStripped.get(stripSuffix(id).replace(/-/g, '')) || null;
+const toEligible = id => matchableIds.has(id) ? id : looseStripped.get(looseKey(stripSuffix(id))) || flatStripped.get(stripSuffix(id).replace(/-/g, '')) || null;
 const TRAILING_EFFORT = /\s+(xhigh|high|medium|low|max|minimal|none)(?:\s+effort)?$/i;
 const VENDOR_PREFIX = /^(?:openai|anthropic|google|meta|xai|moonshotai|mistralai)\s+/i;
 function resolveModelId(raw) {
