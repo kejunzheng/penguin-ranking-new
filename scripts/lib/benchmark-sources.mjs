@@ -3,7 +3,7 @@ import { fetchDeepSwe, fetchFrontierCode } from './coding-benchmarks.mjs';
 // 口径（筛选条件、排序方式、原始名称字段）逐一移植自上游 kejunzheng/penguin-model-capability-ranking 的导入脚本，
 // 只把「读本地冻结文件」改为「每次在线拉取」。每个函数返回：
 //   { date: 快照日期, dataDate: 数据源自身最新条目日期（无法得知时为 null）, rows: [{ benchmarkId, raw, rank, org, releaseDate, openWeights, source }] }
-import { getBuffer, getJson, getText } from './net.mjs';
+import { getBuffer, getJson, getLastModified, getText, githubFileDate } from './net.mjs';
 import { excelDate, parseCsv, parseCsvRows, readXlsxRows } from './formats.mjs';
 
 const today = () => new Date().toISOString().slice(0, 10);
@@ -58,7 +58,8 @@ export async function fetchLivebench() {
   if (!release) throw new Error('未找到 LiveBench 发布列表');
   const tag = release.replace(/-/g, '_');
   const tableUrl = `https://livebench.ai/table_${tag}.csv`;
-  const [csv, categories] = await Promise.all([getText(tableUrl), getJson(`https://livebench.ai/categories_${tag}.json`)]);
+  // 发布列表里的日期是题库版本号；同一版本的成绩表会持续追加新模型，因此数据日期取成绩表文件的 Last-Modified。
+  const [csv, categories, modified] = await Promise.all([getText(tableUrl), getJson(`https://livebench.ai/categories_${tag}.json`), getLastModified(tableUrl)]);
   const meta = new Map();
   for (const match of js.matchAll(/"([^"{}]+)":\{([^{}]*?displayName:"[^"]+"[^{}]*?)\}/g)) {
     const body = match[2], pick = key => body.match(new RegExp(`${key}:"([^"]+)"`))?.[1];
@@ -68,7 +69,7 @@ export async function fetchLivebench() {
   const scored = parseCsv(csv).map(item => ({ item, score: average(Object.values(categories).map(tasks => average(tasks.map(task => number(item[task]))))) }));
   const table = ensure(ranked(scored, entry => entry.score), 20, 'LiveBench');
   return {
-    date: today(), dataDate: release,
+    date: today(), dataDate: [release, modified].filter(Boolean).sort().at(-1),
     rows: table.map(({ item }, index) => {
       const info = meta.get(item.model) || {};
       return row('livebench_overall', tableUrl, info.name || item.model, index + 1, {
@@ -120,12 +121,13 @@ export async function fetchVideommmu() {
     parsed.push({ raw: cleanMarkdown(cells[0]), score: number(cleanMarkdown(cells[1]).split('|')[0]) });
   }
   const table = ensure(ranked(parsed, item => item.score), 5, 'VideoMMMU');
-  return { date: today(), dataDate: null, rows: table.map((item, index) => row('videommmu', url, item.raw, index + 1)) };
+  return { date: today(), dataDate: await githubFileDate('EvolvingLMMs-Lab/VideoMMMU', 'README.md'), rows: table.map((item, index) => row('videommmu', url, item.raw, index + 1)) };
 }
 
 // RULER：维护者 README 主结果表，按 wAvg.(dec) 排序
 export async function fetchRuler() {
-  const url = 'https://raw.githubusercontent.com/Infini-AI-Lab/RULER/main/README.md';
+  // 官方仓库 NVIDIA/RULER（此前误用 fork Infini-AI-Lab/RULER，2024-12 后未同步）
+  const url = 'https://raw.githubusercontent.com/NVIDIA/RULER/main/README.md';
   const parsed = [];
   for (const line of (await getText(url)).split('\n')) {
     if (!line.startsWith('[')) continue;
@@ -134,7 +136,7 @@ export async function fetchRuler() {
     parsed.push({ raw: cleanMarkdown(cells[0]), score: number(cleanMarkdown(cells.at(-1))) });
   }
   const table = ensure(ranked(parsed, item => item.score), 5, 'RULER');
-  return { date: today(), dataDate: null, rows: table.map((item, index) => row('ruler', url, item.raw, index + 1)) };
+  return { date: today(), dataDate: await githubFileDate('NVIDIA/RULER', 'README.md'), rows: table.map((item, index) => row('ruler', url, item.raw, index + 1)) };
 }
 
 // LongBench v2：官网 HTML 排行表，w/ CoT 总分
@@ -169,7 +171,17 @@ export async function fetchBfcl() {
   if (!latest) throw new Error('未找到 BFCL 结果目录');
   const url = `https://raw.githubusercontent.com/HuanzhiMao/BFCL-Result/main/${latest}/score/data_overall.csv`;
   const table = ensure(parseCsv(await getText(url)).filter(item => item.Model && Number.isFinite(Number(item.Rank))), 20, 'BFCL');
-  return { date: today(), dataDate: latest, rows: table.map(item => row('bfcl_v4', url, item.Model, Number(item.Rank), { org: item.Organization || null })) };
+  // 模型名末尾的 (FC) / (Prompt) 是调用方式，拆成配置；否则 “Claude-Opus-4-5-20251101 (FC)” 无法与站内模型匹配
+  const MODES = { fc: '原生函数调用（FC）', prompt: '提示词模式（Prompt）' };
+  return {
+    date: today(), dataDate: latest,
+    rows: table.map(item => {
+      const mode = String(item.Model).match(/\s*\((FC|Prompt)\)\s*$/i);
+      return row('bfcl_v4', url, mode ? item.Model.slice(0, mode.index) : item.Model, Number(item.Rank), {
+        org: item.Organization || null, ...(mode ? { configSuffix: MODES[mode[1].toLowerCase()] } : {}),
+      });
+    }),
+  };
 }
 
 // Terminal-Bench 4.0：官方仓库 leaderboard/submissions/*.json（Agent 系统成绩）

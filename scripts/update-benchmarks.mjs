@@ -235,6 +235,7 @@ const indexBy = transform => { const map = new Map(); for (const id of eligibleI
 const looseStripped = indexBy(id => looseKey(stripSuffix(id))), flatStripped = indexBy(id => stripSuffix(id).replace(/-/g, ''));
 const toEligible = id => eligibleIds.has(id) ? id : looseStripped.get(looseKey(stripSuffix(id))) || flatStripped.get(stripSuffix(id).replace(/-/g, '')) || null;
 const TRAILING_EFFORT = /\s+(xhigh|high|medium|low|max|minimal|none)(?:\s+effort)?$/i;
+const VENDOR_PREFIX = /^(?:openai|anthropic|google|meta|xai|moonshotai|mistralai)\s+/i;
 function resolveModelId(raw) {
   const parsed = extractSku(raw);
   const direct = skuByRawName.get(raw) || parsed.key;
@@ -247,6 +248,13 @@ function resolveModelId(raw) {
     const stripped = extractSku(parsed.display.slice(0, effort.index));
     const matched = toEligible(stripped.key);
     if (matched) return { ...stripped, id: matched, config: parsed.config === STANDARD ? effort[0].trim() : `${parsed.config}；${effort[0].trim()}` };
+  }
+  // 兜底：名称前带厂商前缀（如 “OpenAI O3”“Moonshotai-Kimi-K2-Instruct”）。同样只在去掉后能命中已入选模型时采用。
+  const vendor = parsed.display.match(VENDOR_PREFIX);
+  if (vendor) {
+    const stripped = extractSku(parsed.display.slice(vendor[0].length));
+    const matched = toEligible(stripped.key);
+    if (matched) return { ...stripped, id: matched, config: parsed.config };
   }
   return { ...parsed, id: direct };
 }
@@ -264,7 +272,10 @@ for (const [index, source] of LIVE_SOURCES.entries()) {
     const grouped = new Map(source.benchmarks.map(id => [id, []]));
     for (const row of rows) {
       const { id, config, display } = resolveModelId(row.raw);
-      grouped.get(row.benchmarkId)?.push([id, row.rank, row.config || config, row.source]);
+      // row.config：数据源给出的完整配置，直接采用；row.configSuffix：只描述一个维度（如 BFCL 的调用方式），
+      // 追加到名称里解析出的配置（如推理 / 非推理）之后，避免互相覆盖。
+      const merged = row.configSuffix ? (config !== STANDARD ? `${config}；${row.configSuffix}` : row.configSuffix) : row.config || config;
+      grouped.get(row.benchmarkId)?.push([id, row.rank, merged, row.source]);
       const meta = history.models[id] || {};
       const releaseDate = row.releaseDate && /^\d{4}-\d{2}-\d{2}$/.test(row.releaseDate) ? row.releaseDate : null;
       history.models[id] = {

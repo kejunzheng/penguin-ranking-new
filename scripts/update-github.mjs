@@ -7,9 +7,8 @@
 //   - 净增长 = 当前 Star − 约 24h / 7d / 30d 前的观测值；某周期基线不足 10 个可比仓库时保留旧榜单文件，不输出残缺榜单。
 // 候选池与编辑内容（中文简介、能力标签等）沿用现有榜单文件，新仓库需人工补充 Logo 与简介后再加入候选池。
 // DSH 频道已不在前台展示，不再更新（文件保留以兼容旧链接）。
-import fs from 'node:fs';
 import path from 'node:path';
-import { dataDir, getText, readJson, repoRoot, reportFreshness, stateFile, writeJsonIfChanged } from './lib/net.mjs';
+import { dataDir, getText, githubToken, readJson, repoRoot, reportFreshness, stateFile, writeJsonIfChanged } from './lib/net.mjs';
 
 const CHANNELS = ['product', 'skill'];
 const PERIODS = { daily: 24, weekly: 168, monthly: 720 };
@@ -58,16 +57,6 @@ async function mapLimit(items, limit, task) {
   return results;
 }
 
-// GitHub token：环境变量 GITHUB_TOKEN，或仓库根目录的 .env.github（GITHUB_TOKEN=...，已被 .gitignore 的 .env* 忽略，
-// 且 Vite 只在 mode=github 时才会读取该文件，不会进入前端构建）。只需公开仓库只读权限。
-function readToken() {
-  if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN.trim();
-  try {
-    const line = fs.readFileSync(path.join(repoRoot, '.env.github'), 'utf8').split('\n').find(item => item.startsWith('GITHUB_TOKEN='));
-    return line ? line.slice('GITHUB_TOKEN='.length).trim() || null : null;
-  } catch { return null; }
-}
-
 // 有 token 时用 GraphQL 一次读取全部候选仓库（50 个一批，每批消耗 1 点额度，约 2 秒），
 // 不受仓库页改版影响。token 失效 / 额度耗尽 / 个别仓库缺失时，这些仓库退回网页抓取。
 async function fetchViaApi(token, keys) {
@@ -102,7 +91,7 @@ const record = (key, info) => {
   const entry = (state.repos[key] ??= { fullName: templates.get(key).fullName, points: [] });
   entry.points.push([now.toISOString(), info.stars]);
 };
-const token = readToken();
+const token = githubToken();
 let viaApi = 0;
 if (token) {
   try {

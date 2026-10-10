@@ -61,3 +61,35 @@ export async function getJsonViaCurl(url, { timeout = 60 } = {}) {
     });
   });
 }
+
+// GitHub token：环境变量 GITHUB_TOKEN，或仓库根目录的 .env.github（GITHUB_TOKEN=...，已被 .gitignore 的 .env* 忽略，
+// 且 Vite 只在 mode=github 时才会读取该文件，不会进入前端构建）。只需公开仓库只读权限；没有时返回 null。
+export function githubToken() {
+  if (process.env.GITHUB_TOKEN) return process.env.GITHUB_TOKEN.trim();
+  try {
+    const line = fs.readFileSync(path.join(repoRoot, '.env.github'), 'utf8').split('\n').find(item => item.startsWith('GITHUB_TOKEN='));
+    return line ? line.slice('GITHUB_TOKEN='.length).trim() || null : null;
+  } catch { return null; }
+}
+
+// 数据文件在 GitHub 上最后一次提交的日期（YYYY-MM-DD），用于没有自带更新日期的数据源；取不到时返回 null，不影响抓取。
+export async function githubFileDate(repo, file) {
+  try {
+    const token = githubToken();
+    const response = await fetch(`https://api.github.com/repos/${repo}/commits?path=${encodeURIComponent(file)}&per_page=1`, {
+      signal: AbortSignal.timeout(20000),
+      headers: { accept: 'application/vnd.github+json', 'user-agent': UA, ...(token ? { authorization: `Bearer ${token}` } : {}) },
+    });
+    if (!response.ok) return null;
+    return (await response.json())[0]?.commit?.committer?.date?.slice(0, 10) || null;
+  } catch { return null; }
+}
+
+// HTTP Last-Modified（YYYY-MM-DD）；取不到时返回 null。
+export async function getLastModified(url) {
+  try {
+    const response = await fetch(url, { method: 'HEAD', signal: AbortSignal.timeout(20000), headers: { 'user-agent': UA } });
+    const value = response.ok ? response.headers.get('last-modified') : null;
+    return value && Number.isFinite(Date.parse(value)) ? new Date(value).toISOString().slice(0, 10) : null;
+  } catch { return null; }
+}
