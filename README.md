@@ -76,7 +76,7 @@ npm run update:daily -- --out ../penguin-index-cdn
 | `update-global-prices.mjs` | 全球价格 | 厂商第一方官方定价页与公开价格接口；国内复用当日官网核验数据 |
 | `update-benchmarks.mjs` | 模型评测榜 | 全部 24 项实时抓取：Artificial Analysis、Epoch AI、ARC Prize、LMArena、OSWorld 2.0，以及 `scripts/lib/benchmark-sources.mjs` 中的 14 个官方源（SWE-bench、LiveBench、DeepSWE、FrontierCode、MMLU-Pro、MathVista、VideoMMMU、Terminal-Bench、BFCL、GAIA、OSWorld、AndroidWorld、RULER、LongBench v2） |
 | `update-skillhub.mjs` | SkillHub 榜 | SkillHub 公开 API |
-| `update-github.mjs` | 开源产品榜、Agent Skills 榜 | github.com 仓库页面 Star 自采集，按 24h / 7d / 30d 基线计算净增长 |
+| `update-github.mjs` | 开源产品榜、Agent Skills 榜 | Star 自采集，按 24h / 7d / 30d 基线计算净增长。配置 GitHub token 时用 GraphQL API 一次读取全部仓库，未配置或失败时读取 github.com 仓库页面 |
 
 抓取历史（评测快照、GitHub Star 观测点）保存在 `.data-state/`，不入库但必须持久保存。
 
@@ -115,3 +115,7 @@ npm run update:daily -- --out ../penguin-index-cdn
 完整交付方式、验收清单和接管步骤见 [DELIVERY.md](./DELIVERY.md)。
 
 评测榜 Coding 两列使用 DeepSWE v1.1（官方 pass@1）和 FrontierCode 1.1（Main 子集 new_score），按每模型最高分配置排名，保留 Agent 和推理强度；取代 LiveCodeBench、Aider Polyglot，旧成绩不参与当前覆盖率与比较。数据直接读取 Datacurve 和 Cognition 官方榜单 JSON。
+
+### GitHub token（可选）
+
+在仓库根目录创建 `.env.github`，写入一行 `GITHUB_TOKEN=<token>`，权限建议设为 600；也可以直接设置环境变量 `GITHUB_TOKEN`。token 只需要公开仓库的只读权限。该文件被 `.gitignore` 的 `.env*` 规则忽略，Vite 构建也不会读取它；打包交接仓库时注意不要把它一起带走。token 失效或额度耗尽时，脚本会自动改用网页抓取。
