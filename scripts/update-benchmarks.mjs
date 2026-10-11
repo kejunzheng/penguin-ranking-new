@@ -3,7 +3,7 @@
 // 两层数据：
 //   1. 基线：kejunzheng/penguin-model-capability-ranking 仓库的一次性导入（最后采集 2026-09-21，之后不再更新）。
 //      作为模型元数据、SKU 归一与抓取失败时的兜底来源。
-//   2. 实时：每次运行直接抓取全部 21 项 benchmark 的官方/公开数据源：
+//   2. 实时：每次运行直接抓取全部 22 项 benchmark 的官方/公开数据源：
 //      - Artificial Analysis 排行榜页面（内嵌数据）：AA 智能指数、AA-LCR、HLE、GPQA Diamond、MMMU-Pro
 //      - Epoch AI 公开数据包：FrontierMath Tier 1-3、SimpleQA Verified
 //      - ARC Prize、LMArena、OSWorld 2.0
@@ -219,7 +219,7 @@ benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.map(benchmark => {
   return replacement ? { ...benchmark, ...replacement, update_mode: 'result_addition', ingestion_status: 'live' } : benchmark;
 });
 // 下线的评测：上游榜单只有旧模型或 Agent 产品，站内模型池（18 个月内）没有任何成绩，整列为空（2026-10-11 核对）。
-const RETIRED_BENCHMARKS = new Set(['mathvista', 'androidworld', 'ruler']);
+const RETIRED_BENCHMARKS = new Set(['androidworld', 'ruler']);
 benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.filter(benchmark => !RETIRED_BENCHMARKS.has(benchmark.id));
 const activeBenchmarkIds = new Set(benchmarkPayload.benchmarks.map(benchmark => benchmark.id));
 const recordsById = new Map(upstreamRecords.map(record => [record.record_id, record]));
@@ -425,7 +425,7 @@ const benchmarks = benchmarkPayload.benchmarks.map(benchmark => {
   const latestSnapshot = snapshotDates.at(-1);
   const sourceEntries = latestSnapshot ? rankedEntries(benchmark.id, history.snapshots[benchmark.id][latestSnapshot]) : [];
   const excludedTop10 = sourceEntries.filter(([id, rank]) => rank <= 10 && !representedModelIds.has(id)).map(([id, rank, config]) => ({ rank, name: history.models[id]?.name || id, config }));
-  return { ...benchmark, snapshot_dates: snapshotDates, rank_audit: latestSnapshot ? { snapshot_date: latestSnapshot, rank_basis: RERANK_AMONG_TRACKED.has(benchmark.id) ? 'included_models' : 'source', source_entry_count: sourceEntries.length, included_entry_count: sourceEntries.filter(([id]) => representedModelIds.has(id)).length, excluded_top10: excludedTop10 } : null, latest_date: dates.sort().at(-1) || benchmarkPayload.generated_at.slice(0, 10), model_count: models.filter(model => model.records[benchmark.id]?.length).length };
+  return { ...benchmark, ...(benchmark.id === 'mathvista' ? { source_data_date: history.sourceDates?.MathVista || null, source_snapshot_date: latestSnapshot } : {}), snapshot_dates: snapshotDates, rank_audit: latestSnapshot ? { snapshot_date: latestSnapshot, rank_basis: RERANK_AMONG_TRACKED.has(benchmark.id) ? 'included_models' : 'source', source_entry_count: sourceEntries.length, included_entry_count: sourceEntries.filter(([id]) => representedModelIds.has(id)).length, excluded_top10: excludedTop10 } : null, latest_date: dates.sort().at(-1) || benchmarkPayload.generated_at.slice(0, 10), model_count: models.filter(model => model.records[benchmark.id]?.length).length };
 });
 // 精简：source 与该 benchmark 官方地址相同时省略（前台以 official_url 兜底）
 for (const model of models) for (const [benchmarkId, entries] of Object.entries(model.records)) {

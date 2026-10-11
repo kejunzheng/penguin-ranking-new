@@ -6,7 +6,7 @@ AI 趋势榜是一个中英双语的 AI 数据榜单网站，统一展示模型�
 
 ## 功能范围
 
-- 模型评测榜：21 项公开 Benchmark、模型对比、筛选、排序及评测档案。
+- 模型评测榜：22 项公开 Benchmark、模型对比、筛选、排序及评测档案。
 - 模型调用榜：OpenRouter 公开快照、周期切换、模型对比、CSV 与图片导出、模型调用档案。
 - 模型价格榜：全球与中国模型价格、筛选、排序、币种切换、CSV 导出、模型价格档案。
 - 开源产品榜与 Agent Skills 榜：基于公开 GitHub 快照的日榜、周榜和月榜。
@@ -74,7 +74,7 @@ npm run update:daily -- --out ../penguin-index-cdn
 | `update-models.mjs` | 模型调用榜（及原站国内价格兜底） | 原站 CDN `frontend-data.json`（多节点取最新） |
 | `update-china-prices.mjs` | 国内模型价格 | 10 家厂商官方定价页（`scripts/lib/china-price-sources.mjs`）：DeepSeek、智谱、阿里云百炼、Kimi、MiniMax、百度千帆、腾讯混元 / TokenHub、火山方舟、百川、阶跃星辰；价格历史保存在 `.data-state/china-prices.json`，官网不再列出的模型自动标记 legacy，新模型自动收录。零一万物已不再收录 |
 | `update-global-prices.mjs` | 全球价格 | 厂商第一方官方定价页与公开价格接口；国内复用当日官网核验数据 |
-| `update-benchmarks.mjs` | 模型评测榜 | 全部 21 项实时抓取：Artificial Analysis、Epoch AI、ARC Prize、LMArena、OSWorld 2.0，以及 `scripts/lib/benchmark-sources.mjs` 中的 11 个官方源（SWE-bench、LiveBench、DeepSWE、FrontierCode、MMLU-Pro、VideoMMMU、Terminal-Bench、BFCL、GAIA、OSWorld、LongBench v2）。MathVista、AndroidWorld、RULER 已于 2026-10-11 下线：上游榜单只有旧模型或 Agent 产品，站内模型池没有任何成绩 |
+| `update-benchmarks.mjs` | 模型评测榜 | 全部 22 项实时抓取：Artificial Analysis、Epoch AI、ARC Prize、LMArena、OSWorld 2.0，以及 `scripts/lib/benchmark-sources.mjs` 中的 12 个官方源（SWE-bench、LiveBench、DeepSWE、FrontierCode、MMLU-Pro、MathVista、VideoMMMU、Terminal-Bench、BFCL、GAIA、OSWorld、LongBench v2）。MathVista 已改为抓取官网实际使用的成绩文件，保留来源名次与成绩日期；AndroidWorld、RULER 暂无匹配站内模型池的有效成绩，继续隐藏 |
 | `update-skillhub.mjs` | SkillHub 榜 | SkillHub 公开 API |
 | `update-github.mjs` | 开源产品榜、Agent Skills 榜 | Star 自采集，按 24h / 7d / 30d 基线计算净增长。配置 GitHub token 时用 GraphQL API 一次读取全部仓库，未配置或失败时读取 github.com 仓库页面 |
 

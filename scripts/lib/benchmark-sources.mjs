@@ -1,5 +1,5 @@
 import { fetchDeepSwe, fetchFrontierCode } from './coding-benchmarks.mjs';
-// 模型评测榜：除 AA / Epoch / ARC / LMArena / OSWorld 2.0 之外的 11 个官方数据源。
+// 模型评测榜：除 AA / Epoch / ARC / LMArena / OSWorld 2.0 之外的 12 个官方数据源。
 // 口径（筛选条件、排序方式、原始名称字段）逐一移植自上游 kejunzheng/penguin-model-capability-ranking 的导入脚本，
 // 只把「读本地冻结文件」改为「每次在线拉取」。每个函数返回：
 //   { date: 快照日期, dataDate: 数据源自身最新条目日期（无法得知时为 null）, rows: [{ benchmarkId, raw, rank, org, releaseDate, openWeights, source }] }
@@ -234,7 +234,20 @@ export async function fetchOsworld() {
   };
 }
 
+// MathVista：官网实际使用的成绩文件；保留来源名次，评测条目日期不充当模型发布日期。
+export async function fetchMathvista() {
+  const source = 'https://mathvista.github.io/';
+  const text = await getText(source + 'data/results/model_scores.js');
+  const json = text.match(/score_table\s*=\s*(\{[\s\S]*\})\s*;?\s*$/)?.[1];
+  if (!json) throw new Error('未找到 MathVista score_table');
+  const table = ensure(Object.entries(JSON.parse(json)).filter(([rank, item]) => /^\d+$/.test(rank) && item.Model && typeof item.ALL === 'number' && Number.isFinite(item.ALL)), 10, 'MathVista');
+  const clean = value => String(value || '').replace(/[🥇🥈🥉🧠🖼️]/gu, '').trim();
+  return { date: today(), dataDate: maxDate(table.map(([, item]) => item.Date)),
+    rows: table.map(([rank, item]) => row('mathvista', source, clean(item.Model), Number(rank), {config: `testmini · ${clean(item.Method) || 'unspecified'}`})) };
+}
+
 export const OFFICIAL_SOURCES = [
+  { name: 'MathVista', benchmarks: ['mathvista'], fetch: fetchMathvista },
   { name: 'SWE-bench', benchmarks: ['swe_bench_verified'], fetch: fetchSwebench },
   { name: 'LiveBench', benchmarks: ['livebench_overall'], fetch: fetchLivebench },
   { name: 'DeepSWE', benchmarks: ['deepswe'], fetch: fetchDeepSwe },
