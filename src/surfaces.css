@@ -307,3 +307,4 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .benchmark-suggestions>p.benchmark-suggestions-count{position:sticky;top:-6px;z-index:1;margin:-6px -6px 4px;padding:8px 12px;background:#fff;border-bottom:1px solid #edf2f8;color:#8394a9;font-size:10px}
 .home-leader-list li{grid-template-columns:62px minmax(0,1fr) auto;min-height:64px;padding:12px 0}.home-leader-category{color:#5e7086;font-size:11px;font-weight:600;line-height:1.4}.home-leader-list li>strong{font:600 12px 'IBM Plex Mono',monospace;white-space:nowrap}.home-leader-list li>strong em{font-size:10px}
 @media(max-width:600px){.home-leader-list li{grid-template-columns:52px minmax(0,1fr) auto;gap:8px}.home-leader-category{font-size:10px}.home-leader-list li>strong{font-size:11px}}
+.benchmark-snapshots>button:disabled{opacity:.45;cursor:not-allowed}.benchmark-history-note{order:10;color:#8797aa;font-size:10px;white-space:nowrap;padding-left:2px}

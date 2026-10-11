@@ -384,10 +384,12 @@ for (const sku of skus) {
 
 // 显示名称统一为官方写法：Claude 4 起型号名在前（Claude Opus 4.8），基线沿用旧写法（Claude 4.8 Opus）。
 // 只改显示名称，模型 id 与成绩匹配不变；Claude 3.x 官方本就是 “Claude 3.5 Sonnet”，保持原样。
-// 官方写法：Claude 4 起为“Claude 家族 版本”；GPT 用连字符（GPT-5.2），gpt-oss 全小写
+// 官方写法：Claude 4 起为“Claude 家族 版本”；GPT 用连字符（GPT-5.2），gpt-oss 全小写；数据源给出全小写的 DeepSeek 名称时恢复大小写（DeepSeek V4 Flash）
 const officialName = name => String(name)
   .replace(/^Claude (\d+(?:\.\d+)?) (Haiku|Sonnet|Opus)$/, (whole, version, family) => Number.parseFloat(version) >= 4 ? `Claude ${family} ${version}` : whole)
   .replace(/^gpt[- ]oss[- ](\d+)b$/i, 'gpt-oss-$1b')
+  .replace(/^Deepseek\b/, 'DeepSeek')
+  .replace(/^deepseek( [a-z0-9. ]+)$/, (whole, rest) => `DeepSeek${rest.replace(/ ([a-z])/g, (space, letter) => ` ${letter.toUpperCase()}`)}`)
   .replace(/^gpt[ -](\d+(?:\.\d+)?)\b(.*)$/i, (whole, version, rest) => `GPT-${version}${rest.replace(/\b(instant|codex|pro)\b/g, word => word[0].toUpperCase() + word.slice(1))}`);
 // 入选规则沿用基线：基线已入选的模型保留；新模型需有可靠发布日期、≤18 个月、覆盖 ≥2 项 benchmark
 const cutoffDate = new Date(); cutoffDate.setUTCMonth(cutoffDate.getUTCMonth() - HOME_MAX_AGE_MONTHS);
