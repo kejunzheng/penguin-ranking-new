@@ -1,4 +1,4 @@
-function previewLmarenaConfigurations(model,cutoff,start=null){
+(function(){"use strict";function previewLmarenaConfigurations(model,cutoff,start=null){
  const byConfig=new Map();
  for(const record of model.records.lmarena_text_overall||[]){
   if(!record.date||record.date>cutoff||(start&&record.date<start)||!Number.isFinite(record.rank))continue;
@@ -18,7 +18,7 @@ function previewBenchmarkResult(model,benchmark,result,zh,cutoff,start){
  const config=!result.config||result.config==='标准/未注明'?(zh?'标准／未注明':'Standard / unspecified'):result.config;
  return w.jsxs('span',{className:'benchmark-result',children:[w.jsxs('a',{className:'benchmark-rank rank-'+Math.min(result.rank,4),href:result.source||benchmark.official_url,target:'_blank',rel:'noreferrer',title:`${model.name} · ${benchmark.canonical_name} · ${config} · ${result.date}`,children:['#',result.rank]}),w.jsxs('small',{className:'benchmark-result-config',children:[zh?'配置：':'Config: ',config]})]});
 }
-(function(){"use strict";var pa=typeof document<"u"?document.currentScript:null;function w5(t){return t&&t.__esModule&&Object.prototype.hasOwnProperty.call(t,"default")?t.default:t}var Pp={exports:{}},iu={};/**
+var pa=typeof document<"u"?document.currentScript:null;function w5(t){return t&&t.__esModule&&Object.prototype.hasOwnProperty.call(t,"default")?t.default:t}var Pp={exports:{}},iu={};/**
  * @license React
  * react-jsx-runtime.production.js
  *
