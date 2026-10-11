@@ -368,12 +368,9 @@ for (const benchmarkId of LIVE_BENCHMARKS) {
   const dates = selectSnapshots(history.snapshots[benchmarkId]);
   if (!dates.length) continue;
   liveFromState.add(benchmarkId);
-  const lastKept = new Map();
   for (const date of dates) {
     for (const [id, rank, config, source] of rankedEntries(benchmarkId, history.snapshots[benchmarkId][date])) {
-      const key = `${id}\u0000${config}`;
-      if (lastKept.get(key) === rank) continue; // 名次未变时只保留更早的那条，旧日期筛选与最新视图都能命中
-      lastKept.set(key, rank);
+      // 保留所选快照的全部来源条目：同配置也可能有多个独立名次，不能按模型+配置覆盖。
       addRecord(id, benchmarkId, { date, rank, source, config });
     }
   }
@@ -421,9 +418,14 @@ for (const [id, records] of modelRecords) {
 models.sort((a, b) => (b.releaseDate || '').localeCompare(a.releaseDate || '') || a.id.localeCompare(b.id));
 
 const officialUrlById = new Map(benchmarkPayload.benchmarks.map(benchmark => [benchmark.id, benchmark.official_url]));
+const representedModelIds = new Set(models.map(model => model.id));
 const benchmarks = benchmarkPayload.benchmarks.map(benchmark => {
   const dates = models.flatMap(model => (model.records[benchmark.id] || []).map(record => record.date)).filter(Boolean);
-  return { ...benchmark, latest_date: dates.sort().at(-1) || benchmarkPayload.generated_at.slice(0, 10), model_count: models.filter(model => model.records[benchmark.id]?.length).length };
+  const snapshotDates = liveFromState.has(benchmark.id) ? selectSnapshots(history.snapshots[benchmark.id]) : [];
+  const latestSnapshot = snapshotDates.at(-1);
+  const sourceEntries = latestSnapshot ? rankedEntries(benchmark.id, history.snapshots[benchmark.id][latestSnapshot]) : [];
+  const excludedTop10 = sourceEntries.filter(([id, rank]) => rank <= 10 && !representedModelIds.has(id)).map(([id, rank, config]) => ({ rank, name: history.models[id]?.name || id, config }));
+  return { ...benchmark, snapshot_dates: snapshotDates, rank_audit: latestSnapshot ? { snapshot_date: latestSnapshot, rank_basis: RERANK_AMONG_TRACKED.has(benchmark.id) ? 'included_models' : 'source', source_entry_count: sourceEntries.length, included_entry_count: sourceEntries.filter(([id]) => representedModelIds.has(id)).length, excluded_top10: excludedTop10 } : null, latest_date: dates.sort().at(-1) || benchmarkPayload.generated_at.slice(0, 10), model_count: models.filter(model => model.records[benchmark.id]?.length).length };
 });
 // 精简：source 与该 benchmark 官方地址相同时省略（前台以 official_url 兜底）
 for (const model of models) for (const [benchmarkId, entries] of Object.entries(model.records)) {

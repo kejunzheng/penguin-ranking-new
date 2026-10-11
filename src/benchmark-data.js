@@ -17,11 +17,12 @@ export function chooseBenchmarkRecord(records=[],cutoff,start=null){
  })[0]||null;
 }
 
-export function resolveBenchmarkModel(model,benchmarkIds,cutoff,start=null){
- const results=Object.fromEntries(benchmarkIds.map(id=>[id,chooseBenchmarkRecord(model.records[id],cutoff,start)]));
+export function resolveBenchmarkModel(model,benchmarkIds,cutoff,start=null,snapshotDates=null){
+ const records=Object.fromEntries(benchmarkIds.map(id=>[id,(model.records[id]||[]).filter(record=>!snapshotDates?.[id]||record.date===snapshotDates[id])]));
+ const results=Object.fromEntries(benchmarkIds.map(id=>[id,chooseBenchmarkRecord(records[id],cutoff,start)]));
  const coverage=Object.values(results).filter(Boolean).length;
  const country=String(model.country||'').toLowerCase();
- return {...model,results,coverage,region:chinaCountries.has(country)?'china':'overseas',type:model.openWeights?'open':'closed'};
+ return {...model,records,results,coverage,region:chinaCountries.has(country)?'china':'overseas',type:model.openWeights?'open':'closed'};
 }
 
 export function filterBenchmarkModels(models,filters){
