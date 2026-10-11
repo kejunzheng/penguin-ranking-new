@@ -51,3 +51,18 @@ export function compareBenchmarkRanks(a,b,criteria){
  }
  return b.coverage-a.coverage||a.name.localeCompare(b.name)||a.id.localeCompare(b.id);
 }
+
+export function rankBenchmarkCoverage(data){
+ if(!data)return[];
+ const cutoff=data.generated_at.slice(0,10),benchmarks=data.benchmarks;
+ const snapshots=Object.fromEntries(benchmarks.map(b=>[b.id,(b.snapshot_dates||[]).filter(date=>date<=cutoff).sort().at(-1)||null]));
+ const models=data.models.map(model=>{
+  const hits=benchmarks.flatMap(benchmark=>{
+   const records=(model.records[benchmark.id]||[]).filter(record=>record.date&&record.date<=cutoff&&(!snapshots[benchmark.id]||record.date===snapshots[benchmark.id])&&Number.isFinite(record.rank)&&record.rank>0);
+   return records.length?[{benchmark,recordCount:records.length}]:[];
+  });
+  return {...model,coverage:hits.length,hits};
+ }).filter(model=>model.coverage>0).sort((a,b)=>b.coverage-a.coverage||(a.name.toLowerCase()<b.name.toLowerCase()?-1:a.name.toLowerCase()>b.name.toLowerCase()?1:a.id.localeCompare(b.id)));
+ let position=0;
+ return models.map((model,index)=>{if(!index||model.coverage!==models[index-1].coverage)position=index+1;return {...model,position};});
+}
