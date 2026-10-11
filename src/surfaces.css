@@ -310,3 +310,47 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .benchmark-snapshots>button:disabled{opacity:.45;cursor:not-allowed}.benchmark-history-note{order:10;color:#8797aa;font-size:10px;white-space:nowrap;padding-left:2px}
 /* 两行布局（761–1400px）：导航靠左紧凑排列，不再按整行宽度两端拉开 */
 @media(min-width:761px) and (max-width:1400px){.site-header nav{justify-content:flex-start;gap:28px}}
+/* 价格斩杀线 */
+.price-frontier{margin-top:22px;padding:22px 24px 18px;border:1px solid #dce5f0;border-radius:12px;background:#fff;box-shadow:0 5px 22px #45438208}
+.price-frontier-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.price-frontier-head h3{display:flex;align-items:baseline;gap:10px;font-size:19px;letter-spacing:-.3px;color:#253547}
+.price-frontier-head h3 small{font:11px 'IBM Plex Mono',monospace;color:#8292a6}
+.price-frontier-head p{margin-top:8px;color:#6c7f95;font-size:12px;line-height:1.7}
+.price-frontier-head p b{font-family:'IBM Plex Mono',monospace;color:#36516f}
+.price-frontier-filters{display:flex;gap:8px;flex-shrink:0}
+.price-frontier-toggle{display:flex;align-items:center;gap:7px;height:34px;padding:0 13px;border:1px solid #e2eaf4;border-radius:18px;background:#f5f8fc;color:#5e7189;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.price-frontier-toggle input{accent-color:var(--acid);margin:0}
+.price-frontier-axis-y{margin:16px 0 0;color:#7a8ca2;font-size:10px}
+.price-frontier-plot{padding:14px 10px 0 34px}
+.price-frontier-canvas{position:relative;height:440px;margin-bottom:28px}
+.price-frontier-canvas svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.price-frontier-canvas .grid{stroke:#edf1f6;stroke-width:1;vector-effect:non-scaling-stroke}
+.price-frontier-canvas .area{fill:#f4f7fb}
+.price-frontier-canvas .step{fill:none;stroke:#1f6f8b;stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.price-frontier-canvas .tail{stroke:#1f6f8b;stroke-width:1.5;stroke-dasharray:4 4;opacity:.55;vector-effect:non-scaling-stroke}
+.price-frontier-tick{position:absolute;color:#8a9aae;font:10px 'IBM Plex Mono',monospace;white-space:nowrap}
+.price-frontier-tick.y{left:-30px;transform:translateY(-50%)}
+.price-frontier-tick.x{top:calc(100% + 10px);transform:translateX(-50%)}
+.price-frontier-axis-x{text-align:right;color:#7a8ca2;font-size:10px;margin:0}
+.price-frontier-dot{position:absolute;z-index:2;transform:translate(-50%,-50%);width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;border:1px solid #e3e9f1;border-radius:7px;background:#fff;filter:grayscale(1);opacity:.6;cursor:default}
+.price-frontier-dot:hover,.price-frontier-dot:focus-visible{filter:none;opacity:1;z-index:6;border-color:#9fc0e6}
+.price-frontier-dot .model-logo,.price-frontier-leader .model-logo{width:auto;height:auto}
+.price-frontier-dot .model-logo img,.price-frontier-dot .model-logo svg{width:15px;height:15px}
+.price-frontier-leader{position:absolute;z-index:4;transform:translate(-50%,-50%)}
+.price-frontier-leader .chip{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border:2px solid #1f6f8b;border-radius:9px;background:#fff;box-shadow:0 3px 10px #1f6f8b1f}
+.price-frontier-leader .chip .model-logo img,.price-frontier-leader .chip .model-logo svg{width:21px;height:21px}
+.price-frontier-leader .label{position:absolute;right:calc(100% + 7px);top:50%;transform:translateY(-50%);text-align:right;white-space:nowrap;pointer-events:none}
+.price-frontier-leader.label-right .label{right:auto;left:calc(100% + 7px);text-align:left}
+.price-frontier-leader .label strong{display:block;color:#253547;font-size:12px;line-height:1.3}
+.price-frontier-leader .label em{display:block;color:#7a8ca2;font:10px 'IBM Plex Mono',monospace;font-style:normal;margin-top:2px}
+.price-frontier-leader .label em b{color:#1f6f8b}
+.price-frontier-tooltip{position:absolute;z-index:10;transform:translate(16px,-50%);min-width:170px;padding:10px 12px;border:1px solid #dce6f1;border-radius:8px;background:#fff;box-shadow:0 12px 32px #243b5a24;pointer-events:none;display:grid;gap:4px;font-size:10px;color:#6c7f95}
+.price-frontier-tooltip.left{transform:translate(calc(-100% - 16px),-50%)}
+.price-frontier-tooltip strong{color:#253547;font-size:12px}
+.price-frontier-tooltip b{font-family:'IBM Plex Mono',monospace;color:#253547}
+.price-frontier-list{display:none;list-style:none;margin:14px 0 0;padding:0}
+.price-frontier-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;padding:8px 0;border-bottom:1px solid #eef2f7;font-size:12px;color:#253547}
+.price-frontier-list b{font-family:'IBM Plex Mono',monospace;color:#1f6f8b}
+.price-frontier-list em{font:11px 'IBM Plex Mono',monospace;font-style:normal;color:#7a8ca2;min-width:58px;text-align:right}
+.price-frontier-note{margin:16px 0 0;color:#8a9aae;font-size:10px;line-height:1.7}
+@media(max-width:760px){.price-frontier{padding:18px 14px 14px}.price-frontier-head{display:block}.price-frontier-filters{margin-top:12px}.price-frontier-canvas{height:340px}.price-frontier-leader .label{display:none}.price-frontier-leader .chip{width:28px;height:28px;border-radius:7px}.price-frontier-leader .chip .model-logo img,.price-frontier-leader .chip .model-logo svg{width:16px;height:16px}.price-frontier-dot{width:20px;height:20px;border-radius:5px}.price-frontier-dot .model-logo img,.price-frontier-dot .model-logo svg{width:12px;height:12px}.price-frontier-list{display:block}}

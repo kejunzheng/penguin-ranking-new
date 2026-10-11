@@ -108,7 +108,11 @@ async function fetchArtificialAnalysis() {
       displayHint: releases.find(item => item.slug === model.slug)?.name || null,
     }));
   }
-  return { date: runDate, rows, note: `${models.length} 个模型配置` };
+  // 价格斩杀线：AA 智能指数分数 + AA 标价（美元 / 百万 Token）。只要实测分数（排除 AA 估算值）且三项价格中至少有输入、输出价
+  const points = models
+    .filter(model => Number.isFinite(model.intelligenceIndex) && !model.intelligenceIndexIsEstimated && Number.isFinite(model.price1mInputTokens) && Number.isFinite(model.price1mOutputTokens))
+    .map(model => ({ raw: model.name, score: model.intelligenceIndex, input: model.price1mInputTokens, output: model.price1mOutputTokens, cache: Number.isFinite(model.cacheHitPrice) ? model.cacheHitPrice : null }));
+  return { date: runDate, rows, points, note: `${models.length} 个模型配置` };
 }
 
 async function fetchEpoch() {
@@ -290,7 +294,8 @@ for (const [index, source] of LIVE_SOURCES.entries()) {
   try {
     const fetched = await fetchedSources[index];
     if (fetched.error) throw fetched.error;
-    const { date, rows, note, dataDate = date } = fetched.value;
+    const { date, rows, note, dataDate = date, points } = fetched.value;
+    if (points?.length) history.aaPricePoints = { date, points: points.map(point => { const { id, config } = resolveModelId(point.raw); return [id, point.score, point.input, point.output, point.cache, config]; }) };
     const grouped = new Map(source.benchmarks.map(id => [id, []]));
     for (const row of rows) {
       const { id, config, display } = resolveModelId(row.raw);
@@ -426,6 +431,24 @@ for (const model of models) for (const [benchmarkId, entries] of Object.entries(
 }
 
 if (benchmarks.length < 10 || models.length < 100) throw new Error(`Benchmark 数据过少：benchmarks=${benchmarks.length} models=${models.length}`);
+// 价格斩杀线数据：只保留评测榜收录的模型；同一模型多个推理配置时取 AA 分数最高的一条（价格按该配置）
+const outputIds = new Set(models.map(model => model.id));
+const pricePoints = new Map();
+for (const [id, score, input, outputPrice, cache, config] of history.aaPricePoints?.points || []) {
+  if (!outputIds.has(id)) continue;
+  if (!pricePoints.has(id) || score > pricePoints.get(id).score) pricePoints.set(id, { id, score: Math.round(score * 10) / 10, input, output: outputPrice, cache, config });
+}
+const globalPrices = readJson(path.join(dataDir, 'global-prices.json'), {});
+const priceFrontier = history.aaPricePoints ? {
+  source: 'Artificial Analysis',
+  source_url: 'https://artificialanalysis.ai/leaderboards/models',
+  date: history.aaPricePoints.date,
+  currency: 'USD',
+  usd_to_cny: globalPrices.usd_to_cny || null,
+  blend: { cache: 7, input: 2, output: 1 },
+  points: [...pricePoints.values()].sort((a, b) => b.score - a.score),
+} : null;
+
 const output = {
   schema_version: '1.1',
   generated_at: new Date().toISOString(),
@@ -433,6 +456,7 @@ const output = {
   source_page: 'https://kejunzheng.github.io/penguin-model-capability-ranking/',
   benchmarks,
   models,
+  price_frontier: priceFrontier,
 };
 writeJsonIfChanged(stateFile('benchmark-history.json'), history);
 const target = path.join(dataDir, 'benchmarks.json');
