@@ -173,7 +173,7 @@ dialog{background:#fff;border-color:#e0e5f2;border-radius:14px;box-shadow:0 24px
 @media(max-width:1400px){
  :root{--header-h:112px}
  .site-header .masthead{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:60px 52px;gap:0 15px}
- .site-header nav{grid-row:2;grid-column:1/-1;justify-content:space-between;height:52px;overflow-x:auto}
+ .site-header nav{grid-row:2;grid-column:1/-1;width:auto;justify-content:space-between;height:52px;overflow-x:auto} /* 覆盖旧样式 >1200px 的 width:700px，否则两行布局下导航被截在 700px 内 */
  .site-header .locale{grid-column:2;grid-row:1}
  .site-header .brand-group{grid-column:1;grid-row:1;gap:20px}
 }
