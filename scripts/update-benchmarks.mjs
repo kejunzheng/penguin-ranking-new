@@ -342,6 +342,20 @@ function selectSnapshots(byDate) {
   return [...chosen].sort();
 }
 
+// GAIA 官方结果表按“提交的 Agent 系统”排名（3800+ 条，绝大多数是 Agent 框架而非模型），
+// 原始名次对模型没有可比性；这里只保留能对应到收录模型的条目，同一模型取最好一次，再按收录模型重新排名。
+// 历史快照仍保存原始名次，重排只发生在输出阶段。
+const RERANK_AMONG_TRACKED = new Set(['gaia']);
+function rankedEntries(benchmarkId, entries) {
+  if (!RERANK_AMONG_TRACKED.has(benchmarkId)) return entries;
+  const best = new Map();
+  for (const entry of entries) {
+    if (!matchableIds.has(entry[0])) continue;
+    if (!best.has(entry[0]) || entry[1] < best.get(entry[0])[1]) best.set(entry[0], entry);
+  }
+  return [...best.values()].sort((a, b) => a[1] - b[1]).map(([id, , config, source], index) => [id, index + 1, config, source]);
+}
+
 const modelRecords = new Map(); // id -> { benchmarkId: [record] }
 const addRecord = (id, benchmarkId, record) => ((modelRecords.has(id) ? modelRecords : modelRecords.set(id, {})).get(id)[benchmarkId] ??= []).push(record);
 const liveFromState = new Set();
@@ -351,7 +365,7 @@ for (const benchmarkId of LIVE_BENCHMARKS) {
   liveFromState.add(benchmarkId);
   const lastKept = new Map();
   for (const date of dates) {
-    for (const [id, rank, config, source] of history.snapshots[benchmarkId][date]) {
+    for (const [id, rank, config, source] of rankedEntries(benchmarkId, history.snapshots[benchmarkId][date])) {
       const key = `${id}\u0000${config}`;
       if (lastKept.get(key) === rank) continue; // 名次未变时只保留更早的那条，旧日期筛选与最新视图都能命中
       lastKept.set(key, rank);
@@ -370,7 +384,11 @@ for (const sku of skus) {
 
 // 显示名称统一为官方写法：Claude 4 起型号名在前（Claude Opus 4.8），基线沿用旧写法（Claude 4.8 Opus）。
 // 只改显示名称，模型 id 与成绩匹配不变；Claude 3.x 官方本就是 “Claude 3.5 Sonnet”，保持原样。
-const officialName = name => String(name).replace(/^Claude (\d+(?:\.\d+)?) (Haiku|Sonnet|Opus)$/, (whole, version, family) => Number.parseFloat(version) >= 4 ? `Claude ${family} ${version}` : whole);
+// 官方写法：Claude 4 起为“Claude 家族 版本”；GPT 用连字符（GPT-5.2），gpt-oss 全小写
+const officialName = name => String(name)
+  .replace(/^Claude (\d+(?:\.\d+)?) (Haiku|Sonnet|Opus)$/, (whole, version, family) => Number.parseFloat(version) >= 4 ? `Claude ${family} ${version}` : whole)
+  .replace(/^gpt[- ]oss[- ](\d+)b$/i, 'gpt-oss-$1b')
+  .replace(/^gpt[ -](\d+(?:\.\d+)?)\b(.*)$/i, (whole, version, rest) => `GPT-${version}${rest.replace(/\b(instant|codex|pro)\b/g, word => word[0].toUpperCase() + word.slice(1))}`);
 // 入选规则沿用基线：基线已入选的模型保留；新模型需有可靠发布日期、≤18 个月、覆盖 ≥2 项 benchmark
 const cutoffDate = new Date(); cutoffDate.setUTCMonth(cutoffDate.getUTCMonth() - HOME_MAX_AGE_MONTHS);
 const recencyCutoff = cutoffDate.toISOString().slice(0, 10);

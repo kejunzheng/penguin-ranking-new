@@ -36,6 +36,9 @@ test('bundled benchmark data has 21 benchmarks and current ranked models',()=>{
  assert.ok(['mathvista','androidworld','ruler'].every(id=>!ids.includes(id)),'empty benchmarks are retired');
  assert.ok(data.benchmarks.every(item=>item.model_count>0),'every listed benchmark has on-site results');
  assert.ok(data.models.every(model=>!/^Claude [4-9](?:\.\d+)? (?:Haiku|Sonnet|Opus)$/.test(model.name)),'Claude 4+ names use the official family-first form');
+ assert.ok(data.models.every(model=>!/^gpt[ -]\d|^GPT \d/i.test(model.name)||/^GPT-\d/.test(model.name)),'GPT names use the official hyphenated form');
+ const gaiaRanks=data.models.flatMap(model=>(model.records.gaia||[]).map(record=>record.rank)).sort((a,b)=>a-b);
+ assert.ok(gaiaRanks.length&&gaiaRanks[0]===1&&gaiaRanks.at(-1)<=gaiaRanks.length,'GAIA ranks are re-ranked among tracked models');
  for(const id of ['deepswe','frontiercode'])assert.ok(data.benchmarks.find(item=>item.id===id).model_count>=5,`${id} has live ranked models`);
  assert.ok(data.models.every(model=>!model.records.livecodebench&&!model.records.aider_polyglot),'retired scores do not contribute to coverage');
  const resolved=data.models.map(model=>resolveBenchmarkModel(model,ids,data.generated_at.slice(0,10)));
