@@ -3,6 +3,7 @@ import {LineChart,BarChart} from 'echarts/charts';
 import {GridComponent,TooltipComponent,LegendComponent,DataZoomComponent,TitleComponent,GraphicComponent} from 'echarts/components';
 import {CanvasRenderer} from 'echarts/renderers';
 import {modelBrand} from './model-brand';
+import {assetUrl} from './asset-url';
 import {stackRows} from './usage-data';
 echarts.use([LineChart,BarChart,GridComponent,TooltipComponent,LegendComponent,DataZoomComponent,TitleComponent,GraphicComponent,CanvasRenderer]);
 import {chartColors} from './usage-palette';
@@ -24,7 +25,7 @@ export function createUsageChart(element,data,options={}){
  const names=new Map(picked.map(r=>[r.id,r.name+(r.id.includes(':free')?' · Free':'')]));names.set('__others',zh?'其他模型':'Others');
  const horizontal=singleWeek&&mode==='total';
  const rich={rank:{color:c.muted,width:24,fontSize:11},name:{color:c.text,fontSize:12,align:'left'},arrow:{width:16,height:16,padding:[0,0,0,6],backgroundColor:{image:arrowIcon}},spacer:{width:9},brandPlaceholder:{width:22,height:22}};
- top.forEach((r,i)=>{const brand=modelBrand(r);if(brand)rich['brand'+i]={height:22,width:22,backgroundColor:{image:import.meta.env.BASE_URL+'assets/models/'+brand.file}};});
+ top.forEach((r,i)=>{const brand=modelBrand(r);if(brand)rich['brand'+i]={height:22,width:22,backgroundColor:{image:assetUrl('assets/models/'+brand.file)}};});
  chart.setOption({animation:false,backgroundColor:c.bg,color:chartColors,textStyle:{fontFamily:'Inter, sans-serif'},title:title?{text:title,left:16,top:12,textStyle:{color:c.text,fontSize:20,fontWeight:600},subtext:(data.from||data.weeks[0]?.[0])+' — '+(data.to||data.weeks.at(-1)?.[0]),subtextStyle:{color:c.muted,fontSize:12}}:undefined,
  grid:{left:horizontal?260:12,right:horizontal?106:22,top:header,bottom:horizontal?42:exportMode?115:100,containLabel:!horizontal},
  tooltip:{trigger:'axis',axisPointer:{type:mode==='total'?'shadow':'line'},renderMode:'richText',confine:true,backgroundColor:c.bg,borderColor:c.line,textStyle:{color:c.text,fontSize:11},formatter:params=>{const items=Array.isArray(params)?params:[params];if(horizontal)return items.map(p=>`${p.name}: ${compact(p.value)}`).join('\n');const index=items[0]?.dataIndex;const week=data.weeks[index];return [week?.[0]+(week?.[1]==='i'?(zh?' · 本周未结束':' · Incomplete week'):''),mode==='total'?(zh?'平台总量 ':'Platform total ')+compact(week?.[2]??0):'',...items.filter(p=>p.value!=null&&p.value!==0).sort((a,b)=>b.value-a.value).map(p=>(names.get(p.seriesName)||p.seriesName)+': '+compact(p.value)+(mode==='total'&&week?.[2]?'  '+(p.value/week[2]*100).toFixed(1)+'%':''))].filter(Boolean).join('\n')}},

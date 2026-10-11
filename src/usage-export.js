@@ -1,9 +1,9 @@
 import {stackRows} from './usage-data';
 import {modelBrand} from './model-brand';
+import {assetUrl} from './asset-url';
 import {chartColors} from './usage-palette';
 import {dataDate,getDataNotes} from './DataNotes';
 
-const base=import.meta.env.BASE_URL;
 const font='Inter, "PingFang SC", "Microsoft YaHei", sans-serif';
 const short=n=>new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n);
 function loadImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Image could not be loaded'));img.src=src;});}
@@ -22,9 +22,9 @@ export async function createUsagePoster({data,mode,theme,selected,singleWeek,lan
  const {top,others}=stackRows(data);
  const rows=[...top,{id:'__others',name:zh?'其他模型':'Others',total:others[0]}];
  const [publisher,penguin,wave,...logos]=await Promise.all([
-  loadImage(base+'assets/tencent-technology.png'),loadImage(base+'assets/penguin-logo-supplied.png'),
-  loadImage(base+'assets/blue-wave.webp'),
-  ...top.map(r=>{const brand=modelBrand(r);return brand?loadImage(base+'assets/models/'+brand.file).catch(()=>null):Promise.resolve(null);})
+  loadImage(assetUrl('assets/tencent-technology.png')),loadImage(assetUrl('assets/penguin-logo-supplied.png')),
+  loadImage(assetUrl('assets/blue-wave.webp')),
+  ...top.map(r=>{const brand=modelBrand(r);return brand?loadImage(assetUrl('assets/models/'+brand.file)).catch(()=>null):Promise.resolve(null);})
  ]);
  const chartHeight=horizontal?rows.length*78+130:700;
  const width=1080,chartTop=390,footerHeight=zh?430:510,height=chartTop+chartHeight+footerHeight,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
