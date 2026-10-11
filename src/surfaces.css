@@ -359,3 +359,5 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .price-frontier-threshold-label{position:absolute;right:0;transform:translateY(-130%);padding:1px 6px;border-radius:4px;background:#fff8ea;color:#9a6a1f;font-size:10px;white-space:nowrap;z-index:3}
 
 .benchmark-result{display:inline-flex;flex-direction:column;align-items:center;gap:6px;max-width:100%;vertical-align:middle}.benchmark-result-config{display:block;max-width:144px;font-size:10px;line-height:1.4;color:#60748d;overflow-wrap:anywhere;white-space:normal}.benchmark-rank-note{margin:0 0 12px;padding:10px 12px;border:1px solid #dce6f1;border-radius:8px;background:#f7faff;color:#52677e;font-size:12px;line-height:1.7}
+
+.benchmark-configurations{display:inline-flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0}.benchmark-configurations .benchmark-result+.benchmark-result{padding-top:10px;border-top:1px solid #dce6f1}
