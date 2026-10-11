@@ -24,3 +24,18 @@ export function stackRows(data,limit=10){
  const others=data.weeks.map((w,i)=>Math.max(0,w[2]-top.reduce((sum,r)=>sum+(r.values[i]??0),0)));
  return {top,others};
 }
+
+export function usagePeriodTitle(preset,mode,lang){
+ const zh=lang==='zh';
+ const periods=zh?{'1w':'最近完整周','1m':'近1个月','3m':'近3个月','6m':'近6个月','1y':'近1年',custom:'所选时段'}:{'1w':'Latest complete week','1m':'Last month','3m':'Last 3 months','6m':'Last 6 months','1y':'Last year',custom:'Selected period'};
+ const range=periods[preset]||periods.custom;
+ if(mode==='ranking')return zh?`${range}模型调用排名`:`Model usage ranking · ${range}`;
+ if(mode==='compare')return zh?`${range}模型调用量对比`:`Model usage comparison · ${range}`;
+ return zh?`${range}模型调用${preset==='1w'?'量':'趋势'}`:`Model usage${preset==='1w'?'':' trend'} · ${range}`;
+}
+export function usageRangeNote(preset,data,lang){
+ const zh=lang==='zh',count=data.weeks.length;
+ if(preset==='1w')return zh?'采用最近完整周的数据':'Uses the latest complete week';
+ const partial=data.weeks.some(week=>week[1]!=='f');
+ return (zh?`按周展示 · 共${count}周`:`Weekly observations · ${count} weeks`)+(partial?(zh?' · 浅色为未结束的当周':' · Lighter bars mark the incomplete current week'):'');
+}
