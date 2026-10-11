@@ -33,3 +33,23 @@ export function filterBenchmarkModels(models,filters){
   &&(!selected.length||selected.includes(model.id))
   &&model.coverage>0);
 }
+
+export function toggleBenchmarkSort(criteria, id){
+ const existing=criteria.find(item=>item.id===id);
+ if(!existing)return [...criteria,{id,direction:'asc'}];
+ if(existing.direction==='asc')return criteria.map(item=>item.id===id?{...item,direction:'desc'}:item);
+ return criteria.filter(item=>item.id!==id);
+}
+
+export function compareBenchmarkRanks(a,b,criteria){
+ for(const {id,direction} of criteria){
+  const aRank=a.results[id]?.rank,bRank=b.results[id]?.rank;
+  const aMissing=!Number.isFinite(aRank),bMissing=!Number.isFinite(bRank);
+  if(aMissing&&bMissing)continue;
+  if(aMissing)return 1;
+  if(bMissing)return -1;
+  const difference=direction==='desc'?bRank-aRank:aRank-bRank;
+  if(difference)return difference;
+ }
+ return b.coverage-a.coverage||a.name.localeCompare(b.name)||a.id.localeCompare(b.id);
+}
