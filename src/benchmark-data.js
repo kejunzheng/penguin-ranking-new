@@ -35,10 +35,8 @@ export function filterBenchmarkModels(models,filters){
 }
 
 export function toggleBenchmarkSort(criteria, id){
- const existing=criteria.find(item=>item.id===id);
- if(!existing)return [...criteria,{id,direction:'asc'}];
- if(existing.direction==='asc')return criteria.map(item=>item.id===id?{...item,direction:'desc'}:item);
- return criteria.filter(item=>item.id!==id);
+ const current=criteria[0];
+ return [{id,direction:current?.id===id&&current.direction==='asc'?'desc':'asc'}];
 }
 
 export function compareBenchmarkRanks(a,b,criteria){
