@@ -112,7 +112,9 @@ npm run update:daily -- --out ../penguin-index-cdn
 - `data/*.json` 内联为 `assets/penguin-data.js`（发布工具不上传 JSON），页面经 `src/asset-url.js` 的 `loadJson` 读取；
 - 运行时拼接的图标路径经 `assetUrl` 取发布工具替换后的 CDN 绝对地址；
 - 分享配置在 `scripts/h5-share.js`，分享图标 `public/assets/penguin-share-icon.png`（200×200）；
-- 测试地址：`https://testqqnews.qq.com/qqfile/activity/pages-qwzfth/penguin-trend.html`。H5 版是发布时刻的数据快照，不随每日更新自动同步；大同上报尚未接入，正式发布前需补齐。
+- 测试地址：`https://testqqnews.qq.com/qqfile/activity/pages-qwzfth/penguin-trend.html`；大同上报尚未接入，正式发布前需补齐。
+- `node scripts/deploy-h5.mjs` 一键重新生成、发布测试环境并回读核验（发布工具与凭据在 `../penguin-index-cdn/.h5-deploy`，不入库）。个人空间的定时任务入口在每日数据更新成功后自动调用它；只发测试环境。
+- GitHub Pages 只在 `codex/international-ui` 有推送时部署，且直接使用仓库里提交的 `public/data`，CI 不抓数据。
 
 ## 资源与第三方许可
 
