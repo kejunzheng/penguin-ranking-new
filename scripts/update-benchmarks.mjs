@@ -3,11 +3,11 @@
 // 两层数据：
 //   1. 基线：kejunzheng/penguin-model-capability-ranking 仓库的一次性导入（最后采集 2026-09-21，之后不再更新）。
 //      作为模型元数据、SKU 归一与抓取失败时的兜底来源。
-//   2. 实时：每次运行直接抓取全部 22 项 benchmark 的官方/公开数据源：
+//   2. 实时：每次运行直接抓取全部 24 项 benchmark 的官方/公开数据源：
 //      - Artificial Analysis 排行榜页面（内嵌数据）：AA 智能指数、AA-LCR、HLE、GPQA Diamond、MMMU-Pro
 //      - Epoch AI 公开数据包：FrontierMath Tier 1-3、SimpleQA Verified
 //      - ARC Prize、LMArena、OSWorld 2.0
-//      - 其余 11 项见 scripts/lib/benchmark-sources.mjs（口径逐一移植自上游导入脚本）
+//      - 其余 14 项见 scripts/lib/benchmark-sources.mjs 与 additional-benchmarks.mjs（口径逐一移植自上游导入脚本）
 //      实时 benchmark 不再使用基线里的旧记录（避免新旧配置混排），历史快照保存在 .data-state/ 供「近一周/月/季」筛选。
 //      同一数据源内容未变化时不新增快照，记录日期即该版本数据首次被抓到的日期。
 //
@@ -17,6 +17,7 @@ import { dataDir, getBuffer, getJson, getText, readJson, reportFreshness, stateF
 import { parseCsv, readZip } from './lib/formats.mjs';
 import { CODING_REPLACEMENTS } from './lib/coding-benchmarks.mjs';
 import { OFFICIAL_SOURCES } from './lib/benchmark-sources.mjs';
+import { ADDITIONAL_BENCHMARKS, ADDITIONAL_SOURCES } from './lib/additional-benchmarks.mjs';
 
 const UPSTREAM = 'https://raw.githubusercontent.com/kejunzheng/penguin-model-capability-ranking/main/data';
 const STANDARD = '标准/未注明';
@@ -205,6 +206,7 @@ const LIVE_SOURCES = [
   { name: 'LMArena', benchmarks: ['lmarena_text_overall'], fetch: fetchLmarena },
   { name: 'OSWorld 2.0', benchmarks: ['osworld_2'], fetch: fetchOsworld2 },
   ...OFFICIAL_SOURCES,
+  ...ADDITIONAL_SOURCES,
 ];
 const LIVE_BENCHMARKS = new Set(LIVE_SOURCES.flatMap(source => source.benchmarks));
 // 所有数据源与基线同时发起抓取（各源互不依赖，原先串行约 95 秒，并发后约 5 秒）；
@@ -218,9 +220,11 @@ benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.map(benchmark => {
   const replacement = CODING_REPLACEMENTS[benchmark.id];
   return replacement ? { ...benchmark, ...replacement, update_mode: 'result_addition', ingestion_status: 'live' } : benchmark;
 });
-// 下线的评测：上游榜单只有旧模型或 Agent 产品，站内模型池（18 个月内）没有任何成绩，整列为空（2026-10-11 核对）。
-const RETIRED_BENCHMARKS = new Set(['androidworld', 'ruler']);
-benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.filter(benchmark => !RETIRED_BENCHMARKS.has(benchmark.id));
+// AndroidWorld、RULER 暂无匹配成绩；MathVista 被专业图表基准 Chartography 替换，以维持 24 项。
+const RETIRED_BENCHMARKS = new Set(['mathvista', 'androidworld', 'ruler']);
+benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.filter(benchmark => !RETIRED_BENCHMARKS.has(benchmark.id) && !ADDITIONAL_BENCHMARKS.some(item => item.id === benchmark.id)).concat(ADDITIONAL_BENCHMARKS);
+const benchmarkOrder = ["lmarena_text_overall", "aa_intelligence_index", "livebench_overall", "swe_bench_verified", "deepswe", "frontiercode", "mmlu_pro", "gpqa_diamond", "simpleqa_verified", "humanitys_last_exam", "frontiermath", "arc_agi_2", "mmmu_pro", "chartography", "videommmu", "terminal_bench_4", "bfcl_v4", "gaia", "agents_last_exam", "osworld", "osworld_2", "longbench_v2", "aa_lcr", "graphwalks"];
+benchmarkPayload.benchmarks.sort((a,b) => benchmarkOrder.indexOf(a.id) - benchmarkOrder.indexOf(b.id));
 const activeBenchmarkIds = new Set(benchmarkPayload.benchmarks.map(benchmark => benchmark.id));
 const recordsById = new Map(upstreamRecords.map(record => [record.record_id, record]));
 const snapshotsById = new Map(snapshots.map(snapshot => [snapshot.snapshot_id, snapshot]));
@@ -302,7 +306,7 @@ for (const [index, source] of LIVE_SOURCES.entries()) {
       // row.config：数据源给出的完整配置，直接采用；row.configSuffix：只描述一个维度（如 BFCL 的调用方式），
       // 追加到名称里解析出的配置（如推理 / 非推理）之后，避免互相覆盖。
       const merged = row.configSuffix ? (config !== STANDARD ? `${config}；${row.configSuffix}` : row.configSuffix) : row.config || config;
-      grouped.get(row.benchmarkId)?.push([id, row.rank, merged, row.source]);
+      grouped.get(row.benchmarkId)?.push(Number.isFinite(row.score) ? [id, row.rank, merged, row.source, row.score] : [id, row.rank, merged, row.source]);
       const meta = history.models[id] || {};
       const releaseDate = row.releaseDate && /^\d{4}-\d{2}-\d{2}$/.test(row.releaseDate) ? row.releaseDate : null;
       history.models[id] = {
@@ -369,9 +373,9 @@ for (const benchmarkId of LIVE_BENCHMARKS) {
   if (!dates.length) continue;
   liveFromState.add(benchmarkId);
   for (const date of dates) {
-    for (const [id, rank, config, source] of rankedEntries(benchmarkId, history.snapshots[benchmarkId][date])) {
+    for (const [id, rank, config, source, score] of rankedEntries(benchmarkId, history.snapshots[benchmarkId][date])) {
       // 保留所选快照的全部来源条目：同配置也可能有多个独立名次，不能按模型+配置覆盖。
-      addRecord(id, benchmarkId, { date, rank, source, config });
+      addRecord(id, benchmarkId, { date, rank, source, config, ...(Number.isFinite(score) ? { score } : {}) });
     }
   }
 }
@@ -425,7 +429,7 @@ const benchmarks = benchmarkPayload.benchmarks.map(benchmark => {
   const latestSnapshot = snapshotDates.at(-1);
   const sourceEntries = latestSnapshot ? rankedEntries(benchmark.id, history.snapshots[benchmark.id][latestSnapshot]) : [];
   const excludedTop10 = sourceEntries.filter(([id, rank]) => rank <= 10 && !representedModelIds.has(id)).map(([id, rank, config]) => ({ rank, name: history.models[id]?.name || id, config }));
-  return { ...benchmark, ...(benchmark.id === 'mathvista' ? { source_data_date: history.sourceDates?.MathVista || null, source_snapshot_date: latestSnapshot } : {}), snapshot_dates: snapshotDates, rank_audit: latestSnapshot ? { snapshot_date: latestSnapshot, rank_basis: RERANK_AMONG_TRACKED.has(benchmark.id) ? 'included_models' : 'source', source_entry_count: sourceEntries.length, included_entry_count: sourceEntries.filter(([id]) => representedModelIds.has(id)).length, excluded_top10: excludedTop10 } : null, latest_date: dates.sort().at(-1) || benchmarkPayload.generated_at.slice(0, 10), model_count: models.filter(model => model.records[benchmark.id]?.length).length };
+  return { ...benchmark, ...(benchmark.source_name ? { source_data_date: history.sourceDates?.[benchmark.source_name] || null, source_snapshot_date: latestSnapshot } : {}), snapshot_dates: snapshotDates, rank_audit: latestSnapshot ? { snapshot_date: latestSnapshot, rank_basis: RERANK_AMONG_TRACKED.has(benchmark.id) ? 'included_models' : benchmark.rank_basis || 'source', source_entry_count: sourceEntries.length, included_entry_count: sourceEntries.filter(([id]) => representedModelIds.has(id)).length, excluded_top10: excludedTop10 } : null, latest_date: dates.sort().at(-1) || benchmarkPayload.generated_at.slice(0, 10), model_count: models.filter(model => model.records[benchmark.id]?.length).length };
 });
 // 精简：source 与该 benchmark 官方地址相同时省略（前台以 official_url 兜底）
 for (const model of models) for (const [benchmarkId, entries] of Object.entries(model.records)) {
