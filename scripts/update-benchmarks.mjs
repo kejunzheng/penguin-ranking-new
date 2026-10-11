@@ -368,6 +368,9 @@ for (const sku of skus) {
   }
 }
 
+// 显示名称统一为官方写法：Claude 4 起型号名在前（Claude Opus 4.8），基线沿用旧写法（Claude 4.8 Opus）。
+// 只改显示名称，模型 id 与成绩匹配不变；Claude 3.x 官方本就是 “Claude 3.5 Sonnet”，保持原样。
+const officialName = name => String(name).replace(/^Claude (\d+(?:\.\d+)?) (Haiku|Sonnet|Opus)$/, (whole, version, family) => Number.parseFloat(version) >= 4 ? `Claude ${family} ${version}` : whole);
 // 入选规则沿用基线：基线已入选的模型保留；新模型需有可靠发布日期、≤18 个月、覆盖 ≥2 项 benchmark
 const cutoffDate = new Date(); cutoffDate.setUTCMonth(cutoffDate.getUTCMonth() - HOME_MAX_AGE_MONTHS);
 const recencyCutoff = cutoffDate.toISOString().slice(0, 10);
@@ -381,7 +384,7 @@ for (const [id, records] of modelRecords) {
   for (const entries of Object.values(records)) entries.sort((a, b) => (a.rank ?? Number.MAX_SAFE_INTEGER) - (b.rank ?? Number.MAX_SAFE_INTEGER));
   models.push({
     id,
-    name: sku?.homepage_eligible ? sku.display_name : meta.name || sku?.display_name || id,
+    name: officialName(sku?.homepage_eligible ? sku.display_name : meta.name || sku?.display_name || id),
     // 基线已入选模型沿用基线元数据；新模型优先用实时来源（AA/Epoch 的厂商名大小写更规范）
     organization: (eligibleIds.has(id) ? sku?.organization : meta.organization) || sku?.organization || meta.organization || null,
     country: (eligibleIds.has(id) ? sku?.organization_country : meta.country) || sku?.organization_country || meta.country || null,
