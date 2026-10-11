@@ -9,7 +9,7 @@ export function priceValue(model,currency,key){return model.latest?.[`${key}_${c
 export function readState() {
  const p=new URLSearchParams(location.search); const route=p.get('page');
  let saved;try{saved=localStorage.getItem('penguin-locale')}catch{}
- return {priceScope:p.get('scope')==='china'?'china':'global',page:routes.includes(route)?route:'home',lang:['zh','en'].includes(p.get('lang'))?p.get('lang'):saved|| (navigator.language.startsWith('zh')?'zh':'en'),channel:['product','skill'].includes(p.get('channel'))?p.get('channel'):'product',period:['daily','weekly','monthly'].includes(p.get('period'))?p.get('period'):'daily'};
+ return {priceScope:p.get('scope')==='china'?'china':'global',page:routes.includes(route)?route:'home',lang:['zh','en'].includes(p.get('lang'))?p.get('lang'):saved||'zh',channel:['product','skill'].includes(p.get('channel'))?p.get('channel'):'product',period:['daily','weekly','monthly'].includes(p.get('period'))?p.get('period'):'daily'};
 }
 
 export function paginatePrices(rows,requestedPage=1){
