@@ -1,10 +1,10 @@
 import { fetchDeepSwe, fetchFrontierCode } from './coding-benchmarks.mjs';
-// 模型评测榜：除 AA / Epoch / ARC / LMArena / OSWorld 2.0 之外的 13 个官方数据源。
+// 模型评测榜：除 AA / Epoch / ARC / LMArena / OSWorld 2.0 之外的 11 个官方数据源。
 // 口径（筛选条件、排序方式、原始名称字段）逐一移植自上游 kejunzheng/penguin-model-capability-ranking 的导入脚本，
 // 只把「读本地冻结文件」改为「每次在线拉取」。每个函数返回：
 //   { date: 快照日期, dataDate: 数据源自身最新条目日期（无法得知时为 null）, rows: [{ benchmarkId, raw, rank, org, releaseDate, openWeights, source }] }
 import { getBuffer, getJson, getLastModified, getText, githubFileDate } from './net.mjs';
-import { excelDate, parseCsv, parseCsvRows, readXlsxRows } from './formats.mjs';
+import { excelDate, parseCsv, readXlsxRows } from './formats.mjs';
 
 const today = () => new Date().toISOString().slice(0, 10);
 const number = value => {
@@ -87,26 +87,6 @@ export async function fetchMmluPro() {
   return { date: today(), dataDate: maxDate([info?.lastModified]), rows: table.map((item, index) => row('mmlu_pro', url, item.Models, index + 1)) };
 }
 
-// MathVista：官方 README testmini 榜（使用表内名次）
-export async function fetchMathvista() {
-  const url = 'https://raw.githubusercontent.com/lupantech/MathVista/main/README.md';
-  const lines = (await getText(url)).split('\n');
-  const start = lines.findIndex(line => line.startsWith('| **#**') && line.includes('**ALL**'));
-  if (start < 0) throw new Error('未找到 MathVista 排行表');
-  const table = [];
-  for (const line of lines.slice(start + 2)) {
-    if (!line.startsWith('|')) break;
-    const cells = markdownCells(line);
-    const rank = /^\d+$/.test(cells[0]) ? Number(cells[0]) : null, score = number(cleanMarkdown(cells[5] || ''));
-    if (rank && score != null) table.push({ rank, raw: cleanMarkdown(cells[1]), date: cleanMarkdown(cells[4] || '') });
-  }
-  ensure(table, 10, 'MathVista');
-  return {
-    date: today(), dataDate: maxDate(table.map(item => item.date)),
-    rows: table.map(item => row('mathvista', url, item.raw, item.rank, { releaseDate: /^\d{4}-\d{2}-\d{2}$/.test(item.date) ? item.date : null })),
-  };
-}
-
 // VideoMMMU：官方 README 排行表，按 Overall 排序
 export async function fetchVideommmu() {
   const url = 'https://raw.githubusercontent.com/EvolvingLMMs-Lab/VideoMMMU/main/README.md';
@@ -122,21 +102,6 @@ export async function fetchVideommmu() {
   }
   const table = ensure(ranked(parsed, item => item.score), 5, 'VideoMMMU');
   return { date: today(), dataDate: await githubFileDate('EvolvingLMMs-Lab/VideoMMMU', 'README.md'), rows: table.map((item, index) => row('videommmu', url, item.raw, index + 1)) };
-}
-
-// RULER：维护者 README 主结果表，按 wAvg.(dec) 排序
-export async function fetchRuler() {
-  // 官方仓库 NVIDIA/RULER（此前误用 fork Infini-AI-Lab/RULER，2024-12 后未同步）
-  const url = 'https://raw.githubusercontent.com/NVIDIA/RULER/main/README.md';
-  const parsed = [];
-  for (const line of (await getText(url)).split('\n')) {
-    if (!line.startsWith('[')) continue;
-    const cells = markdownCells(line);
-    if (cells.length < 11) continue;
-    parsed.push({ raw: cleanMarkdown(cells[0]), score: number(cleanMarkdown(cells.at(-1))) });
-  }
-  const table = ensure(ranked(parsed, item => item.score), 5, 'RULER');
-  return { date: today(), dataDate: await githubFileDate('NVIDIA/RULER', 'README.md'), rows: table.map((item, index) => row('ruler', url, item.raw, index + 1)) };
 }
 
 // LongBench v2：官网 HTML 排行表，w/ CoT 总分
@@ -269,35 +234,16 @@ export async function fetchOsworld() {
   };
 }
 
-// AndroidWorld：官方社区排行榜（Google Sheet CSV 导出）；首行为免责声明，第二行为表头
-export async function fetchAndroidworld() {
-  const sheet = 'https://docs.google.com/spreadsheets/d/1cchzP9dlTZ3WXQTfYNhh3avxoLipqHN75v1Tb86uhHo';
-  const [, header, ...body] = parseCsvRows(await getText(`${sheet}/export?format=csv&gid=0`));
-  const keys = (header || []).map(key => key.replace(/\s+/g, ' ').trim());
-  const items = body.map(values => Object.fromEntries(keys.map((key, index) => [key, (values[index] || '').trim()])));
-  const table = ensure(ranked(items.filter(item => item.Model), item => number(item['Success Rate (pass@1)'])), 10, 'AndroidWorld');
-  const monthDate = value => { const match = String(value).match(/^(\d{1,2})\/(\d{4})$/); return match ? `${match[2]}-${match[1].padStart(2, '0')}-01` : null; };
-  return {
-    date: today(), dataDate: maxDate(table.map(item => monthDate(item['Release Date']))),
-    rows: table.map((item, index) => row('androidworld', `${sheet}/edit?gid=0#gid=0`, item['Result Source'] || item.Model, index + 1, {
-      org: item['Result Source'] || null, openWeights: item['Open?'] ? item['Open?'] === '✔' : null,
-    })),
-  };
-}
-
 export const OFFICIAL_SOURCES = [
   { name: 'SWE-bench', benchmarks: ['swe_bench_verified'], fetch: fetchSwebench },
   { name: 'LiveBench', benchmarks: ['livebench_overall'], fetch: fetchLivebench },
   { name: 'DeepSWE', benchmarks: ['deepswe'], fetch: fetchDeepSwe },
   { name: 'FrontierCode', benchmarks: ['frontiercode'], fetch: fetchFrontierCode },
   { name: 'MMLU-Pro', benchmarks: ['mmlu_pro'], fetch: fetchMmluPro },
-  { name: 'MathVista', benchmarks: ['mathvista'], fetch: fetchMathvista },
   { name: 'VideoMMMU', benchmarks: ['videommmu'], fetch: fetchVideommmu },
   { name: 'Terminal-Bench 4.0', benchmarks: ['terminal_bench_4'], fetch: fetchTerminalBench },
   { name: 'BFCL v4', benchmarks: ['bfcl_v4'], fetch: fetchBfcl },
   { name: 'GAIA', benchmarks: ['gaia'], fetch: fetchGaia },
   { name: 'OSWorld-Verified', benchmarks: ['osworld'], fetch: fetchOsworld },
-  { name: 'AndroidWorld', benchmarks: ['androidworld'], fetch: fetchAndroidworld },
-  { name: 'RULER', benchmarks: ['ruler'], fetch: fetchRuler },
   { name: 'LongBench v2', benchmarks: ['longbench_v2'], fetch: fetchLongbench },
 ];

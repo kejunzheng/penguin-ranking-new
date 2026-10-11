@@ -3,11 +3,11 @@
 // 两层数据：
 //   1. 基线：kejunzheng/penguin-model-capability-ranking 仓库的一次性导入（最后采集 2026-09-21，之后不再更新）。
 //      作为模型元数据、SKU 归一与抓取失败时的兜底来源。
-//   2. 实时：每次运行直接抓取全部 24 项 benchmark 的官方/公开数据源：
+//   2. 实时：每次运行直接抓取全部 21 项 benchmark 的官方/公开数据源：
 //      - Artificial Analysis 排行榜页面（内嵌数据）：AA 智能指数、AA-LCR、HLE、GPQA Diamond、MMMU-Pro
 //      - Epoch AI 公开数据包：FrontierMath Tier 1-3、SimpleQA Verified
 //      - ARC Prize、LMArena、OSWorld 2.0
-//      - 其余 14 项见 scripts/lib/benchmark-sources.mjs（口径逐一移植自上游导入脚本）
+//      - 其余 11 项见 scripts/lib/benchmark-sources.mjs（口径逐一移植自上游导入脚本）
 //      实时 benchmark 不再使用基线里的旧记录（避免新旧配置混排），历史快照保存在 .data-state/ 供「近一周/月/季」筛选。
 //      同一数据源内容未变化时不新增快照，记录日期即该版本数据首次被抓到的日期。
 //
@@ -214,6 +214,9 @@ benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.map(benchmark => {
   const replacement = CODING_REPLACEMENTS[benchmark.id];
   return replacement ? { ...benchmark, ...replacement, update_mode: 'result_addition', ingestion_status: 'live' } : benchmark;
 });
+// 下线的评测：上游榜单只有旧模型或 Agent 产品，站内模型池（18 个月内）没有任何成绩，整列为空（2026-10-11 核对）。
+const RETIRED_BENCHMARKS = new Set(['mathvista', 'androidworld', 'ruler']);
+benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.filter(benchmark => !RETIRED_BENCHMARKS.has(benchmark.id));
 const activeBenchmarkIds = new Set(benchmarkPayload.benchmarks.map(benchmark => benchmark.id));
 const recordsById = new Map(upstreamRecords.map(record => [record.record_id, record]));
 const snapshotsById = new Map(snapshots.map(snapshot => [snapshot.snapshot_id, snapshot]));
@@ -229,15 +232,23 @@ for (const sku of skus) if (sku.organization && sku.organization_country && !cou
 CHINA_CREATORS.forEach(org => countryByOrg.set(org.toLowerCase(), 'China'));
 US_CREATORS.forEach(org => { if (!countryByOrg.has(org.toLowerCase())) countryByOrg.set(org.toLowerCase(), 'United States of America'); });
 
-// 去掉日期/版本后缀与连字符差异后再与已入选模型比对（如 claude-haiku-4-5-20251001 → claude-4-5-haiku，qwen-3-6-plus → qwen3-6-plus）。
-const stripSuffix = key => key.replace(/-(?:20\d{6}|\d{4})$/, '').replace(/-(?:instruct|chat)$/, '');
+// 去掉日期/版本后缀与连字符差异后再与已入选模型比对（如 claude-haiku-4-5-20251001 → claude-4-5-haiku，o3-2025-04-16 → o3，qwen-3-6-plus → qwen3-6-plus）。
+const stripSuffix = key => key.replace(/-(?:20\d\d-\d\d-\d\d|20\d{6}|\d{4})$/, '').replace(/-(?:instruct|chat)$/, '');
 // 名称兜底匹配的候选：基线入选模型 + 上一次已上榜的模型。基线截止 2026-09-21，只用基线会让之后新上榜的模型
 // （如 Claude Sonnet 5.5）在其他数据源里的变体名（claude-sonnet-5-5-xhigh-effort）全部匹配失败。
 // 只影响“能否对上已有模型”，入选规则不变。
 const matchableIds = new Set([...eligibleIds, ...(readJson(path.join(dataDir, 'benchmarks.json'))?.models || []).map(model => model.id)]);
 const indexBy = transform => { const map = new Map(); for (const id of matchableIds) { const key = transform(id); map.set(key, map.has(key) ? null : id); } return map; };
+// flatExact 先于去后缀比对：否则 qwen3-8-max 与 qwen3-8-max-0902 去后缀后相同、互相冲突，qwen-3-8-max 两边都对不上。
+const flatExact = indexBy(id => id.replace(/-/g, ''));
 const looseStripped = indexBy(id => looseKey(stripSuffix(id))), flatStripped = indexBy(id => stripSuffix(id).replace(/-/g, ''));
-const toEligible = id => matchableIds.has(id) ? id : looseStripped.get(looseKey(stripSuffix(id))) || flatStripped.get(stripSuffix(id).replace(/-/g, '')) || null;
+// 数据源只写产品名、站内 SKU 带参数规模的个别模型，逐个登记（不做通用的规模后缀剥离，避免 qwen3-8 误配 Qwen3.8 27B）。
+const MODEL_ALIASES = { 'nemotron-3-ultra': 'nemotron-3-ultra-550b-a55b' };
+const toEligible = id => {
+  if (matchableIds.has(id)) return id;
+  if (MODEL_ALIASES[id] && matchableIds.has(MODEL_ALIASES[id])) return MODEL_ALIASES[id];
+  return flatExact.get(id.replace(/-/g, '')) || looseStripped.get(looseKey(stripSuffix(id))) || flatStripped.get(stripSuffix(id).replace(/-/g, '')) || null;
+};
 const TRAILING_EFFORT = /\s+(xhigh|high|medium|low|max|minimal|none)(?:\s+effort)?$/i;
 const VENDOR_PREFIX = /^(?:openai|anthropic|google|meta|xai|moonshotai|mistralai)\s+/i;
 function resolveModelId(raw) {
@@ -252,6 +263,13 @@ function resolveModelId(raw) {
     const stripped = extractSku(parsed.display.slice(0, effort.index));
     const matched = toEligible(stripped.key);
     if (matched) return { ...stripped, id: matched, config: parsed.config === STANDARD ? effort[0].trim() : `${parsed.config}；${effort[0].trim()}` };
+  }
+  // 兜底：MMLU-Pro 的月/年快照写法，如 “Gemini-3-Pro(11/25)”。各来源对 (05/28) 这类写法含义不一（月/日、年/月），
+  // 因此只在去掉后与站内模型 id 完全一致时才合并，记为日期快照。
+  const monthYear = parsed.display.match(/\s*\((?:0?[1-9]|1[0-2])\/\d{2}\)\s*$/);
+  if (monthYear) {
+    const stripped = extractSku(parsed.display.slice(0, monthYear.index));
+    if (matchableIds.has(stripped.key)) return { ...stripped, id: stripped.key, config: stripped.config === STANDARD ? '日期快照' : `${stripped.config}；日期快照` };
   }
   // 兜底：名称前带厂商前缀（如 “OpenAI O3”“Moonshotai-Kimi-K2-Instruct”）。同样只在去掉后能命中已入选模型时采用。
   const vendor = parsed.display.match(VENDOR_PREFIX);

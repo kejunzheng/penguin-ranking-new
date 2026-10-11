@@ -24,15 +24,17 @@ test('record selection respects cutoff and prefers standard configuration',()=>{
  assert.equal(chooseBenchmarkRecord(records,'2026-01-01'),null);
 });
 
-test('bundled benchmark data has 24 benchmarks and current ranked models',()=>{
+test('bundled benchmark data has 21 benchmarks and current ranked models',()=>{
  const data=JSON.parse(fs.readFileSync('public/data/benchmarks.json','utf8'));
- assert.equal(data.benchmarks.length,24);
+ assert.equal(data.benchmarks.length,21);
  assert.ok(data.generated_at.slice(0,10)>='2026-09-29');
  assert.ok(data.benchmarks.every(item=>/^\d{4}-\d{2}-\d{2}$/.test(item.latest_date)),'every benchmark exposes its source snapshot date');
  assert.ok(data.models.length>=300);
  const ids=data.benchmarks.map(item=>item.id);
  assert.ok(ids.includes('deepswe')&&ids.includes('frontiercode'));
  assert.ok(!ids.includes('livecodebench')&&!ids.includes('aider_polyglot'));
+ assert.ok(['mathvista','androidworld','ruler'].every(id=>!ids.includes(id)),'empty benchmarks are retired');
+ assert.ok(data.benchmarks.every(item=>item.model_count>0),'every listed benchmark has on-site results');
  for(const id of ['deepswe','frontiercode'])assert.ok(data.benchmarks.find(item=>item.id===id).model_count>=5,`${id} has live ranked models`);
  assert.ok(data.models.every(model=>!model.records.livecodebench&&!model.records.aider_polyglot),'retired scores do not contribute to coverage');
  const resolved=data.models.map(model=>resolveBenchmarkModel(model,ids,data.generated_at.slice(0,10)));
