@@ -2,7 +2,7 @@ const day=86400000;
 export const weekEnd=date=>new Date(Date.parse(date+'T00:00:00Z')+6*day).toISOString().slice(0,10);
 export function usageWindow(trends,preset='3m',custom={}) {
  const weeks=trends.weeks;const last=weeks.length-1;const lastFull=weeks.findLastIndex(w=>w[1]==='f');
- let end=preset==='1w'?lastFull:last;let start=Math.max(0,end-({ '1w':1,'1m':4,'3m':13,'6m':26,'1y':52 }[preset]||13)+1);
+ let end=last;let start=Math.max(0,end-({ '1w':1,'1m':4,'3m':13,'6m':26,'1y':52 }[preset]||13)+1);
  if(preset==='custom'){
   if(!custom.from||!custom.to||custom.from>custom.to)return {invalid:true,weeks:[],rows:[],platformTotal:0};
   const indices=weeks.map((w,i)=>w[0]<=custom.to&&weekEnd(w[0])>=custom.from?i:-1).filter(i=>i>=0);
@@ -27,7 +27,7 @@ export function stackRows(data,limit=10){
 
 export function usagePeriodTitle(preset,mode,lang){
  const zh=lang==='zh';
- const periods=zh?{'1w':'最近完整周','1m':'近1个月','3m':'近3个月','6m':'近6个月','1y':'近1年',custom:'所选时段'}:{'1w':'Latest complete week','1m':'Last month','3m':'Last 3 months','6m':'Last 6 months','1y':'Last year',custom:'Selected period'};
+ const periods=zh?{'1w':'本周','1m':'近1个月','3m':'近3个月','6m':'近6个月','1y':'近1年',custom:'所选时段'}:{'1w':'This week','1m':'Last month','3m':'Last 3 months','6m':'Last 6 months','1y':'Last year',custom:'Selected period'};
  const range=periods[preset]||periods.custom;
  if(mode==='ranking')return zh?`${range}模型调用排名`:`Model usage ranking · ${range}`;
  if(mode==='compare')return zh?`${range}模型调用量对比`:`Model usage comparison · ${range}`;
@@ -35,7 +35,7 @@ export function usagePeriodTitle(preset,mode,lang){
 }
 export function usageRangeNote(preset,data,lang){
  const zh=lang==='zh',count=data.weeks.length;
- if(preset==='1w')return zh?'采用最近完整周的数据':'Uses the latest complete week';
+ if(preset==='1w')return (zh?`本周累计 · 截至${data.to}`:`This week to date · through ${data.to}`)+(data.weeks.some(week=>week[1]!=='f')?(zh?' · 数据尚未完整':' · Data is incomplete'):'');
  const partial=data.weeks.some(week=>week[1]!=='f');
  return (zh?`按周展示 · 共${count}周`:`Weekly observations · ${count} weeks`)+(partial?(zh?' · 浅色为未结束的当周':' · Lighter bars mark the incomplete current week'):'');
 }
