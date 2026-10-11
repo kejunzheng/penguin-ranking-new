@@ -19,6 +19,8 @@ export default function PriceFrontier({frontier,models,lang}){
   return frontier.points.map(point=>({...point,model:byId.get(point.id),price:blendedPrice(point,frontier.blend,frontier.usd_to_cny)}))
    .filter(point=>point.model&&point.score>=MIN_SCORE&&point.price>0);
  },[frontier,models]);
+ // 低于分数门槛、未画入图中的收录模型数量，用于标注
+ const belowCount=useMemo(()=>{if(!frontier)return 0;const ids=new Set(models.map(model=>model.id));return frontier.points.filter(point=>ids.has(point.id)&&point.score<MIN_SCORE).length},[frontier,models]);
  const points=all.filter(point=>(!china||point.model.region==='china')&&(!open||point.model.type==='open'));
  const line=frontierOf(points),onLine=new Set(line.map(point=>point.id));
  if(!frontier||!all.length)return null;
@@ -39,7 +41,8 @@ export default function PriceFrontier({frontier,models,lang}){
  return <section className="price-frontier" aria-label={zh?'价格斩杀线':'Price frontier'}>
   <div className="price-frontier-head">
    <div><h3>{zh?'价格斩杀线':'Price frontier'}<small>{zh?`${points.length} 个模型`:`${points.length} models`}</small></h3>
-    <p>{zh?<>斩杀线上是各价位 AA 智能指数最高的模型。价格按一般用量折算：缓存命中 : 输入 : 输出 = <b>7 : 2 : 1</b>。</>:<>Models on the line have the highest AA Intelligence Index at their price. Blended price: cache hit : input : output = <b>7 : 2 : 1</b>.</>}</p></div>
+    <p>{zh?<>斩杀线上是各价位 AA 智能指数最高的模型。价格按一般用量折算：缓存命中 : 输入 : 输出 = <b>7 : 2 : 1</b>。</>:<>Models on the line have the highest AA Intelligence Index at their price. Blended price: cache hit : input : output = <b>7 : 2 : 1</b>.</>}</p>
+    <p className="price-frontier-threshold">{zh?<>AA 智能指数低于 <b>{MIN_SCORE}</b> 分的模型不在此图中{belowCount?`（共 ${belowCount} 个）`:''}。</>:<>Models scoring below <b>{MIN_SCORE}</b> on the AA Index are not shown{belowCount?` (${belowCount} models)`:''}.</>}</p></div>
    <div className="price-frontier-filters">
     <label className="price-frontier-toggle"><input type="checkbox" checked={china} onChange={e=>setChina(e.target.checked)}/>{zh?'国产模型':'China models'}</label>
     <label className="price-frontier-toggle"><input type="checkbox" checked={open} onChange={e=>setOpen(e.target.checked)}/>{zh?'开源模型':'Open weights'}</label>
@@ -53,8 +56,10 @@ export default function PriceFrontier({frontier,models,lang}){
      {xTicks.map(tick=><line key={'x'+tick} className="grid" y1="0" y2="100" x1={x(tick)} x2={x(tick)}/>)}
      {area&&<path className="area" d={area}/>}
      {path&&<path className="step" d={path}/>}
+     <line className="threshold" x1="0" x2="100" y1={y(MIN_SCORE)} y2={y(MIN_SCORE)}/>
      {last&&<line className="tail" x1={x(last.price)} x2="100" y1={y(last.score)} y2={y(last.score)}/>}
     </svg>
+    <span className="price-frontier-threshold-label" style={{top:`${y(MIN_SCORE)}%`}}>{zh?`${MIN_SCORE} 分以下未列入`:`Below ${MIN_SCORE} not shown`}</span>
     {yTicks.map(tick=><span key={'yl'+tick} className="price-frontier-tick y" style={{top:`${y(tick)}%`}}>{tick}</span>)}
     {xTicks.map(tick=><span key={'xl'+tick} className="price-frontier-tick x" style={{left:`${x(tick)}%`}}>{money(tick,cny).replace(/\.00$|\.0$/,'')}</span>)}
     {points.filter(point=>!onLine.has(point.id)).map(point=><button type="button" key={point.id} className="price-frontier-dot" style={{left:`${x(point.price)}%`,top:`${y(point.score)}%`}} aria-label={`${point.model.name} ${point.score} · ${money(point.price,cny)}`} onMouseEnter={()=>setHover(point.id)} onMouseLeave={()=>setHover(null)} onFocus={()=>setHover(point.id)} onBlur={()=>setHover(null)}><ModelLogo item={logoItem(point.model)} lang={lang}/></button>)}
