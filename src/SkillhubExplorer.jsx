@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useState} from 'react';
 import {MagnifyingGlassIcon,DownloadSimpleIcon,StarIcon} from '@phosphor-icons/react';
 
-const categoryNames={'dev-programming':['开发编程','Development'],'content-creation':['内容创作','Content'],'office-efficiency':['办公效率','Productivity'],'data-analysis':['数据分析','Data'],'knowledge-management':['知识管理','Knowledge'],'ai-agent':['AI Agent','AI Agent'],'education-learning':['教育学习','Education'],'life-services':['生活服务','Lifestyle'],'industry-professional':['行业专业','Industry'],'business-ops':['商业运营','Business operations'],'design-media':['设计创意','Design & media'],education:['教育学习','Education'],'it-ops-security':['IT 运维与安全','IT, ops & security'],'life-service':['生活服务','Lifestyle'],professional:['行业专业','Professional'],uncategorized:['未分类','Uncategorized']};
+export const categoryNames={'dev-programming':['开发编程','Development'],'content-creation':['内容创作','Content'],'office-efficiency':['办公效率','Productivity'],'data-analysis':['数据分析','Data'],'knowledge-management':['知识管理','Knowledge'],'ai-agent':['AI Agent','AI Agent'],'education-learning':['教育学习','Education'],'life-services':['生活服务','Lifestyle'],'industry-professional':['行业专业','Industry'],'business-ops':['商业运营','Business operations'],'design-media':['设计创意','Design & media'],education:['教育学习','Education'],'it-ops-security':['IT 运维与安全','IT, ops & security'],'life-service':['生活服务','Lifestyle'],professional:['行业专业','Professional'],uncategorized:['未分类','Uncategorized']};
 const compact=value=>new Intl.NumberFormat('zh-CN',{notation:'compact',maximumFractionDigits:1}).format(value||0);
 
 export default function SkillhubExplorer({data,lang}){

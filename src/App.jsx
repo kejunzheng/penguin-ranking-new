@@ -11,7 +11,7 @@ import DataNotes from './DataNotes';
 import UsageExplorer from './UsageExplorer';
 import PageHeading from './PageHeading';
 import BenchmarkExplorer from './BenchmarkExplorer';
-import SkillhubExplorer from './SkillhubExplorer';
+import SkillhubExplorer,{categoryNames as skillhubCategoryNames} from './SkillhubExplorer';
 import {rankBenchmarkCoverage} from './benchmark-data';
 import {readState,rankProjects,usageRows,priceValue,routes,paginatePrices} from './data';
 import {findMatchingUsageModel} from './model-profile';
@@ -21,7 +21,6 @@ const number=n=>n==null?'—':new Intl.NumberFormat('en').format(n);
 // path 为 null 时不请求：数据按页面懒加载；已加载的数据在本次会话内复用，切回页面不重复下载。
 const jsonCache=new Map();
 function useJson(path){const [data,setData]=useState(()=>path&&jsonCache.has(path)?jsonCache.get(path):null),[error,setError]=useState(false),[retry,setRetry]=useState(0);useEffect(()=>{let cancelled=false;setError(false);if(!path){setData(null);return}if(jsonCache.has(path)){setData(jsonCache.get(path));return}setData(null);loadJson(path).then(d=>{jsonCache.set(path,d);if(!cancelled)setData(d)}).catch(()=>{if(!cancelled)setError(true)});return()=>{cancelled=true}},[path,retry]);return {data,error,retry:()=>setRetry(x=>x+1)}}
-function Chart({data,t}){const ref=useRef(null);useEffect(()=>{let chart;let cancelled=false;let observer;import('./chart').then(({createChart})=>{if(cancelled)return;chart=createChart(ref.current,data);observer=new ResizeObserver(()=>chart.resize());observer.observe(ref.current)});return()=>{cancelled=true;observer?.disconnect();chart?.dispose()}},[data,t]);return <div ref={ref} className="chart" role="img" aria-label={t.chartLabel}/>}
 function Empty({t,baseline=false,reset}){return <div className="empty"><span className="eyebrow">{baseline?'720H':'0 '+t.count}</span><h3>{baseline?t.baseline:t.noResults}</h3><p>{baseline?t.baselineDesc:t.noResultsDesc}</p>{reset&&!baseline&&<button className="solid" onClick={reset}>{t.reset}<ArrowClockwiseIcon/></button>}</div>}
 function Loading({resource,t}){return <div className="empty" role="status"><p>{resource.error?t.error:t.loading}</p>{resource.error&&<button className="solid" onClick={resource.retry}>{t.retry}</button>}</div>}
 function CSVButton({rows,name,t}){function save(){const keys=Object.keys(rows[0]||{});const val=v=>'"'+String(v??'').replaceAll('"','""')+'"';const blob=new Blob(['\ufeff'+[keys.map(val).join(','),...rows.map(r=>keys.map(k=>val(r[k])).join(','))].join('\r\n')],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}return <button className="text-button" onClick={save} disabled={!rows.length}><DownloadSimpleIcon/>{t.export}</button>}
@@ -33,7 +32,7 @@ export default function App(){
  const [pricePage,setPricePage]=useState(1);
  const [query,setQuery]=useState(''),[projectLang,setProjectLang]=useState('all'),[savedOnly,setSavedOnly]=useState(false),[currency,setCurrency]=useState('USD'),[provider,setProvider]=useState('all'),[openOnly,setOpenOnly]=useState(false),[sort,setSort]=useState('input'),[modal,setModal]=useState(null);
  const [saved,setSaved]=useState(()=>{try{return JSON.parse(localStorage.getItem('penguin-saved')||'[]')}catch{return []}});
- const projects=useJson(`data/${channel}/${period}.json`),modelData=useJson(['home','usage','pricing'].includes(page)?'data/models.json':null),globalPrices=useJson(page==='usage'||page==='pricing'?'data/global-prices.json':null),skillhubData=useJson(page==='skillhub'?'data/skillhub.json':null);
+ const projects=useJson(`data/${channel}/${period}.json`),modelData=useJson(['home','usage','pricing'].includes(page)?'data/models.json':null),globalPrices=useJson(page==='usage'||page==='pricing'?'data/global-prices.json':null),skillhubData=useJson(['home','skillhub'].includes(page)?'data/skillhub.json':null);
  const dialog=useRef(null);
  function change(p){setState(s=>({...s,...p}));if((p.page&&p.page!==page)||(p.channel&&p.channel!==channel)){setQuery('');setProjectLang('all');setSavedOnly(false);setModal(null);if(p.page)window.scrollTo({top:0,behavior:'instant'})}}
  useEffect(()=>{const p=new URLSearchParams(location.search);p.set('page',page);p.set('lang',lang);p.set('channel',channel);p.set('period',period);if(page==='pricing')p.set('scope',priceScope);else p.delete('scope');const url=location.pathname+'?'+p; if(location.search!=='?'+p)history.pushState(null,'',url);document.documentElement.lang=lang==='zh'?'zh-CN':'en';document.title=(page==='home'?t.brand:(page==='opensource'?t[projectSection.label]:t[page])+' | '+t.brand);try{localStorage.setItem('penguin-locale',lang)}catch{}},[page,lang,channel,period,priceScope]);
@@ -67,7 +66,7 @@ export default function App(){
 
  <aside className="home-sidebar"><section id="home-usage" className="home-digest usage-digest"><div className="home-section-head"><div><p className="eyebrow">MODEL USAGE</p><h2>{t.usageTitle}</h2></div></div><p className="digest-caption">{t.last4} · TOP 5</p>{!homeUsage?<Loading resource={modelData} t={t}/>:<ol className="digest-list">{homeUsage.rows.slice(0,5).map((r,i)=><li key={r.id}><span className="digest-rank">{String(i+1).padStart(2,'0')}</span><div className="model-identity"><ModelLogo item={r} lang={lang}/><div>{link('usage',r.name,'digest-name')}<small>{r.provider}</small></div></div><strong>{short(r.total)}</strong></li>)}</ol>}{cta('usage')}</section>
  <section id="home-prices" className="home-digest"><div className="home-section-head"><div><p className="eyebrow">API PRICING</p><h2>{t.pricingTitle}</h2></div></div><div className="digest-currency"><p className="digest-caption">{t.input} · {t.perMillion}</p><div className="segmented" aria-label={t.currency}>{['USD','CNY'].map(c=><button key={c} onClick={()=>setCurrency(c)} aria-pressed={currency===c}>{c}</button>)}</div></div>{!modelData.data?<Loading resource={modelData} t={t}/>:<ol className="digest-list price-digest">{homePrices.map((r,i)=><li key={r.slug}><span className="digest-rank">{String(i+1).padStart(2,'0')}</span><div className="model-identity"><ModelLogo item={r} lang={lang}/><div><button className="digest-name" onClick={()=>setModal({type:'price',item:r})}>{r.name}</button><small>{r.provider_name}</small></div></div><strong>{formatPrice(currency)(priceValue(r,currency,'input'))}</strong></li>)}</ol>}{cta('pricing')}</section>
- <section className="home-chart"><div className="home-section-head"><div><p className="eyebrow">THE BIGGER PICTURE</p><h2>{t.trend}</h2></div></div><p className="digest-caption">{t.last4} · {t.top10}</p>{homeUsage?<><Chart data={homeUsage} t={t}/><p className="quiet">{t.chartHelp}</p></>:<Loading resource={modelData} t={t}/>}<div className="home-chart-link">{cta('usage')}</div></section>
+ <HomeSkillhubCard lang={lang} change={change} resource={skillhubData}/>
 </aside><HomeProjectCard channel="skill" lang={lang} initialPeriod={period} saved={saved} toggleSave={toggleSave} setModal={setModal} change={change}/></div>
 </>:
 
@@ -107,6 +106,16 @@ function HomeBenchmarkCard({lang,change}){
   <ul className="home-coverage-detail-list">{detail==='all'?models.map(model=><li key={model.id}><button className="home-coverage-all-row" type="button" onClick={()=>setDetail(model)}><span>#{model.position}</span><strong>{model.name}</strong><small>{model.coverage}/{total}</small></button></li>):detail.hits.map(hit=><li key={hit.benchmark.id}><a href={hit.benchmark.official_url} target="_blank" rel="noreferrer">{hit.benchmark.display_name} ↗</a><small>{zh?`${hit.recordCount}条配置成绩`:`${hit.recordCount} configurations`}</small></li>)}</ul>
   <a className="inline-link" href={`?page=benchmarks&lang=${lang}`} onClick={open}>{zh?'进入完整评测页':'Open full benchmark explorer'}<ArrowRightIcon size={18}/></a>
   </aside></div>}
+ </section>;
+}
+function HomeSkillhubCard({lang,change,resource}){
+ const t=copy[lang],zh=lang==='zh',rows=(resource.data?.trending||[]).slice(0,5);
+ const open=event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();change({page:'skillhub'})};
+ return <section id="home-skillhub" className="home-digest home-skillhub-card" aria-label={zh?'SkillHub榜':t.skillhubTitle}>
+  <div className="home-section-head"><div><p className="eyebrow">SKILLHUB / TOP 5</p><h2>{zh?'SkillHub榜':t.skillhubTitle}</h2></div></div>
+  <p className="digest-caption">{zh?'近期飙升 · TOP 5':'Trending now · TOP 5'}</p>
+  {!resource.data?<Loading resource={resource} t={t}/>:<ol className="digest-list home-skillhub-list">{rows.map((item,index)=><li key={item.id}><span className="digest-rank">{String(index+1).padStart(2,'0')}</span><div className="model-identity"><span className="home-skillhub-icon" aria-hidden="true"><span>{item.name?.trim()?.[0]||'S'}</span>{item.icon_url&&<img src={item.icon_url} alt="" loading="lazy" referrerPolicy="no-referrer" onError={event=>{event.currentTarget.style.display='none'}}/>}</span><div><a className="digest-name home-skillhub-name" href={item.url||`https://skillhub.cn/skills/${item.id}`} target="_blank" rel="noreferrer">{item.name}</a><small>{skillhubCategoryNames[item.category]?.[zh?0:1]||(zh?'未分类':'Uncategorized')}</small></div></div><strong>{short(item.downloads)}<small>{zh?'累计下载':'Total downloads'}</small></strong></li>)}</ol>}
+  <div className="home-skillhub-foot"><p className="home-benchmark-note">{zh?'按SkillHub公开飙升榜顺序展示。':'Uses the order of SkillHub’s public trending list.'}</p><a className="inline-link" href={`?page=skillhub&lang=${lang}`} onClick={open}>{t.view}<ArrowRightIcon size={23}/></a></div>
  </section>;
 }
 function Search({value,onChange,label}){return <label className="search"><MagnifyingGlassIcon size={19}/><input aria-label={label} placeholder={label} value={value} onChange={e=>onChange(e.target.value)}/>{value&&<button aria-label="Clear / 清除" onClick={()=>onChange('')}><XIcon/></button>}</label>}
