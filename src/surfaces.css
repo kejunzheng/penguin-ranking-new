@@ -433,3 +433,6 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .chart-dark .summary-name .usage-profile-trigger{color:#eef4fc}
 .chart-ranking-head>span{font-family:Inter,"PingFang SC",sans-serif}
 @media(max-width:600px){.summary-name .usage-profile-trigger{font-size:13px;font-weight:600}.chart-ranking-head>span{font-size:12px;color:#627f9f;margin-top:6px}}
+/* 价格榜表格字号与调用榜表格一致：模型名 13px、常规字重，其余单元格 13px */
+.price-table .project-name,.price-table .model-identity .project-name{font-size:13px;font-weight:500;line-height:1.5}
+.price-table tbody td{font-size:13px}
