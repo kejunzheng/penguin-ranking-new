@@ -420,3 +420,11 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
  .compare-bar-tags{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
  .compare-bar-tags::-webkit-scrollbar{display:none}
 }
+/* 评测榜顶部与调用榜共用 usage-controls 样式 */
+.benchmark-controls .period-buttons{align-items:center}
+.benchmark-controls .period-buttons button:disabled{opacity:.45;cursor:not-allowed}
+.benchmark-controls .benchmark-history-note{font-size:11px;color:#8a9ab0;white-space:nowrap}
+.benchmark-controls .benchmark-custom-panel button{border-radius:6px}
+.benchmark-filter-bar{justify-content:flex-start;margin-bottom:12px}
+@media(max-width:600px){.benchmark-controls .period-buttons{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}}
+.benchmark-controls .period-buttons>button,.benchmark-controls .period-buttons>div,.benchmark-controls .period-buttons>span{flex:0 0 auto;white-space:nowrap}
