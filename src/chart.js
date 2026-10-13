@@ -6,7 +6,7 @@ import {modelBrand} from './model-brand';
 import {assetUrl} from './asset-url';
 import {stackRows} from './usage-data';
 echarts.use([LineChart,BarChart,GridComponent,TooltipComponent,LegendComponent,DataZoomComponent,TitleComponent,GraphicComponent,CanvasRenderer]);
-import {chartColors} from './usage-palette';
+import {chartColors,compareColor} from './usage-palette';
 export {chartColors} from './usage-palette';
 const compact=n=>new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n);
 const colors=dark=>({bg:dark?'#16202d':'#ffffff',text:dark?'#f1f6fc':'#162333',muted:dark?'#a5b6cb':'#7c8fa7',line:dark?'#344253':'#e9edf6',other:dark?'#56687e':'#d4deec'});
@@ -19,7 +19,7 @@ export function createUsageChart(element,data,options={}){
  const total=data.platformTotal??data.weeks.reduce((s,w)=>s+w[2],0);
  const header=title?70:20;
  const series=singleWeek&&mode==='total'?[{name:zh?'调用量':'Tokens',type:'bar',barMaxWidth:25,data:[...top.map((r,i)=>({value:r.total,itemStyle:{color:chartColors[i],borderRadius:[0,4,4,0]}})),{value:others[0],itemStyle:{color:c.other,borderRadius:[0,4,4,0]}}],label:{show:true,position:'right',color:c.text,fontSize:12,formatter:p=>compact(p.value)+'  '+(total?p.value/total*100:0).toFixed(1)+'%'}}]:[
- ...picked.map((r,rank)=>({id:r.id,name:r.id,type:mode==='compare'?'line':'bar',stack:mode==='compare'?undefined:'usage',barMaxWidth:48,barCategoryGap:'36%',showSymbol:mode==='compare'&&data.weeks.length<3,symbolSize:7,connectNulls:false,lineStyle:{width:2.5},itemStyle:{color:chartColors[rank%chartColors.length]},emphasis:{focus:'series'},data:r.values.map((v,i)=>({value:mode==='total'?(v??0):v,itemStyle:{opacity:data.weeks[i][1]==='i'?.35:1}}))})),
+ ...picked.map((r,rank)=>({id:r.id,name:r.id,type:mode==='compare'?'line':'bar',stack:mode==='compare'?undefined:'usage',barMaxWidth:48,barCategoryGap:'36%',showSymbol:mode==='compare'&&data.weeks.length<3,symbol:data.weeks.length===1?'circle':'emptyCircle',symbolSize:data.weeks.length===1?11:7,connectNulls:false,lineStyle:{width:2.5},itemStyle:{color:mode==='compare'?compareColor(rank,theme):chartColors[rank%chartColors.length]},emphasis:{focus:'series'},data:r.values.map((v,i)=>({value:mode==='total'?(v??0):v,itemStyle:{opacity:data.weeks[i][1]==='i'?.35:1}}))})),
  ...(mode==='total'?[{id:'__others',name:'__others',type:'bar',stack:'usage',barMaxWidth:48,itemStyle:{color:c.other,borderRadius:[3,3,0,0]},emphasis:{focus:'series'},data:others.map((v,i)=>({value:v,itemStyle:{opacity:data.weeks[i][1]==='i'?.35:1}}))}]:[])
  ];
  const names=new Map(picked.map(r=>[r.id,r.name+(r.id.includes(':free')?' · Free':'')]));names.set('__others',zh?'其他模型':'Others');
