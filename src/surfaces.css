@@ -428,3 +428,8 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .benchmark-filter-bar{justify-content:flex-start;margin-bottom:12px}
 @media(max-width:600px){.benchmark-controls .period-buttons{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}}
 .benchmark-controls .period-buttons>button,.benchmark-controls .period-buttons>div,.benchmark-controls .period-buttons>span{flex:0 0 auto;white-space:nowrap}
+/* TOP 5 快照：模型名改成可点按钮后沿用原 strong 的字号字重，和上方柱状列表一致 */
+.summary-name .usage-profile-trigger{font-size:12px;font-weight:500;line-height:1.4;color:#223143}
+.chart-dark .summary-name .usage-profile-trigger{color:#eef4fc}
+.chart-ranking-head>span{font-family:Inter,"PingFang SC",sans-serif}
+@media(max-width:600px){.summary-name .usage-profile-trigger{font-size:13px;font-weight:600}.chart-ranking-head>span{font-size:12px;color:#627f9f;margin-top:6px}}
