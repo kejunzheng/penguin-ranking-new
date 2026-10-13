@@ -8,9 +8,9 @@ test('English and Chinese dictionaries have matching complete keys',()=>{assert.
 test('model snapshot has real timestamps and complete weeks',()=>{const data=JSON.parse(fs.readFileSync('public/data/models.json'));assert.ok(Date.parse(data.generated_at));for(const count of [4,12,26]){const r=usageRows(data.trends,count);assert.equal(r.weeks.length,count);assert.ok(r.weeks.every(w=>w[1]==='f'))}});
 import {usageWindow,stackRows,weekEnd} from '../src/usage-data.js';
 import {blendedPrice,priceHistory} from '../src/price-details.js';
-test('usage ranges preserve incomplete weeks, align custom weeks, and compare prior complete week',()=>{
+test('usage ranges show the current week to date, preserve incomplete weeks, and align custom weeks',()=>{
  const d={updated_at:'2026-09-08',weeks:[['2026-08-24','f',100],['2026-08-31','f',120],['2026-09-07','i',10]],models:[{id:'a'},{id:'a:free'}],points:[[0,0,40],[1,0,60],[2,1,5]]};
- const w=usageWindow(d,'1w');assert.equal(w.platformTotal,120);assert.equal(w.growth,.2);assert.equal(w.from,'2026-08-31');assert.equal(w.to,'2026-09-06');
+ const w=usageWindow(d,'1w');assert.equal(w.platformTotal,10);assert.equal(w.growth,null);assert.equal(w.from,'2026-09-07');assert.equal(w.to,'2026-09-08');
  const m=usageWindow(d,'1m');assert.equal(m.platformTotal,230);assert.equal(m.to,'2026-09-08');assert.deepEqual(m.rows[1].values,[null,null,5]);
  const c=usageWindow(d,'custom',{from:'2026-09-02',to:'2026-09-03'});assert.equal(c.from,'2026-08-31');assert.equal(c.weeks.length,1);
  assert.equal(usageWindow(d,'custom',{from:'2026-09-03',to:'2026-09-02'}).invalid,true);assert.equal(weekEnd('2025-12-29'),'2026-01-04');
