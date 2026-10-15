@@ -39,7 +39,7 @@ export function getDataNotes(kind,channel='product',lang='zh'){
 }
 export default function DataNotes({kind,channel='product',lang,updated,globalUpdated,chinaUpdated,globalSources=[],globalCoverage,rate,compact=false}){
  const zh=lang==='zh',content=getDataNotes(kind,channel,lang);
- return <details className={'data-notes'+(compact?' compact':'')} open={!compact}>
+ return <details className={'data-notes'+(compact?' compact':'')}>
   <summary>{zh?'数据来源与统计口径':'Sources & methodology'}</summary>
   <div className="data-notes-body">
    {['source','method','disclaimer'].map(section=><section className="data-note-section" key={section}><h3>{(zh?{source:'数据来源',method:'统计口径',disclaimer:'免责声明'}:{source:'Data sources',method:'Methodology',disclaimer:'Disclaimer'})[section]}</h3>{content[section].map(text=><p key={text}>{text}</p>)}</section>)}
