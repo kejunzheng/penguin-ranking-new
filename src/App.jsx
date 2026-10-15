@@ -15,7 +15,7 @@ import SkillhubExplorer,{categoryNames as skillhubCategoryNames} from './Skillhu
 import {rankBenchmarkCoverage,orderBenchmarks} from './benchmark-data';
 import {readState,rankProjects,usageRows,priceValue,routes,paginatePrices} from './data';
 import {findMatchingUsageModel} from './model-profile';
-const projectSections=[{channel:'product',label:'products',title:'opensourcePageTitle',description:'opensourceDesc',eyebrow:'04 / OPEN SOURCE'},{channel:'skill',label:'skills',title:'skillsTitle',description:'skillsDesc',eyebrow:'05 / SKILLS'}];
+const projectSections=[{channel:'skill',label:'skills',title:'skillsTitle',description:'skillsDesc',eyebrow:'05 / SKILLS'},{channel:'product',label:'products',title:'opensourcePageTitle',description:'opensourceDesc',eyebrow:'06 / OPEN SOURCE'}];
 const short=n=>n==null?'—':new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n);
 const number=n=>n==null?'—':new Intl.NumberFormat('en').format(n);
 // path 为 null 时不请求：数据按页面懒加载；已加载的数据在本次会话内复用，切回页面不重复下载。
@@ -62,15 +62,15 @@ export default function App(){
  <main id="main" className={'frame '+(page==='home'?'home':'inner-page')}>
  {page==='home'?<>
  <h1 className="visually-hidden">{t.brand}</h1>
- <div className="home-layout"><HomeBenchmarkCard lang={lang} change={change}/><HomeProjectCard channel="product" lang={lang} initialPeriod={period} saved={saved} toggleSave={toggleSave} setModal={setModal} change={change}/>
+ <div className="home-layout"><HomeBenchmarkCard lang={lang} change={change}/>
 
  <aside className="home-sidebar"><section id="home-usage" className="home-digest usage-digest"><div className="home-section-head"><div><p className="eyebrow">MODEL USAGE</p><h2>{t.usageTitle}</h2></div></div><p className="digest-caption">{t.last4} · TOP 5</p>{!homeUsage?<Loading resource={modelData} t={t}/>:<ol className="digest-list">{homeUsage.rows.slice(0,5).map((r,i)=><li key={r.id}><span className="digest-rank">{String(i+1).padStart(2,'0')}</span><div className="model-identity"><ModelLogo item={r} lang={lang}/><div>{link('usage',r.name,'digest-name')}<small>{r.provider}</small></div></div><strong>{short(r.total)}</strong></li>)}</ol>}{cta('usage')}</section>
  <section id="home-prices" className="home-digest"><div className="home-section-head"><div><p className="eyebrow">API PRICING</p><h2>{t.pricingTitle}</h2></div></div><div className="digest-currency"><p className="digest-caption">{t.input} · {t.perMillion}</p><div className="segmented" aria-label={t.currency}>{['USD','CNY'].map(c=><button key={c} onClick={()=>setCurrency(c)} aria-pressed={currency===c}>{c}</button>)}</div></div>{!modelData.data?<Loading resource={modelData} t={t}/>:<ol className="digest-list price-digest">{homePrices.map((r,i)=><li key={r.slug}><span className="digest-rank">{String(i+1).padStart(2,'0')}</span><div className="model-identity"><ModelLogo item={r} lang={lang}/><div><button className="digest-name" onClick={()=>setModal({type:'price',item:r})}>{r.name}</button><small>{r.provider_name}</small></div></div><strong>{formatPrice(currency)(priceValue(r,currency,'input'))}</strong></li>)}</ol>}{cta('pricing')}</section>
  <HomeSkillhubCard lang={lang} change={change} resource={skillhubData}/>
-</aside><HomeProjectCard channel="skill" lang={lang} initialPeriod={period} saved={saved} toggleSave={toggleSave} setModal={setModal} change={change}/></div>
+</aside><HomeProjectCard channel="skill" lang={lang} initialPeriod={period} saved={saved} toggleSave={toggleSave} setModal={setModal} change={change}/><HomeProjectCard channel="product" lang={lang} initialPeriod={period} saved={saved} toggleSave={toggleSave} setModal={setModal} change={change}/></div>
 </>:
 
- <>{page!=='usage'&&<PageHeading eyebrow={page==='benchmarks'?'01 / BENCHMARKS':page==='pricing'?'03 / PRICING':page==='skillhub'?'06 / SKILLHUB':projectSection.eyebrow} title={t[page==='opensource'?projectSection.title:page==='benchmarks'?'benchmarkTitle':page==='skillhub'?'skillhubTitle':'pricingPageTitle']} description={t[page==='opensource'?projectSection.description:page==='benchmarks'?'benchmarkDesc':page==='skillhub'?'skillhubDesc':'pricingDesc']}/>}
+ <>{page!=='usage'&&<PageHeading eyebrow={page==='benchmarks'?'01 / BENCHMARKS':page==='pricing'?'03 / PRICING':page==='skillhub'?'04 / SKILLHUB':projectSection.eyebrow} title={t[page==='opensource'?projectSection.title:page==='benchmarks'?'benchmarkTitle':page==='skillhub'?'skillhubTitle':'pricingPageTitle']} description={t[page==='opensource'?projectSection.description:page==='benchmarks'?'benchmarkDesc':page==='skillhub'?'skillhubDesc':'pricingDesc']}/>}
 
  {page==='benchmarks'&&<BenchmarkPage lang={lang} t={t}/>}
  {page==='opensource'&&<>{renderProjects()}<DataNotes kind="projects" channel={channel} lang={lang} updated={status.data?.updatedAt}/></>}

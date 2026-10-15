@@ -1,4 +1,4 @@
-export const routes = ['home', 'benchmarks', 'usage', 'pricing', 'opensource', 'skillhub'];
+export const routes = ['home', 'benchmarks', 'usage', 'pricing', 'skillhub', 'opensource'];
 export function rankProjects(rows) { return [...rows].filter(r => r.starGrowth > 0).sort((a,b) => b.starGrowth-a.starGrowth || b.stars-a.stars || a.repositoryId-b.repositoryId).slice(0,10); }
 export function usageRows(trends, count = 12) {
  const end=trends.weeks.findLastIndex(w=>w[1]==='f'); const start=Math.max(0,end-count+1); const sums=new Map();
