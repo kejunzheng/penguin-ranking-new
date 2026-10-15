@@ -12,7 +12,7 @@ import UsageExplorer from './UsageExplorer';
 import PageHeading from './PageHeading';
 import BenchmarkExplorer from './BenchmarkExplorer';
 import SkillhubExplorer,{categoryNames as skillhubCategoryNames} from './SkillhubExplorer';
-import {rankBenchmarkCoverage} from './benchmark-data';
+import {rankBenchmarkCoverage,orderBenchmarks} from './benchmark-data';
 import {readState,rankProjects,usageRows,priceValue,routes,paginatePrices} from './data';
 import {findMatchingUsageModel} from './model-profile';
 const projectSections=[{channel:'product',label:'products',title:'opensourcePageTitle',description:'opensourceDesc',eyebrow:'04 / OPEN SOURCE'},{channel:'skill',label:'skills',title:'skillsTitle',description:'skillsDesc',eyebrow:'05 / SKILLS'}];
@@ -84,7 +84,7 @@ export default function App(){
  {modal?.type==='price'&&<ModelProfileDialog usageModel={findMatchingUsageModel(modal.item,modelData.data?.trends.models||[])} priceModel={modal.item} initialTab="price" trends={modelData.data?.trends} lang={lang} currency={currency} onCurrency={setCurrency} priceMeta={modal.item.price_scope==='global'?globalPrices.data:modelData.data?.prices} onClose={()=>setModal(null)}/>}
  </>
 }
-function BenchmarkPage({lang,t}){const resource=useJson('data/benchmarks.json');return resource.data?<BenchmarkExplorer data={resource.data} lang={lang}/>:<Loading resource={resource} t={t}/>}
+function BenchmarkPage({lang,t}){const resource=useJson('data/benchmarks.json'),ordered=useMemo(()=>orderBenchmarks(resource.data),[resource.data]);return resource.data?<BenchmarkExplorer data={ordered} lang={lang}/>:<Loading resource={resource} t={t}/>}
 // 首页按不同评测的上榜次数展示；每项评测最多计一次，同次数并列。
 function HomeBenchmarkCard({lang,change}){
  const t=copy[lang],resource=useJson('data/benchmarks.json'),zh=lang==='zh';

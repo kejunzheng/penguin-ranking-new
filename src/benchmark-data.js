@@ -66,3 +66,10 @@ export function rankBenchmarkCoverage(data){
  let position=0;
  return models.map((model,index)=>{if(!index||model.coverage!==models[index-1].coverage)position=index+1;return {...model,position};});
 }
+
+// 评测列顺序：综合类排最前，其余按本页收录模型数从多到少排列（同类内也按收录数降序）
+export function orderBenchmarks(data){
+ if(!data?.benchmarks)return data;
+ const lead=b=>b.category==='综合'?0:1;
+ return {...data,benchmarks:[...data.benchmarks].sort((a,b)=>lead(a)-lead(b)||(b.model_count||0)-(a.model_count||0))};
+}
