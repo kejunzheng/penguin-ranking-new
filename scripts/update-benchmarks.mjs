@@ -18,6 +18,7 @@ import { parseCsv, readZip } from './lib/formats.mjs';
 import { CODING_REPLACEMENTS } from './lib/coding-benchmarks.mjs';
 import { OFFICIAL_SOURCES } from './lib/benchmark-sources.mjs';
 import { ADDITIONAL_BENCHMARKS, ADDITIONAL_SOURCES } from './lib/additional-benchmarks.mjs';
+import { updateComposite } from './update-composite.mjs';
 
 const UPSTREAM = 'https://raw.githubusercontent.com/kejunzheng/penguin-model-capability-ranking/main/data';
 const STANDARD = '标准/未注明';
@@ -470,6 +471,8 @@ const output = {
 writeJsonIfChanged(stateFile('benchmark-history.json'), history);
 const target = path.join(dataDir, 'benchmarks.json');
 writeJsonIfChanged(target, output);
+// 综合分依赖最新评测数据；失败时保留上一版 composite.json，不阻断评测更新。
+try { updateComposite(); } catch (error) { console.error(`composite failed: ${error.message}`); }
 
 const STALE_DAYS = 45;
 const staleBefore = new Date(Date.now() - STALE_DAYS * 864e5).toISOString().slice(0, 10);

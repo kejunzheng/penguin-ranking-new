@@ -83,7 +83,7 @@ export default function App(){
  {modal?.type==='price'&&<ModelProfileDialog usageModel={findMatchingUsageModel(modal.item,modelData.data?.trends.models||[])} priceModel={modal.item} initialTab="price" trends={modelData.data?.trends} lang={lang} currency={currency} onCurrency={setCurrency} priceMeta={modal.item.price_scope==='global'?globalPrices.data:modelData.data?.prices} onClose={()=>setModal(null)}/>}
  </>
 }
-function BenchmarkPage({lang,t}){const resource=useJson('data/benchmarks.json'),ordered=useMemo(()=>orderBenchmarks(resource.data),[resource.data]);return resource.data?<BenchmarkExplorer data={ordered} lang={lang}/>:<Loading resource={resource} t={t}/>}
+function BenchmarkPage({lang,t}){const resource=useJson('data/benchmarks.json'),composite=useJson('data/composite.json'),ordered=useMemo(()=>orderBenchmarks(resource.data),[resource.data]);return resource.data?<BenchmarkExplorer data={ordered} lang={lang} composite={composite.data}/>:<Loading resource={resource} t={t}/>}
 // 首页按不同评测的上榜次数展示；每项评测最多计一次，同次数并列。
 function HomeBenchmarkCard({lang,change}){
  const t=copy[lang],resource=useJson('data/benchmarks.json'),zh=lang==='zh';
