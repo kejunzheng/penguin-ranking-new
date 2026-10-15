@@ -436,3 +436,4 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 /* 价格榜表格字号与调用榜表格一致：模型名 13px、常规字重，其余单元格 13px */
 .price-table .project-name,.price-table .model-identity .project-name{font-size:13px;font-weight:500;line-height:1.5}
 .price-table tbody td{font-size:13px}
+.benchmark-compare-empty{margin-top:12px;border:1px solid #dce5f0;border-radius:12px;background:#fff;box-shadow:0 5px 22px #45438208}.benchmark-compare-empty p{margin:0 auto}

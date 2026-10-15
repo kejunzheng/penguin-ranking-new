@@ -33,6 +33,6 @@ export default function ModelCompareBar({lang,options,selectedIds,onToggle,onCle
    <div className="compare-bar-actions">{actions}{selectedIds.length>0&&<button type="button" className="compare-bar-clear" onClick={onClear}>{zh?'清空':'Clear'}</button>}</div>
   </div>
   {selectedIds.length>0?<ul className="compare-bar-tags">{selectedIds.map((id,index)=>{const option=byId.get(id);return <li key={id}>{marker?.(id,index)}<span>{option?.name||id}</span>{option?.disabled&&<small>{option.note}</small>}<button type="button" aria-label={(zh?'移除 ':'Remove ')+(option?.name||id)} onClick={()=>onToggle(id)}><XIcon size={13}/></button></li>})}</ul>
-   :<p className="compare-bar-hint">{zh?'搜索并添加模型开始对比。':'Search and add models to start comparing.'}</p>}
+   :<p className="compare-bar-hint">{zh?'搜索并添加模型对比':'Search and add models to compare'}</p>}
  </section>;
 }
