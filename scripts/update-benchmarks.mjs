@@ -32,6 +32,9 @@ const SLUG_EFFORT = /\s+(xhigh|high|medium|low|max|minimal|thinking|non[- ]?reas
 export function extractSku(rawName) {
   let text = String(rawName || '').replace(/[🥇🥈🥉🤖]|🖼️?/gu, '').trim();
   const configuration = [];
+  // 新增：OSWorld 等来源用 claude-opus-5[1m] 表示 1M 上下文版本，视为配置，归到基础模型
+  const context = text.match(/\s*\[(\d+(?:\.\d+)?[km])\]\s*$/i);
+  if (context) { configuration.push(`${context[1].toUpperCase()} 上下文`); text = text.slice(0, context.index).trim(); }
   const slugStyle = /^[a-z0-9_.-]+$/i.test(text) && /[-_]/.test(text);
   if (slugStyle) {
     text = text.replace(/[_-]/g, ' ').replace(/\s+/g, ' ').trim();

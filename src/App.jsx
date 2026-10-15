@@ -88,10 +88,10 @@ function BenchmarkPage({lang,t}){const resource=useJson('data/benchmarks.json'),
 // 首页按不同评测的上榜次数展示；每项评测最多计一次，同次数并列。
 function HomeBenchmarkCard({lang,change}){
  const t=copy[lang],resource=useJson('data/benchmarks.json'),zh=lang==='zh';
- const models=useMemo(()=>rankBenchmarkCoverage(resource.data),[resource.data]),[detail,setDetail]=useState(null);
+ const shownData=useMemo(()=>orderBenchmarks(resource.data),[resource.data]),models=useMemo(()=>rankBenchmarkCoverage(shownData),[shownData]),[detail,setDetail]=useState(null);
  useEffect(()=>{if(!detail)return;const close=event=>{if(event.key==='Escape')setDetail(null)};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close)},[detail]);
- const total=resource.data?.benchmarks.length||0,shown=models.slice(0,5),boundary=shown.at(-1)?.coverage,extra=models.slice(5).filter(model=>model.coverage===boundary).length;
- const categories=new Set(resource.data?.benchmarks.map(benchmark=>benchmark.category)||[]).size;
+ const total=shownData?.benchmarks.length||0,shown=models.slice(0,5),boundary=shown.at(-1)?.coverage,extra=models.slice(5).filter(model=>model.coverage===boundary).length;
+ const categories=new Set(shownData?.benchmarks.map(benchmark=>benchmark.category)||[]).size;
  const open=event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();setDetail(null);change({page:'benchmarks'})};
  return <section id="home-benchmarks" className="home-digest home-benchmark-card home-coverage-card" aria-label={t.benchmarkTitle}>
   <div className="home-section-head"><div><p className="eyebrow">MODEL CAPABILITY / TOP 5 COVERAGE</p><h2>{t.benchmarkTitle}</h2></div></div>

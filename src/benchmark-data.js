@@ -67,9 +67,11 @@ export function rankBenchmarkCoverage(data){
  return models.map((model,index)=>{if(!index||model.coverage!==models[index-1].coverage)position=index+1;return {...model,position};});
 }
 
+// 暂不在前台展示的评测：收录模型过少（个位数且缺少新模型），无法形成有效排名。数据仍照常抓取，覆盖量上来后可移出此名单。
+export const HIDDEN_BENCHMARKS=new Set(['graphwalks','videommmu','osworld_2']);
 // 评测列顺序：综合类排最前，其余按本页收录模型数从多到少排列（同类内也按收录数降序）
 export function orderBenchmarks(data){
  if(!data?.benchmarks)return data;
  const lead=b=>b.category==='综合'?0:1;
- return {...data,benchmarks:[...data.benchmarks].sort((a,b)=>lead(a)-lead(b)||(b.model_count||0)-(a.model_count||0))};
+ return {...data,benchmarks:data.benchmarks.filter(b=>!HIDDEN_BENCHMARKS.has(b.id)).sort((a,b)=>lead(a)-lead(b)||(b.model_count||0)-(a.model_count||0))};
 }
