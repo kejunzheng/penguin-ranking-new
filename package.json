@@ -13,6 +13,7 @@
     "update:daily": "node scripts/daily-cdn.mjs",
     "update:models": "node scripts/update-models.mjs",
     "update:global-prices": "node scripts/update-global-prices.mjs",
+    "update:openrouter-prices": "node scripts/update-openrouter-prices.mjs",
     "update:github": "node scripts/update-github.mjs",
     "update:china-prices": "node scripts/update-china-prices.mjs"
   },

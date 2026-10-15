@@ -86,10 +86,10 @@ try {
   if (!skipFetch) {
     fs.rmSync(backup, { recursive: true, force: true });
     fs.cpSync(dataDir, backup, { recursive: true });
-    // 分组并行：组内顺序有依赖（china-prices 叠加在 models.json 之上；global-prices 使用 models.json 中的汇率），
+    // 分组并行：组内顺序有依赖（china-prices 叠加在 models.json 之上；global-prices / openrouter-prices 使用 models.json 中的汇率与中国官网价），
     // 组与组之间读写的文件互不重叠，可以同时执行。总耗时由最慢的一组决定。
     const groups = [
-      [['models', 'scripts/update-models.mjs'], ['china-prices', 'scripts/update-china-prices.mjs'], ['global-prices', 'scripts/update-global-prices.mjs']],
+      [['models', 'scripts/update-models.mjs'], ['china-prices', 'scripts/update-china-prices.mjs'], ['global-prices', 'scripts/update-global-prices.mjs'], ['openrouter-prices', 'scripts/update-openrouter-prices.mjs']],
       [['benchmarks', 'scripts/update-benchmarks.mjs']],
       [['skillhub', 'scripts/update-skillhub.mjs']],
       [['github', 'scripts/update-github.mjs']],
