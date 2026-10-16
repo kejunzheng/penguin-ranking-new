@@ -9,12 +9,45 @@ export function benchmarkCutoff(latest,preset,custom){
  return date.toISOString().slice(0,10);
 }
 
+// 推理档位（综合分规则 v4 第 3.2 节）：按表格从上到下第一个匹配为准，大小写不敏感；无法识别返回 null。
+export function reasoningTier(config){
+ const text=String(config||'').toLowerCase();
+ if(/non-reasoning|no thinking|none|minimal|instant/.test(text))return 1;
+ if(/max|maximum|adaptive\/max/.test(text))return 6;
+ if(/xhigh|x-high|extra high/.test(text))return 5;
+ if(/high/.test(text))return 4;
+ if(/medium|med/.test(text))return 3;
+ if(/low/.test(text))return 2;
+ const budget=text.match(/thinking[^0-9]*(\d+(?:\.\d+)?)\s*k/);
+ if(budget)return 3+Math.min(2.9,Number(budget[1])/100);
+ if(/reasoning|thinking/.test(text))return 4;
+ return null;
+}
+
+// 同一模型在同一评测的多条记录里取哪一条：先按配置选，不看名次（禁止取名次最好的一条）。
+// 综合分计算与表格展示共用这一个函数，保证表格默认显示的就是综合分用的那条。
+export function pickConfigRecord(records=[]){
+ const valid=records.filter(record=>Number.isFinite(record.rank));
+ if(valid.length<2)return valid[0]||null;
+ const tiered=valid.map(record=>({record,tier:reasoningTier(record.config)}));
+ const known=tiered.filter(item=>item.tier!==null);
+ let pool;
+ if(known.length){
+  const top=Math.max(...known.map(item=>item.tier));
+  pool=known.filter(item=>item.tier===top).map(item=>item.record);
+ }else{
+  const standard=valid.filter(record=>!record.config||record.config==='标准/未注明');
+  pool=standard.length?standard:valid;
+ }
+ pool=[...pool].sort((a,b)=>a.rank-b.rank||String(a.config).localeCompare(String(b.config)));
+ return pool[Math.floor((pool.length-1)/2)];
+}
+
 export function chooseBenchmarkRecord(records=[],cutoff,start=null){
  const valid=records.filter(record=>record.date&&record.date<=cutoff&&(!start||record.date>=start)&&record.rank!=null);
- return valid.sort((a,b)=>{
-  const standardA=a.config==='标准/未注明'?1:0,standardB=b.config==='标准/未注明'?1:0;
-  return standardB-standardA||b.date.localeCompare(a.date)||a.rank-b.rank;
- })[0]||null;
+ if(!valid.length)return null;
+ const latest=valid.map(record=>record.date).sort().at(-1);
+ return pickConfigRecord(valid.filter(record=>record.date===latest));
 }
 
 export function resolveBenchmarkModel(model,benchmarkIds,cutoff,start=null,snapshotDates=null){
@@ -23,6 +56,22 @@ export function resolveBenchmarkModel(model,benchmarkIds,cutoff,start=null,snaps
  const coverage=Object.values(results).filter(Boolean).length;
  const country=String(model.country||'').toLowerCase();
  return {...model,records,results,coverage,region:chinaCountries.has(country)?'china':'overseas',type:model.openWeights?'open':'closed'};
+}
+
+// 综合分列（v4 第 12 节）：数据来自 benchmarks.json 的 composite 字段；只给出列头元信息，不计入评测数量和覆盖数。
+export const COMPOSITE_COLUMN_ID='__composite';
+export function withCompositeColumn(data){
+ const summary=data?.composite;
+ if(!summary)return {...data,compositeColumn:null};
+ return {...data,compositeColumn:{id:COMPOSITE_COLUMN_ID,date:summary.date,version:summary.version,benchmarks:summary.benchmarks.length,scored:summary.scored,ranked:summary.ranked,reference:summary.reference}};
+}
+// 综合分排序：进入排名的按名次，倒序只翻转它们；未进入排名或无分的始终在最后，再按发布日期、名称稳定排序。
+export function compareComposite(a,b,direction='asc'){
+ const x=Number.isFinite(a.composite?.rank)?a.composite.rank:null,y=Number.isFinite(b.composite?.rank)?b.composite.rank:null;
+ if(x===null&&y===null)return (b.releaseDate||'').localeCompare(a.releaseDate||'')||String(a.name).localeCompare(String(b.name));
+ if(x===null)return 1;
+ if(y===null)return -1;
+ return direction==='desc'?y-x:x-y;
 }
 
 export function filterBenchmarkModels(models,filters){

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {benchmarkCutoff,chooseBenchmarkRecord,filterBenchmarkModels,resolveBenchmarkModel} from '../src/benchmark-data.js';
+import {benchmarkCutoff,chooseBenchmarkRecord,filterBenchmarkModels,pickConfigRecord,resolveBenchmarkModel} from '../src/benchmark-data.js';
 
 test('benchmark snapshot presets calculate stable UTC cutoffs',()=>{
  assert.equal(benchmarkCutoff('2026-09-21','latest'),'2026-09-21');
@@ -52,4 +52,12 @@ test('bundled benchmark data has 24 benchmarks and current ranked models',()=>{
  const recent=resolved.filter(model=>(model.releaseDate||'')>=recentCutoff&&model.results.aa_intelligence_index?.rank);
  assert.ok(recent.length>=3,'recent models carry live AA ranks');
  assert.equal(new Set(data.models.map(model=>model.id)).size,data.models.length,'model ids are unique');
+});
+
+test('table default record matches the record the composite score uses',()=>{
+ const records=[{date:'2026-10-01',rank:4,config:'High'},{date:'2026-10-01',rank:9,config:'Max'},{date:'2026-10-01',rank:23,config:'Medium'}];
+ const model={id:'m',name:'M',records:{arc_agi_2:records}};
+ const resolved=resolveBenchmarkModel(model,['arc_agi_2'],'2026-10-01');
+ assert.equal(resolved.results.arc_agi_2.rank,pickConfigRecord(records).rank);
+ assert.equal(resolved.results.arc_agi_2.rank,9);
 });
