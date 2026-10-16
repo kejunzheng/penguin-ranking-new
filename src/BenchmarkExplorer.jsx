@@ -3,7 +3,7 @@ import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {CheckIcon,MagnifyingGlassIcon,XIcon} from '@phosphor-icons/react';
 import PriceFrontier from './PriceFrontier';
 import ModelCompareBar,{COMPARE_LIMIT} from './ModelCompareBar';
-import {benchmarkCutoff,filterBenchmarkModels,resolveBenchmarkModel,toggleBenchmarkSort,compareBenchmarkRanks,compareComposite,withCompositeColumn,COMPOSITE_COLUMN_ID} from './benchmark-data';
+import {benchmarkCutoff,filterBenchmarkModels,resolveBenchmarkModel,toggleBenchmarkSort,compareBenchmarkRanks,bestRankRecord,compareComposite,withCompositeColumn,COMPOSITE_COLUMN_ID} from './benchmark-data';
 
 const groupMeta={
  '综合':{en:'Overall',color:'#e8f1ff'},Coding:{en:'Coding',color:'#e9f7f3'},'知识':{en:'Knowledge',color:'#fff5db'},'推理':{en:'Reasoning',color:'#f1edff'},'视觉理解':{en:'Vision',color:'#e8f6ff'},'Agent能力':{en:'Agent',color:'#ffede8'},'电脑应用':{en:'Computer use',color:'#edf3f5'},'长上下文':{en:'Long context',color:'#f7efe4'}
@@ -208,7 +208,9 @@ export default function BenchmarkExplorer({data:rawData,lang}){
  const snapshotDates=Object.fromEntries(data.benchmarks.map(benchmark=>[benchmark.id,(benchmark.snapshot_dates||[]).filter(date=>date<=cutoff&&(!rangeStart||date>=rangeStart)).sort().at(-1)]));
  const resolved=useMemo(()=>data.models.map(model=>resolveBenchmarkModel(model,benchmarkIds,cutoff,rangeStart,snapshotDates)),[data,cutoff,rangeStart]);
  const modelPool=resolved.filter(model=>model.coverage>0);
- let rows=filterBenchmarkModels(resolved,{type,region,coverage,selected});
+ const sortOnBenchmark=sortBy&&sortBy!==COMPOSITE?sortBy:null;
+ const byOwnRank=model=>sortOnBenchmark?{...model,results:{...model.results,[sortOnBenchmark]:bestRankRecord(model.records[sortOnBenchmark],cutoff,rangeStart)}}:model;
+ let rows=filterBenchmarkModels(resolved,{type,region,coverage,selected}).map(byOwnRank);
  // 每个模型只占一行：各评测默认显示按推理档位选出的那条成绩（与综合分取数一致），其余配置折叠；按某列排序也不再拆行
  const compareRank=(a,b)=>sortBy===COMPOSITE?compareComposite(a,b,sortCriteria[0]?.direction):compareBenchmarkRanks(a,b,sortCriteria);
  if(sortBy)rows=[...rows].sort(compareRank);
@@ -221,7 +223,7 @@ export default function BenchmarkExplorer({data:rawData,lang}){
  const sortedBenchmark=data.benchmarks.find(benchmark=>benchmark.id===sortBy);
  const rankAudit=sortedBenchmark?.rank_audit,excludedTop10=rankAudit&&rankAudit.snapshot_date===snapshotDates[sortBy]?rankAudit.excluded_top10||[]:[];
  const comparing=view==='compare'&&selected.length>0;
- const compareModels=selected.map(id=>resolved.find(model=>model.id===id)).filter(Boolean).sort((a,b)=>sortBy?compareRank(a,b):0);
+ const compareModels=selected.map(id=>resolved.find(model=>model.id===id)).filter(Boolean).map(byOwnRank).sort((a,b)=>sortBy?compareRank(a,b):0);
  const [userSorted,setUserSorted]=useState(false);
  const toggleSort=id=>{setUserSorted(true);setSortCriteria(toggleBenchmarkSort(sortCriteria,id));};
  const benchmarkDate=id=>{const benchmark=data.benchmarks.find(b=>b.id===id);return benchmark?.source_snapshot_date===snapshotDates[id]&&benchmark?.source_data_date?benchmark.source_data_date:resolved.map(model=>model.results[id]?.date).filter(Boolean).sort().at(-1)||data.benchmarks.find(b=>b.id===id)?.latest_date;};

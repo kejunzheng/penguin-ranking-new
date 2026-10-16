@@ -50,6 +50,14 @@ export function chooseBenchmarkRecord(records=[],cutoff,start=null){
  return pickConfigRecord(valid.filter(record=>record.date===latest));
 }
 
+// 按某一评测排序时：只看该评测本身的名次，取该模型在最新一期里名次最靠前的一条（与综合分按推理档位取数无关）
+export function bestRankRecord(records=[],cutoff,start=null){
+ const valid=records.filter(record=>record.date&&record.date<=cutoff&&(!start||record.date>=start)&&record.rank!=null);
+ if(!valid.length)return null;
+ const latest=valid.map(record=>record.date).sort().at(-1);
+ return valid.filter(record=>record.date===latest).sort((a,b)=>a.rank-b.rank)[0];
+}
+
 export function resolveBenchmarkModel(model,benchmarkIds,cutoff,start=null,snapshotDates=null){
  const records=Object.fromEntries(benchmarkIds.map(id=>[id,(model.records[id]||[]).filter(record=>!snapshotDates?.[id]||record.date===snapshotDates[id])]));
  const results=Object.fromEntries(benchmarkIds.map(id=>[id,chooseBenchmarkRecord(records[id],cutoff,start)]));
@@ -98,7 +106,7 @@ export function compareBenchmarkRanks(a,b,criteria){
   const difference=direction==='desc'?bRank-aRank:aRank-bRank;
   if(difference)return difference;
  }
- return b.coverage-a.coverage||a.name.localeCompare(b.name)||a.id.localeCompare(b.id);
+ return (b.releaseDate||'').localeCompare(a.releaseDate||'')||a.name.localeCompare(b.name)||a.id.localeCompare(b.id);
 }
 
 export function rankBenchmarkCoverage(data){
