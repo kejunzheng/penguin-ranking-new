@@ -12,7 +12,7 @@ import UsageExplorer from './UsageExplorer';
 import PageHeading from './PageHeading';
 import BenchmarkExplorer from './BenchmarkExplorer';
 import SkillhubExplorer,{categoryNames as skillhubCategoryNames} from './SkillhubExplorer';
-import {rankBenchmarkCoverage,orderBenchmarks} from './benchmark-data';
+import {orderBenchmarks} from './benchmark-data';
 import {readState,rankProjects,usageRows,priceValue,routes,paginatePrices} from './data';
 import {findMatchingUsageModel} from './model-profile';
 const projectSections=[{channel:'skill',label:'skills',title:'skillsTitle',description:'skillsDesc',eyebrow:'05 / SKILLS'},{channel:'product',label:'products',title:'opensourcePageTitle',description:'opensourceDesc',eyebrow:'06 / OPEN SOURCE'}];
@@ -90,22 +90,24 @@ function BenchmarkPage({lang,t}){const resource=useJson('data/benchmarks.json'),
 // 首页按不同评测的上榜次数展示；每项评测最多计一次，同次数并列。
 function HomeBenchmarkCard({lang,change}){
  const t=copy[lang],resource=useJson('data/benchmarks.json'),zh=lang==='zh';
- const shownData=useMemo(()=>orderBenchmarks(resource.data),[resource.data]),models=useMemo(()=>rankBenchmarkCoverage(shownData),[shownData]),[detail,setDetail]=useState(null);
+ const shownData=useMemo(()=>orderBenchmarks(resource.data),[resource.data]),[detail,setDetail]=useState(null);
+ const summary=shownData?.composite,models=useMemo(()=>(shownData?.models||[]).filter(model=>model.composite?.rank).sort((a,b)=>a.composite.rank-b.composite.rank||a.name.localeCompare(b.name)),[shownData]),shown=models.slice(0,5),top=shown[0]?.composite.score||100;
  useEffect(()=>{if(!detail)return;const close=event=>{if(event.key==='Escape')setDetail(null)};document.addEventListener('keydown',close);return()=>document.removeEventListener('keydown',close)},[detail]);
- const total=shownData?.benchmarks.length||0,shown=models.slice(0,5),boundary=shown.at(-1)?.coverage,extra=models.slice(5).filter(model=>model.coverage===boundary).length;
+ const total=shownData?.benchmarks.length||0;
  const categories=new Set(shownData?.benchmarks.map(benchmark=>benchmark.category)||[]).size;
  const open=event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();setDetail(null);change({page:'benchmarks'})};
- return <section id="home-benchmarks" className="home-digest home-benchmark-card home-coverage-card" aria-label={t.benchmarkTitle}>
-  <div className="home-section-head"><div><p className="eyebrow">MODEL CAPABILITY / TOP 5 COVERAGE</p><h2>{t.benchmarkTitle}</h2></div></div>
-  <p className="digest-caption">{zh?`${categories} 类能力 · ${total} 项公开 benchmark`:`${categories} capabilities · ${total} public benchmarks`}</p>
-  {!resource.data?<Loading resource={resource} t={t}/>:<ul className="home-benchmark-list home-coverage-list">{shown.map(model=><li key={model.id}><span className="home-coverage-position">{String(model.position).padStart(2,'0')}</span><div><button className="home-coverage-name" title={model.name} type="button" onClick={()=>setDetail(model)} aria-haspopup="dialog">{model.name}</button><small>{model.organization} · {model.openWeights?(zh?'开放权重':'Open weights'):(zh?'闭源':'Closed')}</small><span className="home-coverage-track" role="img" aria-label={zh?`上榜${model.coverage}项，共${total}项`:`${model.coverage} of ${total} benchmarks`}><span style={{width:`${model.coverage/total*100}%`}}/></span></div><strong>{model.coverage}<small>/{total}</small><em>{zh?'上榜次数':'Coverage'}</em></strong></li>)}</ul>}
-  <div className="home-coverage-foot"><p className="home-benchmark-note">{zh?'同一评测只计1次，同次数并列；上榜次数不代表能力高低。':'Each benchmark counts once, equal counts share a rank, and coverage does not measure capability.'}</p>
+ const title=zh?'AI趋势榜·综合分':'AI Trend Ranking · Composite';
+ return <section id="home-benchmarks" className="home-digest home-benchmark-card home-coverage-card" aria-label={title}>
+  <div className="home-section-head"><div><p className="eyebrow">MODEL CAPABILITY / TOP 5 COMPOSITE</p><h2>{title}</h2></div></div>
+  <p className="digest-caption">{zh?`${categories} 类能力 · ${summary?.benchmarks.length||total} 项评测汇总`:`${categories} capabilities · ${summary?.benchmarks.length||total} benchmarks combined`}</p>
+  {!resource.data?<Loading resource={resource} t={t}/>:<ul className="home-benchmark-list home-coverage-list">{shown.map(model=><li key={model.id}><span className="home-coverage-position">{String(model.composite.rank).padStart(2,'0')}</span><div><button className="home-coverage-name" title={model.name} type="button" onClick={()=>setDetail(model)} aria-haspopup="dialog">{model.name}</button><small>{model.organization} · {model.openWeights?(zh?'开放权重':'Open weights'):(zh?'闭源':'Closed')}</small><span className="home-coverage-track" role="img" aria-label={zh?`综合分 ${model.composite.score.toFixed(1)}`:`Composite ${model.composite.score.toFixed(1)}`}><span style={{width:`${Math.max(8,model.composite.score/top*100)}%`}}/></span></div><strong>{model.composite.score.toFixed(1)}<em>{zh?'综合分':'Composite'}</em></strong></li>)}</ul>}
+  <div className="home-coverage-foot"><p className="home-benchmark-note">{zh?'综合分只用各评测的名次汇总，不是百分制，也不反映分差。':'The composite summarises benchmark ranks only; it is not a percentage and ignores score gaps.'}</p>
   <a className="inline-link home-coverage-more" href={`?page=benchmarks&lang=${lang}`} onClick={open}>{zh?'查看完整榜单':'View full ranking'}<ArrowRightIcon size={18}/></a>
   </div>
-  {detail&&<div className="benchmark-mobile-profile-backdrop" role="presentation" onClick={()=>setDetail(null)}><aside className="benchmark-mobile-profile home-coverage-dialog" role="dialog" aria-modal="true" aria-label={zh?'模型上榜次数详情':'Benchmark coverage details'} onClick={event=>event.stopPropagation()}><button className="benchmark-mobile-profile-close" type="button" aria-label={zh?'关闭详情':'Close details'} onClick={()=>setDetail(null)} autoFocus><XIcon size={18}/></button>
-  <h3>{detail==='all'?(zh?'模型上榜次数':'Benchmark coverage'):detail.name}</h3><p>{detail==='all'?(zh?`${total}项评测，按上榜次数排序。同次数按模型名称排列，名次并列。`:`${total} benchmarks. Equal counts are ordered by model name and share a rank.`):(zh?`上榜${detail.coverage}项 / 共${total}项，按不同评测去重。配置条目不额外增加上榜次数。`:`${detail.coverage} of ${total} benchmarks. Multiple configurations count once.`)}</p>
-  {resource.data&&<p className="home-coverage-date">{zh?'本站快照：':'Snapshot: '}{resource.data.generated_at.slice(0,10)}{detail==='all'&&extra>0&&(zh?` · 首页未展示的同次数模型：${extra}个（${boundary}项）`:` · ${extra} tied models beyond the homepage (${boundary} results)`)}</p>}
-  <ul className="home-coverage-detail-list">{detail==='all'?models.map(model=><li key={model.id}><button className="home-coverage-all-row" type="button" onClick={()=>setDetail(model)}><span>#{model.position}</span><strong>{model.name}</strong><small>{model.coverage}/{total}</small></button></li>):detail.hits.map(hit=><li key={hit.benchmark.id}><a href={hit.benchmark.official_url} target="_blank" rel="noreferrer">{hit.benchmark.display_name} ↗</a><small>{zh?`${hit.recordCount}条配置成绩`:`${hit.recordCount} configurations`}</small></li>)}</ul>
+  {detail&&<div className="benchmark-mobile-profile-backdrop" role="presentation" onClick={()=>setDetail(null)}><aside className="benchmark-mobile-profile home-coverage-dialog" role="dialog" aria-modal="true" aria-label={zh?'综合分详情':'Composite details'} onClick={event=>event.stopPropagation()}><button className="benchmark-mobile-profile-close" type="button" aria-label={zh?'关闭详情':'Close details'} onClick={()=>setDetail(null)} autoFocus><XIcon size={18}/></button>
+  <h3>{detail.name}</h3><p>{zh?`综合分 ${detail.composite.score.toFixed(1)} · 第 ${detail.composite.rank} 名 · 入选 ${detail.composite.benchmarks} 项评测，覆盖 ${detail.composite.domains}/6 个领域。`:`Composite ${detail.composite.score.toFixed(1)} · rank #${detail.composite.rank} · ${detail.composite.benchmarks} benchmarks across ${detail.composite.domains}/6 domains.`}</p>
+  <p className="home-coverage-date">{zh?'数据日期：':'Data date: '}{detail.composite.date}</p>
+  <ul className="home-coverage-detail-list">{Object.entries(detail.composite.domain_scores||{}).map(([domain,score])=><li key={domain}><span>{domain}</span><small>{Number(score).toFixed(1)}</small></li>)}</ul>
   <a className="inline-link" href={`?page=benchmarks&lang=${lang}`} onClick={open}>{zh?'进入完整评测页':'Open full benchmark explorer'}<ArrowRightIcon size={18}/></a>
   </aside></div>}
  </section>;

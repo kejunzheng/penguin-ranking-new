@@ -461,3 +461,5 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .composite-dialog-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}.composite-dialog-stats>div{padding:10px 12px;border-radius:10px;background:#f4f8ff}.composite-dialog-stats small{display:block;font-size:11px;color:#7a8ba0}.composite-dialog-stats strong{font:700 20px/1.3 'IBM Plex Mono',monospace;color:#10233a}
 .composite-dialog-grid{display:grid;grid-template-columns:1fr;gap:0 28px}.composite-dialog-foot{margin-top:4px}
 @media(min-width:761px){.benchmark-mobile-profile-backdrop.composite-dialog-backdrop{align-items:center;justify-content:center;padding:24px}.composite-dialog{max-width:min(980px,94vw);max-height:88vh;padding:30px 36px}.composite-dialog-stats{grid-template-columns:repeat(6,1fr)}.composite-dialog-grid{grid-template-columns:1fr 1fr}}
+
+.benchmark-column.composite-column{background:#eef4fc!important}.benchmark-compare-table .composite-column{background:#eef4fc!important}.home-coverage-list li>strong em{display:block;font-style:normal;color:#899ab1}
