@@ -437,6 +437,13 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .price-table .project-name,.price-table .model-identity .project-name{font-size:13px;font-weight:500;line-height:1.5}
 .price-table tbody td{font-size:13px}
 .benchmark-compare-empty{margin-top:12px;border:1px solid #dce5f0;border-radius:12px;background:#fff;box-shadow:0 5px 22px #45438208}.benchmark-compare-empty p{margin:0 auto}
+
+.benchmark-table .composite-column{min-width:150px;background:#eef4ff!important;box-shadow:inset 3px 0 0 #176be8}.composite-column strong{color:#14417a}
+.benchmark-table td.composite-cell{background:#f6f9ff;box-shadow:inset 3px 0 0 #176be8}
+.composite-result{display:inline-flex;flex-direction:column;align-items:center;gap:5px;padding:10px 0}
+.composite-score{font:700 22px/1 'IBM Plex Mono',monospace;color:#10233a;letter-spacing:-.5px}
+.composite-unranked{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:12px;border:1px dashed #b9c7d8;color:#7a8ba0;font-size:10px;white-space:nowrap}
+.composite-range{position:relative;display:block;width:96px;height:6px;border-radius:3px;background:#e3eaf3}.composite-range i{position:absolute;top:0;bottom:0;border-radius:3px;background:#9fc3f5}.composite-range b{position:absolute;top:-2px;width:2px;height:10px;margin-left:-1px;border-radius:1px;background:#176be8}
 .price-table td.china-official{color:#7a3e00}.price-table td.china-official small{font-family:Inter,-apple-system,'PingFang SC',sans-serif;white-space:normal;max-width:170px}.price-table th.china-official-head{color:#7a3e00}.china-official-detail{margin-top:16px;padding:14px 16px;background:#fff7ec;border-left:3px solid #e3a24a}.china-official-detail h3{font-size:14px;margin-bottom:6px}.china-official-detail p{margin:4px 0}
 @media (max-width:640px){.price-table-or th:nth-child(2),.price-table-or td:nth-child(2){display:none}.price-table-or th,.price-table-or td{padding-left:8px;padding-right:8px}.price-table-or th{white-space:normal;min-width:64px}.price-table-or td.china-official span{white-space:normal}}
 .china-official-inline{display:none!important}@media (max-width:640px){.price-table-or .china-official-inline{display:block!important;color:#7a3e00;font-size:11px;font-family:'IBM Plex Mono',monospace}}
