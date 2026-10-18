@@ -486,3 +486,9 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 @media(max-width:760px){.home-coverage-list li{grid-template-columns:20px minmax(0,1fr) auto}}
 /* 首页综合分榜的模型名与右侧调用榜 / 价格榜 / SkillHub 的名称统一：14px / 600 */
 .home .home-coverage-name{font-size:14px;font-weight:600;line-height:1.5;letter-spacing:-.1px}
+/* 首页各榜单卡片字号统一：副标题 12 / 名称 14·600 / 副文字 10 / 数值 14 / 脚注 10（综合分大数字保留 22） */
+.home .digest-caption{font-size:12px}
+.home .project-table .project-name{font-size:14px!important;font-weight:600!important}
+.home .project-table .repo-name,.home .project-table small{font-size:10px!important}
+.home .project-table .growth{font-size:14px!important}
+.home .home-benchmark-note,.home-skillhub-foot .home-benchmark-note{font-size:10px!important}
