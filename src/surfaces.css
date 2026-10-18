@@ -477,3 +477,10 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .benchmark-scroll-frame.can-right>.benchmark-scroll-arrow.right,.benchmark-scroll-frame.can-left>.benchmark-scroll-arrow.left{display:flex}
 .benchmark-scroll-arrow:hover{background:#1769ed;color:#fff;border-color:#1769ed}
 @media(max-width:760px){.benchmark-scroll-arrow{width:30px;height:30px;font-size:21px;top:78px}.benchmark-scroll-arrow.left{left:10px}.benchmark-scroll-frame::before{left:0}.benchmark-scroll-tip{font-size:11px}}
+/* 首页 Agent Skills / 开源榜：≤760px 时表格行被按 table 排版，但表格本身是 display:block，宽度会缩成内容宽度，右侧空出一截；这里统一成整宽表格 */
+@media(max-width:760px){.home .project-table{display:table;width:100%;table-layout:fixed}}
+/* 首页综合分榜：右侧数值列按内容撑开，不再被固定的 55–58px 截断 */
+.home-coverage-list li{grid-template-columns:22px minmax(0,1fr) auto}
+.home-coverage-list li>strong{text-align:right;white-space:nowrap;min-width:64px}
+.home-coverage-list li>strong em{white-space:nowrap}
+@media(max-width:760px){.home-coverage-list li{grid-template-columns:20px minmax(0,1fr) auto}}
