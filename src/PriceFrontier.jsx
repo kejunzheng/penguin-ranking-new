@@ -44,7 +44,7 @@ export default function PriceFrontier({frontier,models,lang}){
     <p>{zh?<>斩杀线上是各价位 AA 智能指数最高的模型。价格按一般用量折算：缓存命中 : 输入 : 输出 = <b>7 : 2 : 1</b>。</>:<>Models on the line have the highest AA Intelligence Index at their price. Blended price: cache hit : input : output = <b>7 : 2 : 1</b>.</>}</p>
     <p className="price-frontier-threshold">{zh?<>AA 智能指数低于 <b>{MIN_SCORE}</b> 分的模型不在此图中{belowCount?`（共 ${belowCount} 个）`:''}。</>:<>Models scoring below <b>{MIN_SCORE}</b> on the AA Index are not shown{belowCount?` (${belowCount} models)`:''}.</>}</p></div>
    <div className="price-frontier-filters">
-    <label className="price-frontier-toggle"><input type="checkbox" checked={china} onChange={e=>setChina(e.target.checked)}/>{zh?'国产模型':'China models'}</label>
+    <label className="price-frontier-toggle"><input type="checkbox" checked={china} onChange={e=>setChina(e.target.checked)}/>{zh?'中国模型':'China models'}</label>
     <label className="price-frontier-toggle"><input type="checkbox" checked={open} onChange={e=>setOpen(e.target.checked)}/>{zh?'开源模型':'Open weights'}</label>
    </div>
   </div>
