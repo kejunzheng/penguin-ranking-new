@@ -500,3 +500,6 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .price-frontier-leader.label-below .label,.price-frontier-leader.label-above .label{right:auto;left:50%;transform:translateX(-50%);text-align:center}
 .price-frontier-leader.label-below .label{top:calc(100% + 6px)}
 .price-frontier-leader.label-above .label{top:auto;bottom:calc(100% + 6px)}
+/* 首页综合分数值与其他卡片统一：等宽 14px，副标签 9px，不再放大 */
+.home .home-coverage-list li>strong{font:400 14px 'IBM Plex Mono',monospace!important;color:#314154;min-width:58px;text-align:right}
+.home .home-coverage-list li>strong em{display:block;margin-top:2px;font:400 9px Inter,sans-serif;font-style:normal;color:#8797aa}
