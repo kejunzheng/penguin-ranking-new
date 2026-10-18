@@ -1,6 +1,6 @@
 // 价格斩杀线的纯计算部分（组件与测试共用）
-// 只画评测榜收录、且 AA 实测分数不低于 MIN_SCORE 的模型；价格为 0 的无法放在对数轴上，不画。
-export const MIN_SCORE=35;
+// 只画有综合分名次、且综合分不低于 MIN_SCORE（参照组均值 50）的模型；价格为 0 的无法放在对数轴上，不画。
+export const MIN_SCORE=50;
 export const TICKS=[0.1,0.3,1,3,10,30,100,300];
 
 export function blendedPrice(point,blend,rate){

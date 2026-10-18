@@ -495,3 +495,8 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 /* 横滑箭头：放在表头竖向正中（日期行附近），既不压住名称也不压住按钮 */
 .benchmark-scroll-arrow{top:59px}
 @media(max-width:760px){.benchmark-scroll-arrow{top:58px}}
+
+/* 斩杀线标签避让 */
+.price-frontier-leader.label-below .label,.price-frontier-leader.label-above .label{right:auto;left:50%;transform:translateX(-50%);text-align:center}
+.price-frontier-leader.label-below .label{top:calc(100% + 6px)}
+.price-frontier-leader.label-above .label{top:auto;bottom:calc(100% + 6px)}
