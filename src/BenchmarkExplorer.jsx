@@ -200,19 +200,19 @@ export default function BenchmarkExplorer({data:rawData,lang}){
  const [view,setView]=useState('ranking'),[selected,setSelected]=useState([]),[sortState,setSortCriteria]=useState(null),[mobileProfile,setMobileProfile]=useState(null),[horizontalScroll,setHorizontalScroll]=useState({value:0,max:0});
  const compositeOn=Boolean(composite)&&preset==='latest';
  const defaultSort=compositeOn?[{id:COMPOSITE,direction:'asc'}]:data.benchmarks[0]?[{id:data.benchmarks[0].id,direction:'asc'}]:[];
- const sortCriteria=sortState&&(sortState[0]?.id!==COMPOSITE||compositeOn)?sortState:defaultSort;
+ const userCriteria=(sortState||[]).filter(item=>item.id!==COMPOSITE||compositeOn),sortCriteria=userCriteria.length?userCriteria:defaultSort;
  const sortBy=sortCriteria[0]?.id||null;
- const sortLabel=id=>{const index=sortCriteria.findIndex(item=>item.id===id);return index<0?(zh?'排序 ↕':'Sort ↕'):`${sortCriteria[index].direction==='asc'?(zh?'正序 ↑':'Ascending ↑'):(zh?'倒序 ↓':'Descending ↓')}`};
+ const sortLabel=id=>{const index=sortCriteria.findIndex(item=>item.id===id);return index<0?(zh?'排序 ↕':'Sort ↕'):`${userCriteria.length>1?(index+1)+' ':''}${sortCriteria[index].direction==='asc'?(zh?'正序 ↑':'Ascending ↑'):(zh?'倒序 ↓':'Descending ↓')}`};
  const tableWrapRef=useRef(null);
  const cutoff=benchmarkCutoff(latest,preset,customRange.end),rangeStart=preset==='custom'?customRange.start:null;
  const snapshotDates=Object.fromEntries(data.benchmarks.map(benchmark=>[benchmark.id,(benchmark.snapshot_dates||[]).filter(date=>date<=cutoff&&(!rangeStart||date>=rangeStart)).sort().at(-1)]));
  const resolved=useMemo(()=>data.models.map(model=>resolveBenchmarkModel(model,benchmarkIds,cutoff,rangeStart,snapshotDates)),[data,cutoff,rangeStart]);
  const modelPool=resolved.filter(model=>model.coverage>0);
- const sortOnBenchmark=sortBy&&sortBy!==COMPOSITE?sortBy:null;
- const byOwnRank=model=>sortOnBenchmark?{...model,results:{...model.results,[sortOnBenchmark]:bestRankRecord(model.records[sortOnBenchmark],cutoff,rangeStart)}}:model;
+ const sortedIds=sortCriteria.map(item=>item.id).filter(id=>id!==COMPOSITE);
+ const byOwnRank=model=>sortedIds.length?{...model,results:{...model.results,...Object.fromEntries(sortedIds.map(id=>[id,bestRankRecord(model.records[id],cutoff,rangeStart)]))}}:model;
  let rows=filterBenchmarkModels(resolved,{type,region,coverage,selected}).map(byOwnRank);
  // 每个模型只占一行：各评测默认显示按推理档位选出的那条成绩（与综合分取数一致），其余配置折叠；按某列排序也不再拆行
- const compareRank=(a,b)=>sortBy===COMPOSITE?compareComposite(a,b,sortCriteria[0]?.direction):compareBenchmarkRanks(a,b,sortCriteria);
+ const compareRank=(a,b)=>compareBenchmarkRanks(a,b,sortCriteria.map(item=>item.id===COMPOSITE?{...item,id:COMPOSITE_COLUMN_ID}:item));
  if(sortBy)rows=[...rows].sort(compareRank);
  else rows=[...rows].sort((a,b)=>(b.releaseDate||'').localeCompare(a.releaseDate||'')||b.coverage-a.coverage||a.name.localeCompare(b.name));
  // 下拉列出榜单里的全部模型（与表格同序：发布日期由近到远），输入时按名称或厂商筛选
@@ -225,7 +225,7 @@ export default function BenchmarkExplorer({data:rawData,lang}){
  const comparing=view==='compare'&&selected.length>0;
  const compareModels=selected.map(id=>resolved.find(model=>model.id===id)).filter(Boolean).map(byOwnRank).sort((a,b)=>sortBy?compareRank(a,b):0);
  const [userSorted,setUserSorted]=useState(false);
- const toggleSort=id=>{setUserSorted(true);setSortCriteria(toggleBenchmarkSort(sortCriteria,id));};
+ const toggleSort=id=>{setUserSorted(true);setSortCriteria(toggleBenchmarkSort(userCriteria,id));};
  const benchmarkDate=id=>{const benchmark=data.benchmarks.find(b=>b.id===id);return benchmark?.source_snapshot_date===snapshotDates[id]&&benchmark?.source_data_date?benchmark.source_data_date:resolved.map(model=>model.results[id]?.date).filter(Boolean).sort().at(-1)||data.benchmarks.find(b=>b.id===id)?.latest_date;};
  useEffect(()=>{
   const tableWrap=tableWrapRef.current;

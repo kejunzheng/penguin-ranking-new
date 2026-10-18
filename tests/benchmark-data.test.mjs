@@ -61,3 +61,11 @@ test('table default record matches the record the composite score uses',()=>{
  assert.equal(resolved.results.arc_agi_2.rank,pickConfigRecord(records).rank);
  assert.equal(resolved.results.arc_agi_2.rank,9);
 });
+
+test('sort keys accumulate: each clicked benchmark is added, same column cycles asc → desc → removed',async()=>{
+ const {toggleBenchmarkSort}=await import('../src/benchmark-data.js');
+ let c=toggleBenchmarkSort([],'a');assert.deepEqual(c,[{id:'a',direction:'asc'}]);
+ c=toggleBenchmarkSort(c,'b');assert.deepEqual(c,[{id:'a',direction:'asc'},{id:'b',direction:'asc'}]);
+ c=toggleBenchmarkSort(c,'a');assert.deepEqual(c,[{id:'a',direction:'desc'},{id:'b',direction:'asc'}]);
+ c=toggleBenchmarkSort(c,'a');assert.deepEqual(c,[{id:'b',direction:'asc'}]);
+});

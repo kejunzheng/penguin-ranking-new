@@ -91,14 +91,19 @@ export function filterBenchmarkModels(models,filters){
   &&model.coverage>0);
 }
 
+// 多列排序：点一个评测只给它加排序，其它列不变；继续点别的评测就依次作为第 2、3…排序键，已有的排序键保持不变。
+// 同一列再点：正序 → 倒序 → 取消（取消后其余排序键保持原顺序）。
 export function toggleBenchmarkSort(criteria, id){
- const current=criteria[0];
- return [{id,direction:current?.id===id&&current.direction==='asc'?'desc':'asc'}];
+ const index=criteria.findIndex(item=>item.id===id);
+ if(index<0)return [...criteria,{id,direction:'asc'}];
+ if(criteria[index].direction==='asc')return criteria.map((item,i)=>i===index?{...item,direction:'desc'}:item);
+ return criteria.filter((_,i)=>i!==index);
 }
 
+const rankOf=(model,id)=>id===COMPOSITE_COLUMN_ID?model.composite?.rank:model.results[id]?.rank;
 export function compareBenchmarkRanks(a,b,criteria){
  for(const {id,direction} of criteria){
-  const aRank=a.results[id]?.rank,bRank=b.results[id]?.rank;
+  const aRank=rankOf(a,id),bRank=rankOf(b,id);
   const aMissing=!Number.isFinite(aRank),bMissing=!Number.isFinite(bRank);
   if(aMissing&&bMissing)continue;
   if(aMissing)return 1;
