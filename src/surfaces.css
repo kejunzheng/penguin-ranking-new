@@ -463,3 +463,17 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 @media(min-width:761px){.benchmark-mobile-profile-backdrop.composite-dialog-backdrop{align-items:center;justify-content:center;padding:24px}.composite-dialog{max-width:min(980px,94vw);max-height:88vh;padding:30px 36px}.composite-dialog-stats{grid-template-columns:repeat(6,1fr)}.composite-dialog-grid{grid-template-columns:1fr 1fr}}
 
 .benchmark-column.composite-column{background:#eef4fc!important}.benchmark-compare-table .composite-column{background:#eef4fc!important}.home-coverage-list li>strong em{display:block;font-style:normal;color:#899ab1}
+
+.benchmark-scroll-tip{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 8px;padding:7px 12px;border-radius:8px;background:#eef4ff;color:#2d5fa8;font-size:12px;font-weight:600}
+.benchmark-scroll-tip span{font-size:15px;animation:scroll-tip-nudge 1.6s ease-in-out infinite}.benchmark-scroll-tip span:first-child{animation-name:scroll-tip-nudge-left}
+@keyframes scroll-tip-nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}@keyframes scroll-tip-nudge-left{0%,100%{transform:translateX(0)}50%{transform:translateX(-5px)}}
+.benchmark-scroll-frame{position:relative}
+.benchmark-scroll-frame::before,.benchmark-scroll-frame::after{content:'';position:absolute;top:1px;bottom:1px;width:34px;z-index:12;pointer-events:none;opacity:0;transition:opacity .2s}
+.benchmark-scroll-frame::before{left:270px;background:linear-gradient(90deg,#1b2f4a22,#1b2f4a00)}
+.benchmark-scroll-frame::after{right:1px;background:linear-gradient(270deg,#1b2f4a2e,#1b2f4a00);border-radius:0 12px 12px 0}
+.benchmark-scroll-frame.can-left::before,.benchmark-scroll-frame.can-right::after{opacity:1}
+.benchmark-scroll-arrow{position:absolute;top:84px;z-index:13;width:34px;height:34px;border-radius:50%;border:1px solid #cddbea;background:#fffffff2;color:#1769ed;font:400 24px/1 Inter,sans-serif;box-shadow:0 4px 14px #243b5a26;cursor:pointer;display:none;align-items:center;justify-content:center;padding:0 0 3px}
+.benchmark-scroll-arrow.right{right:10px}.benchmark-scroll-arrow.left{left:278px}
+.benchmark-scroll-frame.can-right>.benchmark-scroll-arrow.right,.benchmark-scroll-frame.can-left>.benchmark-scroll-arrow.left{display:flex}
+.benchmark-scroll-arrow:hover{background:#1769ed;color:#fff;border-color:#1769ed}
+@media(max-width:760px){.benchmark-scroll-arrow{width:30px;height:30px;font-size:21px;top:78px}.benchmark-scroll-arrow.left{left:10px}.benchmark-scroll-frame::before{left:0}.benchmark-scroll-tip{font-size:11px}}
