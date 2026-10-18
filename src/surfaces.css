@@ -484,3 +484,5 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .home-coverage-list li>strong{text-align:right;white-space:nowrap;min-width:64px}
 .home-coverage-list li>strong em{white-space:nowrap}
 @media(max-width:760px){.home-coverage-list li{grid-template-columns:20px minmax(0,1fr) auto}}
+/* 首页综合分榜的模型名与右侧调用榜 / 价格榜 / SkillHub 的名称统一：14px / 600 */
+.home .home-coverage-name{font-size:14px;font-weight:600;line-height:1.5;letter-spacing:-.1px}
