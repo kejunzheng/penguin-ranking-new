@@ -492,6 +492,6 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .home .project-table .repo-name,.home .project-table small{font-size:10px!important}
 .home .project-table .growth{font-size:14px!important}
 .home .home-benchmark-note,.home-skillhub-foot .home-benchmark-note{font-size:10px!important}
-/* 横滑箭头：垂直居中对齐到表头里的评测名称（名称行中线约在表头顶部下 19–28px） */
-.benchmark-scroll-arrow{top:7px}
-@media(max-width:760px){.benchmark-scroll-arrow{top:4px}}
+/* 横滑箭头：放在表头竖向正中（日期行附近），既不压住名称也不压住按钮 */
+.benchmark-scroll-arrow{top:59px}
+@media(max-width:760px){.benchmark-scroll-arrow{top:58px}}
