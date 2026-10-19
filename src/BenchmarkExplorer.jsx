@@ -268,7 +268,7 @@ export default function BenchmarkExplorer({data:rawData,lang,profileData}){
  function toggleModel(id){setSelected(current=>current.includes(id)?current.filter(item=>item!==id):current.length<COMPARE_LIMIT?[...current,id]:current)}
  return <section className="benchmark-explorer">
   <div className="usage-controls benchmark-controls">
-   <div className="segmented mode-toggle" aria-label={zh?'展示方式':'Display mode'}>{['ranking','compare','frontier'].map(item=><button key={item} aria-pressed={view===item} onClick={()=>setView(item)}>{item==='ranking'?(zh?'评测总榜':'All benchmarks'):item==='compare'?(zh?'模型对比':'Compare models'):(zh?'斩杀线':'Price frontier')}</button>)}</div>
+   <div className="segmented mode-toggle" aria-label={zh?'展示方式':'Display mode'}>{['ranking','compare','frontier'].map(item=><button key={item} aria-pressed={view===item} onClick={()=>setView(item)}>{item==='ranking'?(zh?'能力总榜':'All benchmarks'):item==='compare'?(zh?'模型对比':'Compare models'):(zh?'斩杀线':'Price frontier')}</button>)}</div>
   </div>
   {view==='frontier'?<PriceFrontier frontier={data.price_frontier} models={resolved} lang={lang}/>:<>
   {view==='compare'?<ModelCompareBar lang={lang} options={compareOptions} selectedIds={selected} onToggle={toggleModel} onClear={()=>setSelected([])} marker={id=>{const column=compareModels.findIndex(model=>model.id===id);return <span className="compare-bar-number">{String(column+1).padStart(2,'0')}</span>}} actions={selected.length>0&&<span className="compare-bar-scope">{zh?`逐项对比 ${benchmarkCount} 项评测`:`${benchmarkCount} benchmarks side by side`}</span>}/>:<div className="benchmark-toolbar benchmark-filter-bar" aria-label={zh?'榜单筛选':'Ranking filters'}>
