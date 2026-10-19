@@ -503,3 +503,5 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 /* 首页综合分数值与其他卡片统一：等宽 14px，副标签 9px，不再放大 */
 .home .home-coverage-list li>strong{font:400 14px 'IBM Plex Mono',monospace!important;color:#314154;min-width:58px;text-align:right}
 .home .home-coverage-list li>strong em{display:block;margin-top:2px;font:400 9px Inter,sans-serif;font-style:normal;color:#8797aa}
+/* 左右滑动提示移到表格底部 */
+.benchmark-scroll-tip{margin:10px 0 0}
