@@ -99,7 +99,10 @@ async function fetchArtificialAnalysis() {
     }
     return best || [];
   };
-  const models = extractArray('{"models":[', items => items.some(item => 'intelligenceIndex' in item));
+  // AA 在 2026-10 把页面里的模型数组键从 {"models":[ 改成了 "initialModels":[；两种都试，取模型数更多的一份。
+  const hasIndex = items => items.some(item => 'intelligenceIndex' in item);
+  const candidates = [extractArray('{"models":[', hasIndex), extractArray('"initialModels":[', hasIndex)];
+  const models = candidates.sort((a, b) => b.length - a.length)[0];
   const releases = extractArray('"releases":[', items => items.some(item => item.releaseDate));
   if (models.length < 100) throw new Error(`AA 页面只解析到 ${models.length} 个模型，页面结构可能已变更`);
   const releaseBySlug = new Map(releases.map(item => [item.slug, item.releaseDate]));
@@ -162,8 +165,8 @@ async function fetchArcAgi2() {
   };
 }
 
-async function fetchLmarena() {
-  const base = 'https://datasets-server.huggingface.co/rows?dataset=lmarena-ai/leaderboard-dataset&config=text&split=latest';
+async function fetchLmarenaConfig(config, benchmarkId, label) {
+  const base = `https://datasets-server.huggingface.co/rows?dataset=lmarena-ai/leaderboard-dataset&config=${config}&split=latest`;
   const rows = [];
   let seenOverall = false;
   for (let offset = 0; offset < 3000; offset += 100) {
@@ -175,16 +178,19 @@ async function fetchLmarena() {
     if (overall.length) seenOverall = true;
     if (seenOverall && overall.length < items.length) break; // overall 分类是连续的一段，读完即停
   }
-  if (rows.length < 50) throw new Error(`LMArena overall 只有 ${rows.length} 行`);
+  if (rows.length < 50) throw new Error(`${label} overall 只有 ${rows.length} 行`);
   const date = rows.map(row => row.leaderboard_publish_date).filter(Boolean).sort().at(-1) || runDate;
   return {
     date,
     rows: rows.filter(row => Number.isFinite(row.rank)).map(row => ({
-      benchmarkId: 'lmarena_text_overall', raw: row.model_name, rank: Math.round(row.rank), org: row.organization || null, releaseDate: null,
+      benchmarkId, raw: row.model_name, rank: Math.round(row.rank), org: row.organization || null, releaseDate: null,
       openWeights: row.license ? !/proprietary/i.test(row.license) : null, source: 'https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset',
     })),
   };
 }
+
+const fetchLmarena = () => fetchLmarenaConfig('text', 'lmarena_text_overall', 'LMArena');
+const fetchCodeArena = () => fetchLmarenaConfig('webdev', 'code_arena_webdev', 'Code Arena');
 
 async function fetchOsworld2() {
   const url = 'https://osworld-v2.xlang.ai/static/data/leaderboard/official-results.json';
@@ -208,6 +214,7 @@ const LIVE_SOURCES = [
   { name: 'Epoch AI', benchmarks: ['frontiermath', 'simpleqa_verified'], fetch: fetchEpoch },
   { name: 'ARC Prize', benchmarks: ['arc_agi_2'], fetch: fetchArcAgi2 },
   { name: 'LMArena', benchmarks: ['lmarena_text_overall'], fetch: fetchLmarena },
+  { name: 'Code Arena', benchmarks: ['code_arena_webdev'], fetch: fetchCodeArena },
   { name: 'OSWorld 2.0', benchmarks: ['osworld_2'], fetch: fetchOsworld2 },
   ...OFFICIAL_SOURCES,
   ...ADDITIONAL_SOURCES,
@@ -227,7 +234,7 @@ benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.map(benchmark => {
 // AndroidWorld、RULER 暂无匹配成绩；MathVista 被专业图表基准 Chartography 替换，以维持 24 项。
 const RETIRED_BENCHMARKS = new Set(['mathvista', 'androidworld', 'ruler']);
 benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.filter(benchmark => !RETIRED_BENCHMARKS.has(benchmark.id) && !ADDITIONAL_BENCHMARKS.some(item => item.id === benchmark.id)).concat(ADDITIONAL_BENCHMARKS);
-const benchmarkOrder = ["lmarena_text_overall", "aa_intelligence_index", "livebench_overall", "swe_bench_verified", "deepswe", "frontiercode", "mmlu_pro", "gpqa_diamond", "simpleqa_verified", "humanitys_last_exam", "frontiermath", "arc_agi_2", "mmmu_pro", "chartography", "videommmu", "terminal_bench_4", "bfcl_v4", "gaia", "agents_last_exam", "osworld", "osworld_2", "longbench_v2", "aa_lcr", "graphwalks"];
+const benchmarkOrder = ["lmarena_text_overall", "aa_intelligence_index", "livebench_overall", "swe_bench_verified", "deepswe", "frontiercode", "code_arena_webdev", "mmlu_pro", "gpqa_diamond", "simpleqa_verified", "humanitys_last_exam", "frontiermath", "arc_agi_2", "mmmu_pro", "chartography", "videommmu", "terminal_bench_4", "bfcl_v4", "gaia", "agents_last_exam", "osworld", "osworld_2", "longbench_v2", "aa_lcr", "graphwalks"];
 benchmarkPayload.benchmarks.sort((a,b) => benchmarkOrder.indexOf(a.id) - benchmarkOrder.indexOf(b.id));
 const activeBenchmarkIds = new Set(benchmarkPayload.benchmarks.map(benchmark => benchmark.id));
 const recordsById = new Map(upstreamRecords.map(record => [record.record_id, record]));
@@ -303,7 +310,25 @@ for (const [index, source] of LIVE_SOURCES.entries()) {
     const fetched = await fetchedSources[index];
     if (fetched.error) throw fetched.error;
     const { date, rows, note, dataDate = date, points } = fetched.value;
+    const previousPricePoints = history.aaPricePoints;
     if (points?.length) history.aaPricePoints = { date, points: points.map(point => { const { id, config } = resolveModelId(point.raw); return [id, point.score, point.input, point.output, point.cache, config]; }) };
+    // AA 现在的页面只返回未下线的模型（约 270 个），之前的快照包含已下线模型（约 365 个）。
+    // 综合分只用每项评测的最新一期，若直接换成缩水后的名单，大批仍在榜的模型会因不在最新一期而掉出综合分，
+    // 所以名单缩水超过 15% 时只更新价格点，评测名次沿用上一份完整快照。
+    if (source.name === 'Artificial Analysis') {
+      const previous = history.snapshots.aa_intelligence_index, previousDate = previous && Object.keys(previous).sort().at(-1);
+      const count = rows.filter(row => row.benchmarkId === 'aa_intelligence_index').length;
+      if (previousDate && count < previous[previousDate].length * 0.85) {
+        sourceStatus.set(source.name, { ok: false, error: `AA 页面只有 ${count} 个出分模型（上一份快照 ${previous[previousDate].length} 个），已下线模型不再返回，评测名次沿用上次快照` });
+        // 价格点：页面里仍有的模型用新数据，页面已不再返回的（已下线）模型保留上次的价格点，避免斩杀线图里的模型凭空减少。
+        if (points?.length && previousPricePoints?.points?.length) {
+          const fresh = new Set(history.aaPricePoints.points.map(point => point[0]));
+          history.aaPricePoints.points.push(...previousPricePoints.points.filter(point => !fresh.has(point[0])));
+        }
+        console.log(`  ${source.name}: 名单缩水（${count} / ${previous[previousDate].length}），评测名次沿用上次快照，价格点合并更新`);
+        continue;
+      }
+    }
     const grouped = new Map(source.benchmarks.map(id => [id, []]));
     for (const row of rows) {
       const { id, config, display } = resolveModelId(row.raw);

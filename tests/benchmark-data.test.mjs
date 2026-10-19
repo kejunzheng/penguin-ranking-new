@@ -24,9 +24,9 @@ test('record selection respects cutoff and prefers standard configuration',()=>{
  assert.equal(chooseBenchmarkRecord(records,'2026-01-01'),null);
 });
 
-test('bundled benchmark data has 24 benchmarks and current ranked models',()=>{
+test('bundled benchmark data has 25 benchmarks and current ranked models',()=>{
  const data=JSON.parse(fs.readFileSync('public/data/benchmarks.json','utf8'));
- assert.equal(data.benchmarks.length,24);
+ assert.equal(data.benchmarks.length,25);
  assert.ok(data.generated_at.slice(0,10)>='2026-09-29');
  assert.ok(data.benchmarks.every(item=>/^\d{4}-\d{2}-\d{2}$/.test(item.latest_date)),'every benchmark exposes its source snapshot date');
  assert.ok(data.models.length>=300);
