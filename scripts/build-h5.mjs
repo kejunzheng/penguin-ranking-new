@@ -91,7 +91,7 @@ const marker = '<script defer src=';
 if (!html.includes(marker) || !html.includes('</body>')) throw new Error('index.html 缺少入口脚本或 </body>');
 const ogMeta = [
   '<meta property="og:title" content="企鹅智库 · AI 趋势榜"/>',
-  '<meta property="og:description" content="模型评测榜·模型调用量·API 价格评测榜·开源增长"/>',
+  '<meta property="og:description" content="模型能力榜·模型调用量·API 价格评测榜·开源增长"/>',
   '<meta property="og:image" content="./assets/penguin-share-icon.png"/>',
   '<meta property="og:url" content=""/>',
 ].join('');

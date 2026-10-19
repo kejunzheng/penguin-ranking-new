@@ -96,7 +96,7 @@ function HomeBenchmarkCard({lang,change}){
  const total=shownData?.benchmarks.length||0;
  const categories=new Set(shownData?.benchmarks.map(benchmark=>benchmark.category)||[]).size;
  const open=event=>{if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;event.preventDefault();setDetail(null);change({page:'benchmarks'})};
- const title=zh?'AI趋势榜·综合分':'AI Trend Ranking · Composite';
+ const title=zh?'模型能力榜 综合分':'AI Trend Ranking · Composite';
  return <section id="home-benchmarks" className="home-digest home-benchmark-card home-coverage-card" aria-label={title}>
   <div className="home-section-head"><div><p className="eyebrow">01 / MODEL BENCHMARK / TOP 5</p><h2>{title}</h2></div></div>
   <p className="digest-caption">{zh?`${categories} 类能力 · ${summary?.benchmarks.length||total} 项评测汇总`:`${categories} capabilities · ${summary?.benchmarks.length||total} benchmarks combined`}</p>
