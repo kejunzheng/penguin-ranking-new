@@ -31,7 +31,7 @@ export default function App(){
  const [pricePage,setPricePage]=useState(1);
  const [query,setQuery]=useState(''),[projectLang,setProjectLang]=useState('all'),[savedOnly,setSavedOnly]=useState(false),[currency,setCurrency]=useState('USD'),[provider,setProvider]=useState('all'),[openOnly,setOpenOnly]=useState(false),[sort,setSort]=useState({key:'input',dir:'asc'}),[priceView,setPriceView]=useState('or'),[modal,setModal]=useState(null);
  const [saved,setSaved]=useState(()=>{try{return JSON.parse(localStorage.getItem('penguin-saved')||'[]')}catch{return []}});
- const projects=useJson(`data/${channel}/${period}.json`),status=useJson(page==='opensource'?'data/status.json':null),modelData=useJson(['home','usage','pricing'].includes(page)?'data/models.json':null),globalPrices=useJson(page==='usage'?'data/global-prices.json':null),orPrices=useJson(page==='pricing'?'data/openrouter-prices.json':null),skillhubData=useJson(['home','skillhub'].includes(page)?'data/skillhub.json':null);
+ const projects=useJson(`data/${channel}/${period}.json`),status=useJson(page==='opensource'?'data/status.json':null),modelData=useJson(['home','usage','pricing','benchmarks'].includes(page)?'data/models.json':null),globalPrices=useJson(['usage','benchmarks'].includes(page)?'data/global-prices.json':null),orPrices=useJson(page==='pricing'?'data/openrouter-prices.json':null),skillhubData=useJson(['home','skillhub'].includes(page)?'data/skillhub.json':null);
  const dialog=useRef(null);
  function change(p){setState(s=>({...s,...p}));if((p.page&&p.page!==page)||(p.channel&&p.channel!==channel)){setQuery('');setProjectLang('all');setSavedOnly(false);setModal(null);if(p.page)window.scrollTo({top:0,behavior:'instant'})}}
  useEffect(()=>{const p=new URLSearchParams(location.search);p.set('page',page);p.set('lang',lang);p.set('channel',channel);p.set('period',period);if(page==='pricing')p.set('scope',priceScope);else p.delete('scope');const url=location.pathname+'?'+p; if(location.search!=='?'+p)history.pushState(null,'',url);document.documentElement.lang=lang==='zh'?'zh-CN':'en';document.title=(page==='home'?t.brand:(page==='opensource'?t[projectSection.label]:t[page])+' | '+t.brand);try{localStorage.setItem('penguin-locale',lang)}catch{}},[page,lang,channel,period,priceScope]);
@@ -74,7 +74,7 @@ export default function App(){
 
  <>{page!=='usage'&&<PageHeading eyebrow={page==='benchmarks'?'01 / BENCHMARKS':page==='pricing'?'03 / PRICING':page==='skillhub'?'04 / SKILLHUB':projectSection.eyebrow} title={t[page==='opensource'?projectSection.title:page==='benchmarks'?'benchmarkTitle':page==='skillhub'?'skillhubTitle':'pricingPageTitle']} description={t[page==='opensource'?projectSection.description:page==='benchmarks'?'benchmarkDesc':page==='skillhub'?'skillhubDesc':'pricingDesc']}/>}
 
- {page==='benchmarks'&&<BenchmarkPage lang={lang} t={t}/>}
+ {page==='benchmarks'&&<BenchmarkPage lang={lang} t={t} profileData={{trends:modelData.data?.trends,chinaPrices:modelData.data?.prices,globalPrices:globalPrices.data,currency,onCurrency:setCurrency}}/>}
  {page==='opensource'&&<>{renderProjects()}<DataNotes kind="projects" channel={channel} lang={lang} updated={status.data?.updatedAt}/></>}
  {page==='skillhub'&&(skillhubData.data?<SkillhubExplorer data={skillhubData.data} lang={lang}/>:<Loading resource={skillhubData} t={t}/>)}
  {page==='usage'&&(modelData.data?<UsageExplorer trends={modelData.data.trends} globalPrices={globalPrices.data} chinaPrices={modelData.data.prices} currency={currency} onCurrency={setCurrency} lang={lang}/>:<Loading resource={modelData} t={t}/>)}
@@ -86,7 +86,7 @@ export default function App(){
  {modal?.type==='price'&&<ModelProfileDialog usageModel={findMatchingUsageModel(modal.item,modelData.data?.trends.models||[])} priceModel={modal.item} initialTab="price" trends={modelData.data?.trends} lang={lang} currency={currency} onCurrency={setCurrency} priceMeta={modal.item.price_scope==='openrouter'?orPrices.data:modal.item.price_scope==='global'?globalPrices.data:modelData.data?.prices} onClose={()=>setModal(null)}/>}
  </>
 }
-function BenchmarkPage({lang,t}){const resource=useJson('data/benchmarks.json'),ordered=useMemo(()=>orderBenchmarks(resource.data),[resource.data]);return resource.data?<BenchmarkExplorer data={ordered} lang={lang}/>:<Loading resource={resource} t={t}/>}
+function BenchmarkPage({lang,t,profileData}){const resource=useJson('data/benchmarks.json'),ordered=useMemo(()=>orderBenchmarks(resource.data),[resource.data]);return resource.data?<BenchmarkExplorer data={ordered} lang={lang} profileData={profileData}/>:<Loading resource={resource} t={t}/>}
 // 首页按不同评测的上榜次数展示；每项评测最多计一次，同次数并列。
 function HomeBenchmarkCard({lang,change}){
  const t=copy[lang],resource=useJson('data/benchmarks.json'),zh=lang==='zh';
