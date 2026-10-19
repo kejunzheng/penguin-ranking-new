@@ -8,7 +8,7 @@ export const dataDir = path.join(repoRoot, 'public', 'data');
 export const stateDir = process.env.PENGUIN_STATE_DIR || path.join(repoRoot, '.data-state');
 const UA = 'Mozilla/5.0 (compatible; PenguinIndex/1.0; +https://yonge6.github.io/penguin-index/)';
 
-export async function fetchWithRetry(url, { retries = 3, timeout = 60000, headers = {}, as = 'json' } = {}) {
+export async function fetchWithRetry(url, { retries = 3, timeout = 60000, headers = {}, as = 'json', backoff = 2000 } = {}) {
   let lastError;
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
@@ -19,7 +19,7 @@ export async function fetchWithRetry(url, { retries = 3, timeout = 60000, header
       return await response.text();
     } catch (error) {
       lastError = error;
-      if (attempt < retries - 1) await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
+      if (attempt < retries - 1) await new Promise(resolve => setTimeout(resolve, backoff * (attempt + 1)));
     }
   }
   throw new Error(`${url} 抓取失败：${lastError?.message}`);

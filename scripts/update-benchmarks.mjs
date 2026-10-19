@@ -173,7 +173,7 @@ async function fetchLmarenaConfig(config, benchmarkId, label) {
   const rows = [];
   let seenOverall = false;
   for (let offset = 0; offset < 3000; offset += 100) {
-    const page = await getJson(`${base}&offset=${offset}&length=100`, { timeout: 90000 });
+    const page = await getJson(`${base}&offset=${offset}&length=100`, { timeout: 90000, retries: 6, backoff: 8000 }); // HF 偶发 500/429，多等一会再试
     const items = (page.rows || []).map(item => item.row);
     if (!items.length) break;
     const overall = items.filter(item => item.category === 'overall');

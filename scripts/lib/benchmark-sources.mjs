@@ -57,9 +57,20 @@ export async function fetchLivebench() {
   const release = releases?.sort().at(-1);
   if (!release) throw new Error('未找到 LiveBench 发布列表');
   const tag = release.replace(/-/g, '_');
-  const tableUrl = `https://livebench.ai/table_${tag}.csv`;
+  // LiveBench 在 2026-10 把成绩文件从站点根目录移到了 /v1/ 下（前端脚本里 r="./v1"）；从脚本读取，读不到再依次试 v1 与根目录。
+  const scriptBase = js.match(/r="\.\/([a-z0-9_-]+)",\w="\?v=/i)?.[1];
+  let tableUrl, csv, categories;
+  for (const base of [...new Set([scriptBase, 'v1', ''].filter(item => item !== undefined))]) {
+    const prefix = base ? `https://livebench.ai/${base}` : 'https://livebench.ai';
+    try {
+      [csv, categories] = await Promise.all([getText(`${prefix}/table_${tag}.csv`, { retries: 1 }), getJson(`${prefix}/categories_${tag}.json`, { retries: 1 })]);
+      tableUrl = `${prefix}/table_${tag}.csv`;
+      break;
+    } catch {}
+  }
+  if (!tableUrl) throw new Error(`LiveBench 成绩表 table_${tag}.csv 在 /v1/ 与根目录下都取不到`);
   // 发布列表里的日期是题库版本号；同一版本的成绩表会持续追加新模型，因此数据日期取成绩表文件的 Last-Modified。
-  const [csv, categories, modified] = await Promise.all([getText(tableUrl), getJson(`https://livebench.ai/categories_${tag}.json`), getLastModified(tableUrl)]);
+  const modified = await getLastModified(tableUrl);
   const meta = new Map();
   for (const match of js.matchAll(/"([^"{}]+)":\{([^{}]*?displayName:"[^"]+"[^{}]*?)\}/g)) {
     const body = match[2], pick = key => body.match(new RegExp(`${key}:"([^"]+)"`))?.[1];
