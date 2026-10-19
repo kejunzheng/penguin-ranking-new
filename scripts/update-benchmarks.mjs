@@ -105,13 +105,16 @@ async function fetchArtificialAnalysis() {
   const models = candidates.sort((a, b) => b.length - a.length)[0];
   const releases = extractArray('"releases":[', items => items.some(item => item.releaseDate));
   if (models.length < 100) throw new Error(`AA 页面只解析到 ${models.length} 个模型，页面结构可能已变更`);
+  // 模型的 slug 与发布记录的 slug 不一定相同（如 Step 5 Preview），用模型表里的 releaseSlug 二次对应。
+  const modelRelease = new Map(extractArray('"models":[', items => items.some(item => item.releaseSlug)).map(item => [item.slug, item.releaseSlug]));
   const releaseBySlug = new Map(releases.map(item => [item.slug, item.releaseDate]));
+  const releaseOf = model => releaseBySlug.get(model.slug) || releaseBySlug.get(modelRelease.get(model.slug)) || releaseBySlug.get(model.releaseSlug) || null;
   const fields = { intelligenceIndex: 'aa_intelligence_index', lcr: 'aa_lcr', hle: 'humanitys_last_exam', gpqa: 'gpqa_diamond', mmmuPro: 'mmmu_pro' };
   const rows = [];
   for (const [field, benchmarkId] of Object.entries(fields)) {
     const scored = models.filter(model => Number.isFinite(model[field])).sort((a, b) => b[field] - a[field]);
     scored.forEach((model, index) => rows.push({
-      benchmarkId, raw: model.name, rank: index + 1, org: model.modelCreatorName, releaseDate: releaseBySlug.get(model.slug) || null,
+      benchmarkId, raw: model.name, rank: index + 1, org: model.modelCreatorName, releaseDate: releaseOf(model),
       openWeights: typeof model.isOpenWeights === 'boolean' ? model.isOpenWeights : null, source: url,
       displayHint: releases.find(item => item.slug === model.slug)?.name || null,
     }));
@@ -262,7 +265,7 @@ const indexBy = transform => { const map = new Map(); for (const id of matchable
 const flatExact = indexBy(id => id.replace(/-/g, ''));
 const looseStripped = indexBy(id => looseKey(stripSuffix(id))), flatStripped = indexBy(id => stripSuffix(id).replace(/-/g, ''));
 // 数据源只写产品名、站内 SKU 带参数规模的个别模型，逐个登记（不做通用的规模后缀剥离，避免 qwen3-8 误配 Qwen3.8 27B）。
-const MODEL_ALIASES = { 'nemotron-3-ultra': 'nemotron-3-ultra-550b-a55b' };
+const MODEL_ALIASES = { 'nemotron-3-ultra': 'nemotron-3-ultra-550b-a55b', 'gemini-3-1-pro': 'gemini-3-1-pro-preview' };
 const toEligible = id => {
   if (matchableIds.has(id)) return id;
   if (MODEL_ALIASES[id] && matchableIds.has(MODEL_ALIASES[id])) return MODEL_ALIASES[id];
@@ -274,6 +277,12 @@ function resolveModelId(raw) {
   const parsed = extractSku(raw);
   const direct = skuByRawName.get(raw) || parsed.key;
   const id = toEligible(direct) || toEligible(parsed.key);
+  // slug 末尾的 max / high 等词可能是产品名的一部分（如 Qwen3.8-Max），extractSku 会当成推理强度剥掉。
+  // 剥离后对不上时，用完整写法精确比对已入选模型（不做模糊匹配），命中则不当作配置。
+  const rawKey = String(raw).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+  if (!id && rawKey !== parsed.key && (matchableIds.has(rawKey) || MODEL_ALIASES[rawKey] && matchableIds.has(MODEL_ALIASES[rawKey]))) {
+    return { ...parsed, key: rawKey, display: raw, id: toEligible(rawKey), config: STANDARD };
+  }
   if (id) return { ...parsed, id };
   // 兜底：名称末尾不带括号的推理强度（如 “Grok 4.6 xHigh”“Claude Fable 5.1 Max Effort”）。
   // 只有去掉后能命中已入选模型才采用，避免把 “Qwen 3 Max” 这类产品名误拆。
@@ -324,6 +333,12 @@ for (const [index, source] of LIVE_SOURCES.entries()) {
         if (points?.length && previousPricePoints?.points?.length) {
           const fresh = new Set(history.aaPricePoints.points.map(point => point[0]));
           history.aaPricePoints.points.push(...previousPricePoints.points.filter(point => !fresh.has(point[0])));
+        }
+        // 名次沿用旧快照，但发布日期等元数据仍用新页面补全（缺发布日期的模型因此可以入选）。
+        for (const row of rows) {
+          if (!row.releaseDate || !/^\d{4}-\d{2}-\d{2}$/.test(row.releaseDate)) continue;
+          const { id } = resolveModelId(row.raw), meta = history.models[id];
+          if (meta && !meta.releaseDate) meta.releaseDate = row.releaseDate;
         }
         console.log(`  ${source.name}: 名单缩水（${count} / ${previous[previousDate].length}），评测名次沿用上次快照，价格点合并更新`);
         continue;
