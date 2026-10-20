@@ -35,7 +35,16 @@ export function usagePeriodTitle(preset,mode,lang){
 }
 export function usageRangeNote(preset,data,lang){
  const zh=lang==='zh',count=data.weeks.length;
- if(preset==='1w')return (zh?`本周累计 · 截至${data.to}`:`This week to date · through ${data.to}`)+(data.weeks.some(week=>week[1]!=='f')?(zh?' · 数据尚未完整':' · Data is incomplete'):'');
+ if(preset==='1w'){
+  const current=data.weeks.at(-1),partial=data.weeks.some(week=>week[1]!=='f');
+  if(!partial||!current)return zh?`本周累计 · 截至${data.to}`:`This week to date · through ${data.to}`;
+  // 周还没过完：按数据更新时间算已统计的天数（周一 00:00 UTC 起），说明是“进行中”而不是数据缺失
+  const elapsed=(Date.parse(data.updated)-Date.parse(current[0]+'T00:00:00Z'))/86400000;
+  const [,month,day]=current[0].split('-').map(Number),start=zh?`${month}月${day}日`:current[0].slice(5);
+  if(!Number.isFinite(elapsed))return zh?`本周进行中 · ${start}起`:`Week in progress · since ${start}`;
+  const days=Math.min(7,Math.max(1,Math.round(elapsed)));
+  return zh?`本周进行中 · ${start}起已统计约 ${days} 天`:`Week in progress · about ${days} day${days>1?'s':''} counted since ${start}`;
+ }
  const partial=data.weeks.some(week=>week[1]!=='f');
  return (zh?`按周展示 · 共${count}周`:`Weekly observations · ${count} weeks`)+(partial?(zh?' · 浅色为未结束的当周':' · Lighter bars mark the incomplete current week'):'');
 }
