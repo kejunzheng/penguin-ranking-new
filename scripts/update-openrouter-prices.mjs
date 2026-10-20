@@ -1,5 +1,5 @@
 // OpenRouter 全量模型价格 → public/data/openrouter-prices.json
-// 1. 抓取 OpenRouter Models API 全量目录（只保留文本输出、有价格的模型；排除 ~别名、:free / :batch 变体）。
+// 1. 抓取 OpenRouter Models API 全量目录（只保留文本输出、有价格的模型；排除 ~别名与 :batch 变体；:free 免费版单独成行，名称带“· Free”，免费筛选可见）。
 // 2. 中国厂商模型额外挂上「中国官网价」：来自 models.json 中国官网价格表（与“中国官网价格”榜同一份数据）。
 //    匹配顺序：手工映射表 → 同厂商 slug / 名称自动匹配；官方已弃用（retired）的价格不挂。
 // 人民币 / 美元互换统一使用 models.json 中的汇率。
@@ -103,14 +103,16 @@ export function buildOpenRouterPrices(payload, chinaPrices, previous = { models:
   for (const item of payload.data) {
     const input = perMillion(item.pricing?.prompt), output = perMillion(item.pricing?.completion);
     const inputs = item.architecture?.input_modalities || [], outputs = item.architecture?.output_modalities || [];
-    if (item.id.startsWith('~') || /:(free|batch)$/.test(item.id)) continue; // 别名与变体：别名会和正式模型重复，变体不是标准按量价
+    if (item.id.startsWith('~') || /:batch$/.test(item.id)) continue; // 别名会和正式模型重复；batch 不是标准按量价
+    const freeVariant = /:free$/.test(item.id); // OpenRouter 免费版：输入输出均为 0，作为独立条目保留
     if (input == null || output == null || input < 0 || output < 0 || !outputs.includes('text') || seen.has(item.id)) continue;
-    if (item.id.startsWith('openrouter/') || (input === 0 && output === 0)) continue; // 路由器与不按 Token 计费（输入输出均为 0）的条目
+    if (item.id.startsWith('openrouter/') || (!freeVariant && input === 0 && output === 0)) continue; // 路由器与不按 Token 计费（输入输出均为 0）的非免费版条目
     seen.add(item.id);
     const provider = item.id.split('/')[0];
     const [prefix, ...rest] = String(item.name).split(': ');
-    const name = (rest.length ? rest.join(': ') : item.name).trim();
-    const { china, match, reason } = matchChina(item.id, item.name, chinaModels);
+    const fullName = (rest.length ? rest.join(': ') : item.name).replace(/\s+/g, ' ').trim();
+    const name = freeVariant ? fullName.replace(/\s*\(free\)$/i, '') + ' · Free' : fullName; // 与调用榜的免费版写法一致
+    const { china, match, reason } = matchChina(item.id.replace(/:free$/, ''), item.name, chinaModels); // 免费版按原模型匹配中国官网价
     const history = [...(old.get(item.id)?.history || []).filter(r => r[0] !== date), [date, input, output]].slice(-90);
     models.push({
       slug: item.id, name, provider,
@@ -124,6 +126,7 @@ export function buildOpenRouterPrices(payload, chinaPrices, previous = { models:
       latest: { date, input_usd: input, output_usd: output, input_cny: input * rate, output_cny: output * rate },
       history, history_currency: 'USD', billing_currency: 'USD', price_scope: 'openrouter',
       source: 'openrouter', source_url: `https://openrouter.ai/${item.id}`,
+      is_free_variant: freeVariant,
       is_china: china,
       china_official: match ? {
         slug: match.slug, name: match.name, status: match.status ?? 'active', note: match.status_note || null,
@@ -142,7 +145,7 @@ export function buildOpenRouterPrices(payload, chinaPrices, previous = { models:
     china_official_updated_at: chinaPrices.updated_at || null,
     exchange_rate_note: 'OpenRouter 以美元计费，人民币为参考汇率换算；中国官网价以人民币计费，美元为参考汇率换算。',
     coverage: {
-      models: models.length, china_models: chinaRows.length, china_matched: chinaRows.filter(m => m.china_official).length,
+      models: models.length, free_models: models.filter(m => m.is_free_variant).length, china_models: chinaRows.length, china_matched: chinaRows.filter(m => m.china_official).length,
       china_unmatched: chinaRows.filter(m => !m.china_official).map(m => m.slug),
     },
     models,
