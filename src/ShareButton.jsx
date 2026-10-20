@@ -28,7 +28,7 @@ export default function ShareButton({lang}){
   setToast(await copyText(url)?(zh?'链接已复制，粘贴即可分享':'Link copied — paste it to share'):(zh?'复制失败，请手动复制地址栏链接':'Copy failed. Please copy the address bar link.'));
  };
  return <>
-  <button type="button" className="header-share" onClick={share} aria-label={zh?'分享本页':'Share this page'}><ShareNetworkIcon size={16} weight="bold" aria-hidden="true"/><span>{zh?'分享':'Share'}</span></button>
+  <button type="button" className="header-share" onClick={share} aria-label={zh?'分享本页':'Share this page'} title={zh?'分享本页':'Share this page'}><ShareNetworkIcon size={16} weight="bold" aria-hidden="true"/></button>
   {guide&&createPortal(<div className="share-guide" role="dialog" aria-modal="true" aria-label={zh?'分享引导':'How to share'} onClick={()=>setGuide(false)}>
    <svg className="share-guide-arrow" viewBox="0 0 90 120" aria-hidden="true"><path d="M12 112 C 18 60, 40 30, 78 12" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeDasharray="2 10"/><path d="M58 8 L80 11 L72 32" fill="none" stroke="#fff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"/></svg>
    <div className="share-guide-card" onClick={event=>event.stopPropagation()}>
