@@ -70,7 +70,15 @@ export async function createProfilePoster({capabilityModel,benchmarks,usageModel
  // 当前查看的档案排在最前
  const order={capability:0,usage:1,price:2},first=order[tab]??1;
  const sorted=[blocks[first],...blocks.filter((_,i)=>i!==first)];
+ // 底部来源按实际出现的数据块写，价格来源取决于该模型的价格数据集
+ const has=title=>sorted.some(b=>b.title===title&&!b.empty);
+ const scope=priceModel?.price_scope;
+ const priceSource=scope==='openrouter'?(zh?'价格：OpenRouter 平台标价（美元）':'Pricing: OpenRouter platform list prices (USD)'):scope==='global'?(zh?'价格：厂商官网 API 定价':'Pricing: official provider API pricing pages'):(zh?'价格：中国厂商官网 API 定价（人民币）':'Pricing: China providers’ official API pricing (CNY)');
+ const sources=[
+  [has(zh?'能力档案':'Capability')&&(zh?'能力：各项公开评测榜单（官方及第三方）名次汇总':'Capability: official & third-party leaderboard ranks'),has(zh?'调用档案':'Usage')&&(zh?'调用：OpenRouter 公开榜单':'Usage: OpenRouter rankings')].filter(Boolean).join(' · '),
+  has(zh?'价格档案':'Pricing')&&priceSource,
+ ].filter(Boolean);
  return createModelPoster({lang,name,meta,logo:brand?assetUrl('assets/models/'+brand.file):null,fallback:name,blocks:sorted,
   qrUrl:profileLink({capabilityModel,usageModel,priceModel,tab,lang}),
-  notes:[zh?'能力：公开评测名次汇总 · 调用：OpenRouter 公开数据 · 价格：官方 API 定价':'Capability: public benchmark ranks · Usage: OpenRouter · Pricing: official API prices',zh?'企鹅智库 · AI 趋势榜 · 每日更新':'Penguin Intelligence · AI Trend Rankings · updated daily']});
+  notes:[...sources,zh?'企鹅智库 · AI 趋势榜 · 每日更新':'Penguin Intelligence · AI Trend Rankings · updated daily']});
 }
