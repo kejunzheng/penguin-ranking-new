@@ -56,7 +56,7 @@ export default function PriceFrontier({frontier,models,lang}){
     <label className="price-frontier-toggle"><input type="checkbox" checked={open} onChange={e=>setOpen(e.target.checked)}/>{zh?'开源模型':'Open weights'}</label>
    </div>
   </div>
-  <p className="price-frontier-axis-y">{zh?'模型能力榜 综合分 ↑':'AI Trend · Composite ↑'}</p>
+  <p className="price-frontier-axis-y">{zh?'模型能力榜 综合分 ↑':'Model Capability · Composite ↑'}</p>
   <div className="price-frontier-plot">
    <div className="price-frontier-canvas">
     <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
