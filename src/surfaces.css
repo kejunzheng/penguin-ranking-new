@@ -575,3 +575,9 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .benchmark-mobile-score.unranked{color:#5e7086;background:#f7f9fc}
 .benchmark-mobile-score.empty{color:#9aa9ba;background:#f7f9fc;border-color:#e4ebf4;cursor:default}
 }
+@media(max-width:600px){
+.benchmark-mobile-more{display:block;width:100%;margin:0 0 12px;padding:11px;border:1px solid #d6e3f3;border-radius:10px;background:#fff;color:#1769ed;font:600 13px Inter,-apple-system,'PingFang SC',sans-serif;cursor:pointer}
+/* 关掉嵌套滚动区的回弹，避免 iOS 上拖动时整张表错位 */
+.benchmark-table-wrap{overscroll-behavior:none}
+.benchmark-scroll-frame.mobile-list-active~.benchmark-bottom-scroll{display:none}
+}
