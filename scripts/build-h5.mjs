@@ -79,7 +79,7 @@ if (Buffer.byteLength(dataJs) > MAX_FILE) throw new Error('penguin-data.js 超�
 fs.writeFileSync(path.join(tmpDir, 'assets/penguin-data.js'), dataJs);
 
 // 3. 分享能力：分享图标（200×200）与分享脚本
-fs.copyFileSync(path.join(rootDir, 'public/assets/penguin-share-icon.png'), path.join(tmpDir, 'assets/penguin-share-icon.png'));
+fs.copyFileSync(path.join(rootDir, 'public/assets/penguin-share-logo.png'), path.join(tmpDir, 'assets/penguin-share-logo.png'));
 fs.copyFileSync(path.join(rootDir, 'scripts/h5-share.js'), path.join(tmpDir, 'assets/penguin-share.js'));
 
 // 4. 在入口模块之前加载数据脚本；补 OG meta，页面末尾加载分享脚本
@@ -92,7 +92,7 @@ if (!html.includes(marker) || !html.includes('</body>')) throw new Error('index.
 const ogMeta = [
   '<meta property="og:title" content="企鹅智库 · AI 趋势榜"/>',
   '<meta property="og:description" content="模型能力榜·模型调用榜·模型价格榜·开源产品榜"/>',
-  '<meta property="og:image" content="./assets/penguin-share-icon.png"/>',
+  '<meta property="og:image" content="./assets/penguin-share-logo.png"/>',
   '<meta property="og:url" content=""/>',
 ].join('');
 html = html.replace(marker, `${ogMeta}<script src="./assets/penguin-data.js"></script>${marker}`)
