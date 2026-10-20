@@ -540,3 +540,5 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .inner-page .project-table .icon-button{width:34px;height:34px}
 .inner-page .project-table .mobile-stat-label{display:block;color:#5e7086;font:10px Inter,sans-serif;margin-top:4px}
 }
+.model-profile-tabs button{white-space:nowrap}.model-profile-empty .eyebrow{margin:0 0 8px;color:#7a8ca3;font-size:13px;letter-spacing:0;text-transform:none}
+@media(max-width:600px){.model-profile-tabs{flex:1;min-width:0;gap:6px}.model-profile-tabs button{flex:1 1 0;min-width:0;padding:8px 6px;font-size:13px}.model-profile-empty{padding:44px 22px 56px}.model-profile-tab-suffix{display:none}}
