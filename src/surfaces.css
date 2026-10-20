@@ -542,3 +542,7 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 }
 .model-profile-tabs button{white-space:nowrap}.model-profile-empty .eyebrow{margin:0 0 8px;color:#7a8ca3;font-size:13px;letter-spacing:0;text-transform:none}
 @media(max-width:600px){.model-profile-tabs{flex:1;min-width:0;gap:6px}.model-profile-tabs button{flex:1 1 0;min-width:0;padding:8px 6px;font-size:13px}.model-profile-empty{padding:44px 22px 56px}.model-profile-tab-suffix{display:none}}
+.model-profile-criteria dl{max-width:520px;margin:22px auto 0;padding:16px 20px;border:1px solid #e2eaf4;border-radius:12px;background:#f7faff;text-align:left}.model-profile-criteria dl>div{display:grid;grid-template-columns:72px 1fr;gap:12px;padding:9px 0;border-top:1px dashed #dde6f1}.model-profile-criteria .model-profile-criteria-title{margin:0 0 6px;color:#172536;font-size:14px;font-weight:700}.model-profile-criteria dl>div dt{color:#7a8ca3;font-size:13px;font-weight:600}.model-profile-criteria dd{margin:0;color:#3e5068;font-size:13px;line-height:1.7}.model-profile-criteria .model-profile-criteria-foot{margin-top:16px;font-size:13px}
+@media(max-width:600px){.model-profile-criteria dl{padding:12px 14px}.model-profile-criteria dl>div{grid-template-columns:64px 1fr;gap:8px}}
+.model-profile-criteria dl>div dd{min-width:0;max-width:none;justify-self:stretch;text-align:left;padding:0}.model-profile-criteria dl>div{grid-template-columns:84px minmax(0,1fr)}
+@media(max-width:600px){.model-profile-criteria dl>div{grid-template-columns:1fr;gap:2px}}
