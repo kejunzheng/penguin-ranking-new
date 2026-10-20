@@ -4,7 +4,7 @@
 //   1. 基线：kejunzheng/penguin-model-capability-ranking 仓库的一次性导入（最后采集 2026-09-21，之后不再更新）。
 //      作为模型元数据、SKU 归一与抓取失败时的兜底来源。
 //   2. 实时：每次运行直接抓取全部 24 项 benchmark 的官方/公开数据源：
-//      - Artificial Analysis 排行榜页面（内嵌数据）：AA 智能指数、AA-LCR、HLE、GPQA Diamond、MMMU-Pro
+//      - Artificial Analysis 排行榜页面（内嵌数据）：AA 智能指数、AA-LCR、HLE、GPQA Diamond、MMMU-Pro、SciCode
 //      - Epoch AI 公开数据包：FrontierMath Tier 1-3、SimpleQA Verified
 //      - ARC Prize、LMArena、OSWorld 2.0
 //      - 其余 14 项见 scripts/lib/benchmark-sources.mjs 与 additional-benchmarks.mjs（口径逐一移植自上游导入脚本）
@@ -109,7 +109,7 @@ async function fetchArtificialAnalysis() {
   const modelRelease = new Map(extractArray('"models":[', items => items.some(item => item.releaseSlug)).map(item => [item.slug, item.releaseSlug]));
   const releaseBySlug = new Map(releases.map(item => [item.slug, item.releaseDate]));
   const releaseOf = model => releaseBySlug.get(model.slug) || releaseBySlug.get(modelRelease.get(model.slug)) || releaseBySlug.get(model.releaseSlug) || null;
-  const fields = { intelligenceIndex: 'aa_intelligence_index', lcr: 'aa_lcr', hle: 'humanitys_last_exam', gpqa: 'gpqa_diamond', mmmuPro: 'mmmu_pro' };
+  const fields = { intelligenceIndex: 'aa_intelligence_index', lcr: 'aa_lcr', hle: 'humanitys_last_exam', gpqa: 'gpqa_diamond', mmmuPro: 'mmmu_pro', scicode: 'aa_scicode' };
   const rows = [];
   for (const [field, benchmarkId] of Object.entries(fields)) {
     const scored = models.filter(model => Number.isFinite(model[field])).sort((a, b) => b[field] - a[field]);
@@ -213,7 +213,7 @@ async function fetchOsworld2() {
 }
 
 const LIVE_SOURCES = [
-  { name: 'Artificial Analysis', benchmarks: ['aa_intelligence_index', 'aa_lcr', 'humanitys_last_exam', 'gpqa_diamond', 'mmmu_pro'], fetch: fetchArtificialAnalysis },
+  { name: 'Artificial Analysis', benchmarks: ['aa_intelligence_index', 'aa_lcr', 'humanitys_last_exam', 'gpqa_diamond', 'mmmu_pro', 'aa_scicode'], fetch: fetchArtificialAnalysis },
   { name: 'Epoch AI', benchmarks: ['frontiermath', 'simpleqa_verified'], fetch: fetchEpoch },
   { name: 'ARC Prize', benchmarks: ['arc_agi_2'], fetch: fetchArcAgi2 },
   { name: 'LMArena', benchmarks: ['lmarena_text_overall'], fetch: fetchLmarena },
@@ -237,7 +237,7 @@ benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.map(benchmark => {
 // AndroidWorld、RULER 暂无匹配成绩；MathVista 被专业图表基准 Chartography 替换，以维持 24 项。
 const RETIRED_BENCHMARKS = new Set(['mathvista', 'androidworld', 'ruler']);
 benchmarkPayload.benchmarks = benchmarkPayload.benchmarks.filter(benchmark => !RETIRED_BENCHMARKS.has(benchmark.id) && !ADDITIONAL_BENCHMARKS.some(item => item.id === benchmark.id)).concat(ADDITIONAL_BENCHMARKS);
-const benchmarkOrder = ["lmarena_text_overall", "aa_intelligence_index", "livebench_overall", "swe_bench_verified", "deepswe", "frontiercode", "code_arena_webdev", "mmlu_pro", "gpqa_diamond", "simpleqa_verified", "humanitys_last_exam", "frontiermath", "arc_agi_2", "mmmu_pro", "chartography", "videommmu", "terminal_bench_4", "bfcl_v4", "gaia", "agents_last_exam", "osworld", "osworld_2", "longbench_v2", "aa_lcr", "graphwalks"];
+const benchmarkOrder = ["lmarena_text_overall", "aa_intelligence_index", "livebench_overall", "swe_bench_verified", "deepswe", "frontiercode", "code_arena_webdev", "mmlu_pro", "gpqa_diamond", "simpleqa_verified", "humanitys_last_exam", "frontiermath", "arc_agi_2", "mmmu_pro", "chartography", "videommmu", "terminal_bench_4", "bfcl_v4", "gaia", "agents_last_exam", "osworld", "osworld_2", "longbench_v2", "aa_lcr", "graphwalks", "aa_scicode"];
 benchmarkPayload.benchmarks.sort((a,b) => benchmarkOrder.indexOf(a.id) - benchmarkOrder.indexOf(b.id));
 const activeBenchmarkIds = new Set(benchmarkPayload.benchmarks.map(benchmark => benchmark.id));
 const recordsById = new Map(upstreamRecords.map(record => [record.record_id, record]));

@@ -13,7 +13,7 @@ export const MIN_BENCHMARKS_FOR_RANK = 5;
 export const MIN_DOMAINS_FOR_RANK = 3;
 
 export const DOMAINS = {
-  '编程与Agent': ['swe_bench_verified', 'deepswe', 'frontiercode', 'code_arena_webdev', 'terminal_bench_4', 'bfcl_v4', 'gaia', 'agents_last_exam', 'osworld', 'osworld_2'],
+  '编程与Agent': ['swe_bench_verified', 'deepswe', 'frontiercode', 'code_arena_webdev', 'terminal_bench_4', 'aa_scicode', 'bfcl_v4', 'gaia', 'agents_last_exam', 'osworld', 'osworld_2'],
   '推理': ['humanitys_last_exam', 'frontiermath', 'arc_agi_2'],
   '知识': ['mmlu_pro', 'gpqa_diamond', 'simpleqa_verified'],
   '长上下文': ['longbench_v2', 'aa_lcr', 'graphwalks'],
