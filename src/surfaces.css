@@ -633,3 +633,5 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .model-profile-top .model-profile-share{width:40px;height:40px;margin:0 -10px 0 auto}
 .model-profile-top .model-profile-share+.model-profile-close{margin-left:0}
 .poster-share-dialog .export-header p{margin-top:4px;color:#587493;font-size:13px}
+.price-frontier{position:relative}.price-frontier>.price-frontier-share{position:absolute;top:16px;right:16px;margin:0}.price-frontier-head{padding-right:34px}
+@media(max-width:760px){.price-frontier>.price-frontier-share{top:12px;right:8px}}

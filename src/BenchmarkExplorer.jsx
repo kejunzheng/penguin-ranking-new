@@ -233,7 +233,9 @@ export default function BenchmarkExplorer({data:rawData,lang,profileData}){
  const defaultCustomStart=[benchmarkCutoff(latest,'month'),earliest].sort().at(-1);
  const [type,setType]=useState('all'),[region,setRegion]=useState('all'),[coverage,setCoverage]=useState('all'),[preset,setPreset]=useState('latest');
  const [customRange,setCustomRange]=useState({start:defaultCustomStart,end:latest}),[customDraft,setCustomDraft]=useState({start:defaultCustomStart,end:latest}),[customOpen,setCustomOpen]=useState(false);
- const [view,setView]=useState('ranking'),[selected,setSelected]=useState([]),[sortState,setSortCriteria]=useState(null),[mobileProfile,setMobileProfile]=useState(null),[horizontalScroll,setHorizontalScroll]=useState({left:false,right:false,tip:false,max:0});
+ const [view,setView]=useState(()=>new URLSearchParams(location.search).get('view')==='frontier'?'frontier':'ranking'),[selected,setSelected]=useState([]),[sortState,setSortCriteria]=useState(null),[mobileProfile,setMobileProfile]=useState(null),[horizontalScroll,setHorizontalScroll]=useState({left:false,right:false,tip:false,max:0});
+ // 分享图二维码带 view=frontier 直达价格斩杀线；读取后从地址栏移除，避免切换页面后仍保留
+ useEffect(()=>{const q=new URLSearchParams(location.search);if(q.has('view')){q.delete('view');history.replaceState(null,'',location.pathname+'?'+q)}},[]);
  const [mobileMatrix,setMobileMatrix]=useState(false);
  const compositeOn=Boolean(composite)&&preset==='latest';
  const defaultSort=compositeOn?[{id:COMPOSITE,direction:'asc'}]:data.benchmarks[0]?[{id:data.benchmarks[0].id,direction:'asc'}]:[];

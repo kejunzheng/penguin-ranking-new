@@ -2,6 +2,9 @@ import React,{useMemo,useState} from 'react';
 import ModelLogo from './ModelLogo';
 import {configLabel} from './domains';
 import {MIN_SCORE,TICKS,blendedPrice,frontierOf} from './price-frontier-math';
+import PosterShare from './PosterShare';
+import {modelBrand} from './model-brand';
+import {assetUrl} from './asset-url';
 
 // 价格斩杀线：本站综合分（纵轴）× 一般用量折算价格（横轴，对数刻度）。
 // 斩杀线 = 按价格从低到高，分数创新高的模型（同等或更低价格下没有更高分的模型）。
@@ -34,6 +37,15 @@ export default function PriceFrontier({frontier,models,lang}){
  const y=score=>(1-(score-yMin)/(yMax-yMin))*100;
  const xTicks=TICKS.filter(tick=>Math.log10(tick)>=xMin&&Math.log10(tick)<=xMax);
  const yTicks=[];for(let tick=Math.ceil(yMin/5)*5;tick<=yMax;tick+=5)yTicks.push(tick);
+ const posterLogo=model=>{const brand=modelBrand(logoItem(model));return brand?assetUrl('assets/models/'+brand.file):null};
+ // 分享图：按当前筛选（中国模型 / 开源模型）绘制
+ const buildPoster=async()=>{
+  const {createFrontierPoster,siteUrl}=await import('./share-poster');
+  const filters=[china&&(zh?'中国模型':'China models'),open&&(zh?'开源模型':'Open weights')].filter(Boolean).join(zh?'、':', ');
+  const toPoster=point=>({id:point.id,name:point.model.name,score:point.score,price:point.price,onLine:onLine.has(point.id),logo:posterLogo(point.model)});
+  return createFrontierPoster({lang,title:zh?'价格斩杀线':'Price frontier',caption:zh?`综合分 × 折算价格 · ${points.length} 个模型${filters?` · 仅${filters}`:''} · 斩杀线 ${line.length} 个`:`Composite × blended price · ${points.length} models${filters?` · ${filters} only`:''} · ${line.length} on the line`,points:points.map(toPoster),line:line.map(toPoster),ticks:TICKS,minScore:MIN_SCORE,currencySymbol:cny?'¥':'$',qrUrl:siteUrl({page:'benchmarks',lang,view:'frontier'}),
+   notes:[zh?`斩杀线 = 同等或更低价格下综合分最高的模型 · 价格按缓存命中 : 输入 : 输出 = 7 : 2 : 1 折算`:'On the line: highest composite at or below each price · blend cache : input : output = 7 : 2 : 1',zh?`分数为本站综合分 · 价格取自 Artificial Analysis 标价（${frontier.date}） · 低于 ${MIN_SCORE} 分不列入`:`Composite scores from this site · prices from Artificial Analysis (${frontier.date}) · below ${MIN_SCORE} not shown`]});
+ };
  let path='';line.forEach((point,index)=>{path+=index?` H${x(point.price)} V${y(point.score)}`:`M${x(point.price)} ${y(point.score)}`});
  const last=line.at(-1);
  const area=line.length?`${path} H100 V100 H${x(line[0].price)} Z`:'';
@@ -47,6 +59,7 @@ export default function PriceFrontier({frontier,models,lang}){
  });
 
  return <section className="price-frontier" aria-label={zh?'价格斩杀线':'Price frontier'}>
+  <PosterShare lang={lang} className="price-frontier-share" label={zh?'生成价格斩杀线分享图':'Create price frontier share image'} fileName={`penguin-price-frontier-${frontier.date||'latest'}.png`} build={buildPoster}/>
   <div className="price-frontier-head">
    <div><h3>{zh?'价格斩杀线':'Price frontier'}<small>{zh?`${points.length} 个模型`:`${points.length} models`}</small></h3>
     <p>{zh?<>斩杀线上是各价位综合分最高的模型。价格按一般用量折算：缓存命中 : 输入 : 输出 = <b>7 : 2 : 1</b>。</>:<>Models on the line have the highest composite score at their price. Blended price: cache hit : input : output = <b>7 : 2 : 1</b>.</>}</p>
