@@ -22,7 +22,7 @@ function wrap(ctx,value,x,y,width,size,color){let line='';for(const ch of value)
 export async function createUsagePoster({data,mode,theme,selected,singleWeek,lang,title}){
  await document.fonts.ready;
  const zh=lang==='zh',horizontal=singleWeek&&mode==='total',dark=theme==='dark';
- const pageTitle=zh?'模型调用榜':'Model usage';
+ const pageTitle=zh?'模型调用榜':'Model Usage';
  const pageDescription=zh?'基于 OpenRouter 公开数据，统一查看模型排行与总量趋势':'Explore model rankings and token trends with public OpenRouter data.';
  const {top,others}=stackRows(data);
  const rows=[...top,{id:'__others',name:zh?'其他模型':'Others',total:others[0]}];
