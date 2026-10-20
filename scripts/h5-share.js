@@ -3,7 +3,7 @@
 (function () {
   var SHARE = {
     title: '企鹅智库 · AI 趋势榜',
-    content: '模型能力榜·模型调用量·API 价格评测榜·开源增长',
+    content: '模型能力榜·模型调用榜·模型价格榜·开源产品榜',
     // 发布工具会把该图片上传到 mat1.gtimg.com 并替换为 CDN 绝对地址
     imgUrl: './assets/penguin-share-icon.png'
   };
