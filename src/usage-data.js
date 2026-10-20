@@ -9,13 +9,15 @@ export function usageWindow(trends,preset='3m',custom={}) {
   if(!indices.length)return {invalid:false,weeks:[],rows:[],platformTotal:0};
   start=indices[0];end=indices.at(-1);
  }
+ // 上周：最近一个完整周（区别于还在进行中的本周）
+ if(preset==='lw'&&lastFull>=0){start=lastFull;end=lastFull;}
  if(end<0)return {invalid:false,weeks:[],rows:[],platformTotal:0};
  const selected=weeks.slice(start,end+1);const points=new Map();
  for(const [wi,mi,value] of trends.points)if(wi>=start&&wi<=end){if(!points.has(mi))points.set(mi,new Map());points.get(mi).set(wi,value)}
  const rows=trends.models.map((model,mi)=>{const values=selected.map((_,i)=>points.get(mi)?.get(start+i)??null);return {...model,mi,values,observed:values.some(v=>v!=null),total:values.reduce((a,b)=>a+(b??0),0)}}).sort((a,b)=>b.total-a.total||a.id.localeCompare(b.id));
  const platformTotal=selected.reduce((sum,w)=>sum+w[2],0);const full=selected.filter(w=>w[1]==='f');
- const a=preset==='1w'?weeks[lastFull-1]?.[2]:full[0]?.[2],b=full.at(-1)?.[2];
- const growth=a>0&&b!=null&&(preset==='1w'||full.length>1)?(b-a)/a:null;
+ const single=preset==='1w'||preset==='lw',a=single?weeks[lastFull-1]?.[2]:full[0]?.[2],b=full.at(-1)?.[2];
+ const growth=a>0&&b!=null&&(single||full.length>1)?(b-a)/a:null;
  const snapshotDay=trends.updated_at.slice(0,10);
  return {start,end,weeks:selected,rows,platformTotal,growth,from:selected[0][0],to:weekEnd(selected.at(-1)[0])<snapshotDay?weekEnd(selected.at(-1)[0]):snapshotDay,updated:trends.updated_at,invalid:false};
 }
@@ -27,14 +29,20 @@ export function stackRows(data,limit=10){
 
 export function usagePeriodTitle(preset,mode,lang){
  const zh=lang==='zh';
- const periods=zh?{'1w':'本周','1m':'近1个月','3m':'近3个月','6m':'近6个月','1y':'近1年',custom:'所选时段'}:{'1w':'This week','1m':'Last month','3m':'Last 3 months','6m':'Last 6 months','1y':'Last year',custom:'Selected period'};
+ const periods=zh?{'1w':'本周','lw':'上周','1m':'近1个月','3m':'近3个月','6m':'近6个月','1y':'近1年',custom:'所选时段'}:{'1w':'This week','lw':'Last week','1m':'Last month','3m':'Last 3 months','6m':'Last 6 months','1y':'Last year',custom:'Selected period'};
  const range=periods[preset]||periods.custom;
  if(mode==='ranking')return zh?`${range}模型调用排名`:`Model usage ranking · ${range}`;
  if(mode==='compare')return zh?`${range}模型调用量对比`:`Model usage comparison · ${range}`;
- return zh?`${range}模型调用${preset==='1w'?'量':'趋势'}`:`Model usage${preset==='1w'?'':' trend'} · ${range}`;
+ const single=preset==='1w'||preset==='lw';
+ return zh?`${range}模型调用${single?'量':'趋势'}`:`Model usage${single?'':' trend'} · ${range}`;
 }
 export function usageRangeNote(preset,data,lang){
  const zh=lang==='zh',count=data.weeks.length;
+ if(preset==='lw'){
+  const week=data.weeks[0];if(!week)return '';
+  const md=d=>{const [,m,dd]=d.split('-').map(Number);return zh?`${m}月${dd}日`:d.slice(5)};
+  return zh?`上周完整周 · ${md(week[0])}–${md(weekEnd(week[0]))}`:`Last complete week · ${md(week[0])} – ${md(weekEnd(week[0]))}`;
+ }
  if(preset==='1w'){
   const current=data.weeks.at(-1),partial=data.weeks.some(week=>week[1]!=='f');
   if(!partial||!current)return zh?`本周累计 · 截至${data.to}`:`This week to date · through ${data.to}`;
