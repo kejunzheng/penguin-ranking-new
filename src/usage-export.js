@@ -10,7 +10,8 @@ function usagePageUrl(lang){const u=new URL(location.href);u.search='';u.hash=''
 
 const font='Inter, "PingFang SC", "Microsoft YaHei", sans-serif';
 const short=n=>new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n);
-function loadImage(src){return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Image could not be loaded'));img.src=src;});}
+// 素材在 mat1.gtimg.com CDN（与页面跨域），须以 CORS 方式加载，否则画布被污染无法导出
+function loadImage(src){return new Promise((resolve,reject)=>{const img=new Image();if(!/^(data|blob):/.test(src))img.crossOrigin='anonymous';img.onload=()=>resolve(img);img.onerror=()=>reject(new Error('Image could not be loaded'));img.src=src;});}
 function rect(ctx,x,y,w,h,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
 function text(ctx,value,x,y,size,color='#14283f',weight=400){ctx.font=`${weight} ${size}px ${font}`;ctx.fillStyle=color;ctx.fillText(value,x,y);}
 function fit(ctx,value,width,size){ctx.font=`600 ${size}px ${font}`;while(ctx.measureText(value).width>width&&size>16){size--;ctx.font=`600 ${size}px ${font}`;}return size;}
