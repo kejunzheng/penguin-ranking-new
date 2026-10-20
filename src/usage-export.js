@@ -2,7 +2,11 @@ import {stackRows} from './usage-data';
 import {modelBrand} from './model-brand';
 import {assetUrl} from './asset-url';
 import {chartColors} from './usage-palette';
-import {dataDate,getDataNotes} from './DataNotes';
+import {dataDate} from './DataNotes';
+import QRCode from 'qrcode';
+
+// 分享图二维码指向当前站点的调用榜（测试页 / 正式页 / GitHub Pages 各自指向自己）
+function usagePageUrl(lang){const u=new URL(location.href);u.search='';u.hash='';u.searchParams.set('page','usage');u.searchParams.set('lang',lang);return u.toString();}
 
 const font='Inter, "PingFang SC", "Microsoft YaHei", sans-serif';
 const short=n=>new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n);
@@ -10,6 +14,7 @@ function loadImage(src){return new Promise((resolve,reject)=>{const img=new Imag
 function rect(ctx,x,y,w,h,r,fill){ctx.fillStyle=fill;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill();}
 function text(ctx,value,x,y,size,color='#14283f',weight=400){ctx.font=`${weight} ${size}px ${font}`;ctx.fillStyle=color;ctx.fillText(value,x,y);}
 function fit(ctx,value,width,size){ctx.font=`600 ${size}px ${font}`;while(ctx.measureText(value).width>width&&size>16){size--;ctx.font=`600 ${size}px ${font}`;}return size;}
+function fitPlain(ctx,value,width,size){ctx.font=`500 ${size}px ${font}`;while(ctx.measureText(value).width>width&&size>11){size--;ctx.font=`500 ${size}px ${font}`;}return size;}
 function wrap(ctx,value,x,y,width,size,color){let line='';for(const ch of value){ctx.font=`400 ${size}px ${font}`;if(ctx.measureText(line+ch).width>width){text(ctx,line,x,y,size,color);line='';y+=size*1.5;}line+=ch;}if(line)text(ctx,line,x,y,size,color);return y+size*1.5;}
 
 // Render from the selected data window at a fixed resolution, independent of phone viewport.
@@ -18,16 +23,16 @@ export async function createUsagePoster({data,mode,theme,selected,singleWeek,lan
  const zh=lang==='zh',horizontal=singleWeek&&mode==='total',dark=theme==='dark';
  const pageTitle=zh?'模型调用榜':'Model usage';
  const pageDescription=zh?'基于 OpenRouter 公开数据，统一查看模型排行与总量趋势':'Explore model rankings and token trends with public OpenRouter data.';
- const dataNotes=getDataNotes('usage','product',lang);
  const {top,others}=stackRows(data);
  const rows=[...top,{id:'__others',name:zh?'其他模型':'Others',total:others[0]}];
- const [publisher,penguin,wave,...logos]=await Promise.all([
+ const [qr,publisher,penguin,wave,...logos]=await Promise.all([
+  QRCode.toDataURL(usagePageUrl(lang),{margin:1,width:280,errorCorrectionLevel:'M'}).then(loadImage),
   loadImage(assetUrl('assets/tencent-technology.png')),loadImage(assetUrl('assets/penguin-logo-supplied.png')),
   loadImage(assetUrl('assets/blue-wave.webp')),
   ...top.map(r=>{const brand=modelBrand(r);return brand?loadImage(assetUrl('assets/models/'+brand.file)).catch(()=>null):Promise.resolve(null);})
  ]);
  const chartHeight=horizontal?rows.length*78+130:700;
- const width=1080,chartTop=390,footerHeight=zh?430:510,height=chartTop+chartHeight+footerHeight,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
+ const width=1080,chartTop=390,footerHeight=230,height=chartTop+chartHeight+footerHeight,canvas=document.createElement('canvas');canvas.width=width;canvas.height=height;
  const ctx=canvas.getContext('2d');
  ctx.fillStyle='#f1f6fc';ctx.fillRect(0,0,width,height);
  ctx.fillStyle='#fff';ctx.fillRect(0,0,width,112);
@@ -59,15 +64,13 @@ export async function createUsagePoster({data,mode,theme,selected,singleWeek,lan
   const element=document.createElement('div');element.style.cssText='position:fixed;left:-10000px;top:0;width:984px;height:636px';document.body.append(element);let chart;
   try{const {createUsageChart}=await import('./chart');chart=createUsageChart(element,data,{mode,theme,selected,singleWeek:false,lang,title,exportMode:true});const bitmap=await loadImage(chart.getDataURL({type:'png',pixelRatio:2}));ctx.drawImage(bitmap,48,chartTop+16,984,636);}finally{chart?.dispose();element.remove();}
  }
- let footer=chartTop+chartHeight+34;
- const labels=zh?{source:'数据来源',method:'统计口径',disclaimer:'免责声明'}:{source:'Data sources',method:'Methodology',disclaimer:'Disclaimer'};
- for(const section of ['source','method','disclaimer']){
-  text(ctx,labels[section],48,footer,18,'#45668a',600);footer+=30;
-  for(const paragraph of dataNotes[section])footer=wrap(ctx,paragraph,48,footer,984,16,'#627f9f')+5;
-  footer+=9;
- }
+ // 底部：左侧说明，右侧页面二维码
+ const qrSize=150,qrX=width-48-qrSize,qrY=height-qrSize-36;
+ rect(ctx,qrX-10,qrY-10,qrSize+20,qrSize+20,14,'#fff');ctx.drawImage(qr,qrX,qrY,qrSize,qrSize);
+ text(ctx,zh?'扫码查看完整榜单':'Scan for the full rankings',48,height-118,24,'#10273f',700);
+ text(ctx,zh?'每日更新 · 模型调用量 / 能力 / 价格':'Updated daily · usage, capability and pricing',48,height-88,18,'#45668a',500);
  const sourceLine=zh?`数据来自 OpenRouter rankings · 包含平台路由的模型 Token 用量 · 数据更新：${dataDate(data.updated,lang)}`:`Source: OpenRouter rankings · Includes model tokens routed through OpenRouter · Data updated: ${dataDate(data.updated,lang)}`;
- text(ctx,sourceLine,48,height-58,16,'#45668a',500);
+ text(ctx,sourceLine,48,height-58,fitPlain(ctx,sourceLine,qrX-48-32,16),'#45668a',500);
  text(ctx,zh?'AI 趋势榜':'AI Trend Rankings',48,height-26,14,'#627f9f',500);
  const blob=await new Promise((resolve,reject)=>canvas.toBlob(b=>b?resolve(b):reject(new Error('Image export failed')),'image/png'));
  return {url:canvas.toDataURL('image/png'),blob};
