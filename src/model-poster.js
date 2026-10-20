@@ -4,6 +4,7 @@ import {modelPrices} from './price-details';
 import {modelBrand} from './model-brand';
 import {assetUrl} from './asset-url';
 import {domainLabel} from './domains';
+import {brandLine,dataDay} from './poster-date';
 
 // 模型档案分享图：能力 / 调用 / 价格三块各取关键指标；没进某个榜就写明“暂未进入”。
 const short=n=>n==null?'—':new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n);
@@ -78,7 +79,10 @@ export async function createProfilePoster({capabilityModel,benchmarks,usageModel
   [has(zh?'能力档案':'Capability')&&(zh?'能力：各项公开评测榜单（官方及第三方）名次汇总':'Capability: official & third-party leaderboard ranks'),has(zh?'调用档案':'Usage')&&(zh?'调用：OpenRouter 公开榜单':'Usage: OpenRouter rankings')].filter(Boolean).join(' · '),
   has(zh?'价格档案':'Pricing')&&priceSource,
  ].filter(Boolean);
+ // 数据日期：各块日期相同就写一个，不同就分开写
+ const dates=[has(zh?'能力档案':'Capability')&&[zh?'能力':'capability',dataDay(c?.date)],has(zh?'调用档案':'Usage')&&[zh?'调用':'usage',dataDay(trends?.updated_at)],has(zh?'价格档案':'Pricing')&&[zh?'价格':'pricing',dataDay(priceMeta?.updated_at)]].filter(d=>d&&d[1]);
+ const asOf=new Set(dates.map(d=>d[1])).size<=1?dates[0]?.[1]:dates.map(([k,d])=>`${k} ${d}`).join(zh?'，':', ');
  return createModelPoster({lang,name,meta,logo:brand?assetUrl('assets/models/'+brand.file):null,fallback:name,blocks:sorted,
   qrUrl:profileLink({capabilityModel,usageModel,priceModel,tab,lang}),
-  notes:[...sources,zh?'企鹅智库 · AI 趋势榜 · 每日更新':'Penguin Intelligence · AI Trend Rankings · updated daily']});
+  notes:[...sources,brandLine(lang,asOf)]});
 }
