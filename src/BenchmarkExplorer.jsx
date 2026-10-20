@@ -1,3 +1,4 @@
+import {configLabel,domainLabel} from './domains';
 import profilesZh from './benchmark-profiles-zh.json';
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {CheckIcon,MagnifyingGlassIcon,XIcon} from '@phosphor-icons/react';
@@ -115,7 +116,7 @@ function BenchmarkResult({model,benchmark,result,zh,cutoff,start,highlight}){
  </span>;
 }
 function ResultLine({benchmark,result,zh,highlight,muted}){
- const config=!result.config||result.config==='标准/未注明'?(zh?'标准／未注明':'Standard / unspecified'):result.config;
+ const config=!result.config||result.config==='标准/未注明'?(zh?'标准／未注明':'Standard / unspecified'):configLabel(result.config,zh);
  return <><span className={'benchmark-rank'+(muted?' muted':'')+(highlight?' rank-'+Math.min(result.rank,4):'')}>#{result.rank}</span>{Number.isFinite(result.score)&&<small className="benchmark-result-config">{benchmark.score_label||'Score'}: {result.score}%</small>}<small className="benchmark-result-config">{zh?'配置：':'Config: '}{config}</small></>;
 }
 
@@ -162,7 +163,7 @@ function CompositeDialog({summary,model,names,zh,onClose}){
      <div><small>{zh?'覆盖领域':'Domains'}</small><strong>{row.domains}/{domains.length}</strong></div>
     </div>
     <div className="composite-dialog-grid">
-     <div><h4>{zh?'各领域指数':'Index by domain'}</h4><table><tbody>{domains.map(d=>{const missing=row.missing_domains?.includes(d);return <tr key={d}><th>{d}</th><td>{row.domain_scores?.[d]?.toFixed(1)??'—'}</td><td className="quiet">{missing?(zh?'缺测，按整体水平估计':'Not tested; estimated from overall level'):''}</td></tr>})}</tbody></table></div>
+     <div><h4>{zh?'各领域指数':'Index by domain'}</h4><table><tbody>{domains.map(d=>{const missing=row.missing_domains?.includes(d);return <tr key={d}><th>{domainLabel(d,zh)}</th><td>{row.domain_scores?.[d]?.toFixed(1)??'—'}</td><td className="quiet">{missing?(zh?'缺测，按整体水平估计':'Not tested; estimated from overall level'):''}</td></tr>})}</tbody></table></div>
      <div><h4>{zh?'逐项核对：实际 vs 期望胜率':'Check: actual vs expected win rate'}</h4><table><thead><tr><th>{zh?'评测':'Benchmark'}</th><th>{zh?'场次':'Games'}</th><th>{zh?'实际':'Actual'}</th><th>{zh?'期望':'Expected'}</th></tr></thead><tbody>{(row.checks||[]).map(c=><tr key={c.id}><th>{name(c.id)}</th><td>{c.games}</td><td>{c.actual.toFixed(1)}%</td><td>{c.expected.toFixed(1)}%</td></tr>)}</tbody></table>
       <p className="quiet">{zh?'实际明显高于期望，说明该模型在这项评测上好于总分所反映的水平；反之则拖了后腿。总分有先验收拢，两者不会完全相等。':'Actual well above expected means the model does better on this benchmark than its total suggests; below means it drags the total. Priors pull totals toward the middle, so the two are never identical.'}</p></div>
     </div>
@@ -172,7 +173,7 @@ function CompositeDialog({summary,model,names,zh,onClose}){
     <section><h4>{zh?'怎么算':'How it is computed'}</h4><ul>
      <li>{zh?'每项评测只取最新一期；同一模型有多条配置时，按推理档位取最高的一条（Max > XHigh > High > Medium > Low > 无推理），不取名次最好的一条。':'Each benchmark uses only its latest edition. When a model has several configurations the highest reasoning tier is used (Max > XHigh > High > Medium > Low > non-reasoning), never the best-ranked one.'}</li>
      <li>{zh?'同一项评测内，把名次拆成两两胜负，用 Bradley–Terry 方法一次性拟合每个模型的整体水平和各领域偏差。':'Within a benchmark, ranks are split into pairwise wins and fitted at once with a Bradley–Terry model for each model’s overall level and domain offsets.'}</li>
-     <li>{zh?`${domains.join('、')} ${domains.length} 个领域等权，并让每个领域提供的证据总量相同，评测多的领域不会压过评测少的领域。`:`${domains.length} domains (${domains.join(', ')}) are weighted equally and contribute equal evidence, so domains with many benchmarks do not outweigh those with few.`}</li>
+     <li>{zh?`${domains.join('、')} ${domains.length} 个领域等权，并让每个领域提供的证据总量相同，评测多的领域不会压过评测少的领域。`:`${domains.length} domains (${domains.map(d=>domainLabel(d,false)).join(', ')}) are weighted equally and contribute equal evidence, so domains with many benchmarks do not outweigh those with few.`}</li>
      <li>{zh?'指数 = 50 + 15 × z，z 以参照组的均值和标准差计算。参照组是首次计算时进入排名的模型，刻度固定；指数会随新评测结果更新，但不是「永不变化」。':'Index = 50 + 15 × z, with z based on the mean and standard deviation of a reference group (the models ranked in the first calculation). The scale is fixed, but indices still update with new results.'}</li>
     </ul></section>
     <section><h4>{zh?'出分与排名门槛':'Thresholds'}</h4><ul>
@@ -182,7 +183,7 @@ function CompositeDialog({summary,model,names,zh,onClose}){
     </ul></section>
     <section><h4>{zh?'名次范围':'Rank range'}</h4><p>{zh?`分别去掉 ${summary.benchmarks.length} 项入选评测中的任意一项后重算（共 ${summary.sensitivity_runs} 次），取最低到最高的名次。它用来看名次对评测选择是否敏感，不是置信区间；范围较宽时，相邻名次的先后不宜过度解读。`:`Recomputed ${summary.sensitivity_runs} times, dropping each of the ${summary.benchmarks.length} included benchmarks in turn; the lowest and highest ranks form the range. It shows how sensitive the rank is to benchmark choice and is not a confidence interval.`}</p></section>
    </div>
-   <section className="composite-dialog-benchmarks"><h4>{zh?`本期入选的 ${summary.benchmarks.length} 项评测`:`${summary.benchmarks.length} benchmarks included this edition`}</h4><table><tbody>{domains.map(d=>{const list=summary.benchmarks.filter(b=>b.domain===d);return <tr key={d}><th>{d}</th><td>{list.length?list.map(b=>`${name(b.id)}（${b.models}）`).join('、'):(zh?'本期无入选评测':'None this edition')}</td></tr>})}</tbody></table>
+   <section className="composite-dialog-benchmarks"><h4>{zh?`本期入选的 ${summary.benchmarks.length} 项评测`:`${summary.benchmarks.length} benchmarks included this edition`}</h4><table><tbody>{domains.map(d=>{const list=summary.benchmarks.filter(b=>b.domain===d);return <tr key={d}><th>{domainLabel(d,zh)}</th><td>{list.length?list.map(b=>zh?`${name(b.id)}（${b.models}）`:`${name(b.id)} (${b.models})`).join(zh?'、':', '):(zh?'本期无入选评测':'None this edition')}</td></tr>})}</tbody></table>
     <p className="quiet">{zh?'括号内为参评模型数。电脑应用类目前没有入选评测，综合分不代表电脑操作能力。':'Numbers in brackets are participating models. No computer-use benchmark is included yet, so the score says nothing about computer operation.'}</p></section>
    <section><h4>{zh?'已知局限':'Known limits'}</h4><ul>
     <li>{zh?'只用名次，丢掉分差。':'Only ranks are used; score gaps are ignored.'}</li>

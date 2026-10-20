@@ -1,3 +1,4 @@
+import {domainLabel} from './domains';
 import React,{useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowRightIcon,ArrowUpRightIcon,BookmarkSimpleIcon,MagnifyingGlassIcon,XIcon,DownloadSimpleIcon,ArrowClockwiseIcon} from '@phosphor-icons/react';
 import {copy} from './copy';
@@ -118,7 +119,7 @@ function HomeBenchmarkCard({lang,change}){
   {detail&&<div className="benchmark-mobile-profile-backdrop" role="presentation" onClick={()=>setDetail(null)}><aside className="benchmark-mobile-profile home-coverage-dialog" role="dialog" aria-modal="true" aria-label={zh?'综合分详情':'Composite details'} onClick={event=>event.stopPropagation()}><button className="benchmark-mobile-profile-close" type="button" aria-label={zh?'关闭详情':'Close details'} onClick={()=>setDetail(null)} autoFocus><XIcon size={18}/></button>
   <h3>{detail.name}</h3><p>{zh?`综合分 ${detail.composite.score.toFixed(1)} · 第 ${detail.composite.rank} 名 · 入选 ${detail.composite.benchmarks} 项评测，覆盖 ${detail.composite.domains}/6 个领域。`:`Composite ${detail.composite.score.toFixed(1)} · rank #${detail.composite.rank} · ${detail.composite.benchmarks} benchmarks across ${detail.composite.domains}/6 domains.`}</p>
   <p className="home-coverage-date">{zh?'数据日期：':'Data date: '}{detail.composite.date}</p>
-  <ul className="home-coverage-detail-list">{Object.entries(detail.composite.domain_scores||{}).map(([domain,score])=><li key={domain}><span>{domain}</span><small>{Number(score).toFixed(1)}</small></li>)}</ul>
+  <ul className="home-coverage-detail-list">{Object.entries(detail.composite.domain_scores||{}).map(([domain,score])=><li key={domain}><span>{domainLabel(domain,zh)}</span><small>{Number(score).toFixed(1)}</small></li>)}</ul>
   <a className="inline-link" href={`?page=benchmarks&lang=${lang}`} onClick={open}>{zh?'进入完整评测页':'Open full benchmark explorer'}<ArrowRightIcon size={18}/></a>
   </aside></div>}
  </section>;

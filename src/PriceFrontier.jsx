@@ -1,5 +1,6 @@
 import React,{useMemo,useState} from 'react';
 import ModelLogo from './ModelLogo';
+import {configLabel} from './domains';
 import {MIN_SCORE,TICKS,blendedPrice,frontierOf} from './price-frontier-math';
 
 // 价格斩杀线：本站综合分（纵轴）× 一般用量折算价格（横轴，对数刻度）。
@@ -74,7 +75,7 @@ export default function PriceFrontier({frontier,models,lang}){
      <span className="chip"><ModelLogo item={logoItem(point.model)} lang={lang}/></span>
      <span className="label"><strong>{point.model.name}</strong><em><b>{point.score.toFixed(1)}</b> · {money(point.price,cny)}</em></span>
     </div>)}
-    {hovered&&<div className={'price-frontier-tooltip'+(x(hovered.price)>65?' left':'')} style={{left:`${x(hovered.price)}%`,top:`${y(hovered.score)}%`}} role="status"><strong>{hovered.model.name}</strong><span>{zh?'综合分':'Composite'} <b>{hovered.score.toFixed(1)}</b></span><span>{zh?'折算价格':'Blended'} <b>{money(hovered.price,cny)}</b>{zh?' / 百万 Token':' / 1M tokens'}</span><span>{zh?'计价配置：':'Priced config: '}{hovered.config}</span></div>}
+    {hovered&&<div className={'price-frontier-tooltip'+(x(hovered.price)>65?' left':'')} style={{left:`${x(hovered.price)}%`,top:`${y(hovered.score)}%`}} role="status"><strong>{hovered.model.name}</strong><span>{zh?'综合分':'Composite'} <b>{hovered.score.toFixed(1)}</b></span><span>{zh?'折算价格':'Blended'} <b>{money(hovered.price,cny)}</b>{zh?' / 百万 Token':' / 1M tokens'}</span><span>{zh?'计价配置：':'Priced config: '}{configLabel(hovered.config,zh)}</span></div>}
    </div>
    <p className="price-frontier-axis-x">{zh?`价格（${cny?'¥':'$'} / 百万 Token）→`:`Price (${cny?'¥':'$'} / 1M tokens) →`}</p>
   </div>
