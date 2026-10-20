@@ -644,3 +644,5 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .model-profile-dialog .model-profile-scroll{flex:1 1 auto;min-height:0;max-height:none}
 .model-profile-dialog .model-profile-criteria dl{max-width:none}
 @media(max-width:760px){.model-profile-dialog[open]{height:95dvh}}
+/* 调用榜时段按钮：小屏手机（≤380）收紧间距，中文 6 个按钮排一行 */
+@media(max-width:380px){.usage-explorer .period-buttons{gap:3px}.usage-explorer .period-buttons button{padding-inline:6px;white-space:nowrap}}

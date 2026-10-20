@@ -34,7 +34,8 @@ export async function createProfilePoster({capabilityModel,benchmarks,usageModel
   const [low,high]=c.score_range||[];
   blocks.push({title:zh?'能力档案':'Capability',metrics:[
    [zh?'综合分':'Composite score',c.score.toFixed(1),low!=null?(zh?`区间 ${low.toFixed(1)}–${high.toFixed(1)}`:`Range ${low.toFixed(1)}–${high.toFixed(1)}`):null],
-   [zh?'综合名次':'Composite rank',`#${c.rank}`,c.date||null],
+   // 有分数但没名次：评测不足 5 项或不足 3 个领域，不参与排名
+   [zh?'综合名次':'Composite rank',c.rank?`#${c.rank}`:(zh?'未排名':'Unranked'),c.rank?c.date||null:(zh?'需至少 5 项评测、覆盖 3 个领域':'Needs 5+ benchmarks in 3+ domains')],
    [zh?'计入综合分的评测':'Benchmarks in composite',String(c.benchmarks),null],
    [zh?'覆盖领域':'Domains',`${c.domains}/${Object.keys(c.domain_scores||{}).length||6}`,null],
   ],bars:Object.entries(c.domain_scores||{}).map(([d,score])=>[domainLabel(d,zh),score])});
