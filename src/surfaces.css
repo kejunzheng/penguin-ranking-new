@@ -518,3 +518,5 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 @media(max-width:600px){.capability-domains li{grid-template-columns:76px minmax(0,1fr) 42px;gap:8px}.capability-group li{gap:10px}}
 .digest-free-note{margin:-4px 0 12px}.digest-free-link{border:0;background:none;padding:0;color:#1769ed;font:inherit;cursor:pointer}.digest-free-link:hover{text-decoration:underline}.price-free-toggle{margin-left:8px}
 .composite-unranked{flex-direction:column;align-items:flex-start;gap:2px}.composite-unranked .composite-score{color:#7c8da3;font-weight:600}.composite-unranked-tag{font-size:10px;line-height:1.3;color:#8797aa;padding-left:6px;white-space:nowrap}.composite-dialog-unranked{margin:0 0 14px;padding:10px 12px;border-radius:8px;background:#f4f7fb;color:#5e7086;font-size:12px;line-height:1.7}
+/* 首页 Agent Skills / 开源产品卡：与 SkillHub 卡同一列表样式 */
+.home-project-digest .digest-currency{margin:0 0 12px}.home-project-digest .digest-currency .digest-caption{margin:0}.home-project-digest .project-logo{width:34px;height:34px;flex:0 0 34px}.home-project-digest strong{color:#16a34a}
