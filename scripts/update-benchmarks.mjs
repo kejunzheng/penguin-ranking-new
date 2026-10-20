@@ -259,7 +259,9 @@ const stripSuffix = key => key.replace(/-(?:20\d\d-\d\d-\d\d|20\d{6}|\d{4})$/, '
 // 名称兜底匹配的候选：基线入选模型 + 上一次已上榜的模型。基线截止 2026-09-21，只用基线会让之后新上榜的模型
 // （如 Claude Sonnet 5.5）在其他数据源里的变体名（claude-sonnet-5-5-xhigh-effort）全部匹配失败。
 // 只影响“能否对上已有模型”，入选规则不变。
-const matchableIds = new Set([...eligibleIds, ...(readJson(path.join(dataDir, 'benchmarks.json'))?.models || []).map(model => model.id)]);
+// 数据源把 MMDD 日期后缀的版本单独列为一个模型时（上游调用榜也是两个独立 id），登记后不再被 stripSuffix 并回基础型号。
+const SEPARATE_DATED_VARIANTS = ['deepseek-v4-1-flash-1017'];
+const matchableIds = new Set([...eligibleIds, ...SEPARATE_DATED_VARIANTS, ...(readJson(path.join(dataDir, 'benchmarks.json'))?.models || []).map(model => model.id)]);
 const indexBy = transform => { const map = new Map(); for (const id of matchableIds) { const key = transform(id); map.set(key, map.has(key) ? null : id); } return map; };
 // flatExact 先于去后缀比对：否则 qwen3-8-max 与 qwen3-8-max-0902 去后缀后相同、互相冲突，qwen-3-8-max 两边都对不上。
 const flatExact = indexBy(id => id.replace(/-/g, ''));
@@ -312,6 +314,28 @@ function resolveModelId(raw) {
 // 历史状态：{ snapshots: { benchmarkId: { date: [[modelId, rank, config, source]] } }, models: { id: meta } }
 const historyPath = stateFile('benchmark-history.json');
 const history = readJson(historyPath, { snapshots: {}, models: {} });
+// 新页面只返回未下线的模型时：新页面的名次作为最新一期，已下线模型按它在上一份快照里相对于仍在榜模型的位置并入，再整体重排。
+function mergeRetired(previous, fresh) {
+  const key = entry => `${entry[0]}|${entry[2]}`;
+  const freshKeys = new Set(fresh.map(key));
+  const oldOrder = previous.filter(entry => freshKeys.has(key(entry))).sort((x, y) => x[1] - y[1]).map(key);
+  const retired = previous.filter(entry => !freshKeys.has(key(entry))).sort((x, y) => x[1] - y[1]);
+  if (!retired.length) return fresh;
+  const merged = [...fresh].sort((x, y) => x[1] - y[1]).map(entry => ({ entry, order: 0 }));
+  const position = new Map(merged.map((item, index) => [key(item.entry), index]));
+  const slots = merged.map(() => []);
+  const aboveCount = rank => previous.filter(entry => freshKeys.has(key(entry)) && entry[1] < rank).length;
+  const ranked = [];
+  for (const entry of retired) {
+    const above = aboveCount(entry[1]);
+    const anchor = above ? position.get(oldOrder[above - 1]) : -1;
+    (anchor < 0 ? ranked : slots[anchor]).push(entry);
+  }
+  const out = [...ranked];
+  merged.forEach((item, index) => { out.push(item.entry, ...slots[index]); });
+  return out.map((entry, index) => [entry[0], index + 1, ...entry.slice(2)]);
+}
+
 const freshness = [];
 const sourceStatus = new Map();
 for (const [index, source] of LIVE_SOURCES.entries()) {
@@ -324,24 +348,18 @@ for (const [index, source] of LIVE_SOURCES.entries()) {
     // AA 现在的页面只返回未下线的模型（约 270 个），之前的快照包含已下线模型（约 365 个）。
     // 综合分只用每项评测的最新一期，若直接换成缩水后的名单，大批仍在榜的模型会因不在最新一期而掉出综合分，
     // 所以名单缩水超过 15% 时只更新价格点，评测名次沿用上一份完整快照。
+    let shrunk = false;
     if (source.name === 'Artificial Analysis') {
       const previous = history.snapshots.aa_intelligence_index, previousDate = previous && Object.keys(previous).sort().at(-1);
       const count = rows.filter(row => row.benchmarkId === 'aa_intelligence_index').length;
       if (previousDate && count < previous[previousDate].length * 0.85) {
-        sourceStatus.set(source.name, { ok: false, error: `AA 页面只有 ${count} 个出分模型（上一份快照 ${previous[previousDate].length} 个），已下线模型不再返回，评测名次沿用上次快照` });
+        shrunk = true;
         // 价格点：页面里仍有的模型用新数据，页面已不再返回的（已下线）模型保留上次的价格点，避免斩杀线图里的模型凭空减少。
         if (points?.length && previousPricePoints?.points?.length) {
           const fresh = new Set(history.aaPricePoints.points.map(point => point[0]));
           history.aaPricePoints.points.push(...previousPricePoints.points.filter(point => !fresh.has(point[0])));
         }
-        // 名次沿用旧快照，但发布日期等元数据仍用新页面补全（缺发布日期的模型因此可以入选）。
-        for (const row of rows) {
-          if (!row.releaseDate || !/^\d{4}-\d{2}-\d{2}$/.test(row.releaseDate)) continue;
-          const { id } = resolveModelId(row.raw), meta = history.models[id];
-          if (meta && !meta.releaseDate) meta.releaseDate = row.releaseDate;
-        }
-        console.log(`  ${source.name}: 名单缩水（${count} / ${previous[previousDate].length}），评测名次沿用上次快照，价格点合并更新`);
-        continue;
+        console.log(`  ${source.name}: 名单缩水（${count} / ${previous[previousDate].length}），以新页面为最新一期，已下线模型按上次相对位置并入`);
       }
     }
     const grouped = new Map(source.benchmarks.map(id => [id, []]));
@@ -366,6 +384,7 @@ for (const [index, source] of LIVE_SOURCES.entries()) {
       if (!entries.length) continue;
       const byDate = (history.snapshots[benchmarkId] ??= {});
       const previousDate = Object.keys(byDate).filter(day => day < date).sort().at(-1);
+      if (shrunk && previousDate) entries.splice(0, entries.length, ...mergeRetired(byDate[previousDate], entries));
       // 数据源内容与上一份快照完全相同时不重复保存（冻结的数据源每天都会抓到同样的内容）
       if (previousDate && JSON.stringify(byDate[previousDate]) === JSON.stringify(entries)) delete byDate[date];
       else byDate[date] = entries;
