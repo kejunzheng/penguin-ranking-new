@@ -2,7 +2,7 @@
 // 模型能力 = 整体水平 g + 领域偏差 δ_d；6 个领域等权、证据平衡；刻度固定（参照组 mean/sd 冻结在锚点文件里）。
 import { pickConfigRecord } from '../../src/benchmark-data.js';
 
-export const COMPOSITE_VERSION = '2026.10-bt-v3';
+export const COMPOSITE_VERSION = '2026.10-bt-v4'; // v4：编程与Agent 领域新增 aa_scicode（2026-10-20），刻度与参照组不变
 export const MIN_MODELS_PER_BENCHMARK = 10;
 export const EXCLUDED_BENCHMARKS = ['aa_intelligence_index', 'livebench_overall'];
 export const K_FACTOR = 8;
