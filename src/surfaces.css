@@ -624,3 +624,12 @@ dialog{line-height:1.6}.modal-description{font-size:15px;line-height:1.75}.modal
 .price-table:not(.price-table-or) td.numeric{font-size:12px;white-space:normal;overflow-wrap:anywhere}
 .price-table:not(.price-table-or) th{font-size:10px;white-space:normal}
 }
+
+/* 分享图标（首页各榜单卡片右上角、模型档案顶部）：无边框、无文字 */
+.poster-share-button{flex:none;display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;margin:-6px -8px 0 0;padding:0;border:0;border-radius:10px;background:none;color:#4a6584;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.poster-share-button:hover{background:#eef3fb;color:#176be8}
+.poster-share-button:focus-visible{outline:2px solid #176be8;outline-offset:1px}
+.home-section-head>.poster-share-button{align-self:flex-start}
+.model-profile-top .model-profile-share{width:40px;height:40px;margin:0 -10px 0 auto}
+.model-profile-top .model-profile-share+.model-profile-close{margin-left:0}
+.poster-share-dialog .export-header p{margin-top:4px;color:#587493;font-size:13px}

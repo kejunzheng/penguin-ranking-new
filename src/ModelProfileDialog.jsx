@@ -5,6 +5,7 @@ import UsageProfile from './UsageProfile';
 import CapabilityProfile from './CapabilityProfile';
 import {HIDDEN_BENCHMARKS} from './benchmark-data';
 import {domainLabel} from './domains';
+import PosterShare from './PosterShare';
 
 export default function ModelProfileDialog({capabilityModel,benchmarks,composite,usageModel,priceModel,initialTab='usage',trends,lang,currency,onCurrency,priceMeta,onClose}){
  const zh=lang==='zh',dialog=useRef(null),[tab,setTab]=useState(initialTab);
@@ -19,6 +20,7 @@ export default function ModelProfileDialog({capabilityModel,benchmarks,composite
     <button aria-pressed={tab==='usage'} onClick={()=>setTab('usage')}>{zh?'调用档案':<>Usage<span className="model-profile-tab-suffix"> profile</span></>}</button>
     <button aria-pressed={tab==='price'} onClick={()=>setTab('price')}>{zh?'价格档案':<>Pricing<span className="model-profile-tab-suffix"> profile</span></>}</button>
    </nav>
+   <PosterShare lang={lang} className="model-profile-share" label={zh?'生成模型档案分享图':'Create model profile share image'} fileName={`penguin-model-${String(capabilityModel?.name||usageModel?.name||priceModel?.name||'profile').replace(/[^\w.-]+/g,'-')}.png`} build={async()=>{const {createProfilePoster}=await import('./model-poster');return createProfilePoster({capabilityModel,benchmarks,usageModel,priceModel,trends,priceMeta,currency,lang,tab})}}/>
    <button className="icon-button model-profile-close" aria-label={zh?'关闭档案':'Close profile'} onClick={onClose}><XIcon size={22}/></button>
   </header>
   <div className="model-profile-scroll">
