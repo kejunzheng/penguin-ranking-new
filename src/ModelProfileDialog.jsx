@@ -20,7 +20,7 @@ export default function ModelProfileDialog({capabilityModel,benchmarks,usageMode
    <button className="icon-button model-profile-close" aria-label={zh?'关闭档案':'Close profile'} onClick={onClose}><XIcon size={22}/></button>
   </header>
   <div className="model-profile-scroll">
-   {selectedAvailable?(tab==='capability'?<CapabilityProfile model={capabilityModel} benchmarks={benchmarks} lang={lang}/>:tab==='usage'?<UsageProfile model={usageModel} trends={trends} lang={lang}/>:<PriceDetails model={priceModel} lang={lang} currency={currency} onCurrency={onCurrency} meta={priceMeta}/>):<section className="model-profile-empty"><h2 id="model-profile-title">{tab==='usage'?(zh?'暂无调用档案':'No usage profile'):(zh?'暂无价格档案':'No pricing profile')}</h2><p>{zh?'当前模型暂未在该榜单的数据源中匹配到记录。':'No matching record for this model is available in this ranking source yet.'}</p></section>}
+   {selectedAvailable?(tab==='capability'?<CapabilityProfile model={capabilityModel} benchmarks={benchmarks} lang={lang}/>:tab==='usage'?<UsageProfile model={usageModel} trends={trends} lang={lang}/>:<PriceDetails model={priceModel} lang={lang} currency={currency} onCurrency={onCurrency} meta={priceMeta}/>):<section className="model-profile-empty"><h2 id="model-profile-title">{tab==='capability'?(zh?'暂无能力档案':'No capability profile'):tab==='usage'?(zh?'暂无调用档案':'No usage profile'):(zh?'暂无价格档案':'No pricing profile')}</h2><p>{zh?'当前模型暂未在该榜单的数据源中匹配到记录。':'No matching record for this model is available in this ranking source yet.'}</p></section>}
   </div>
  </dialog>;
 }

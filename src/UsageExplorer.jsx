@@ -1,5 +1,5 @@
 import ModelProfileDialog from './ModelProfileDialog';
-import {findMatchingPriceModel} from './model-profile';
+import {findMatchingCapabilityModel,findMatchingPriceModel} from './model-profile';
 import {useEffect,useMemo,useRef,useState} from 'react';
 import {ArrowUpRightIcon,PlusIcon,XIcon,MagnifyingGlassIcon,DownloadSimpleIcon,CheckIcon,CaretDownIcon} from '@phosphor-icons/react';
 import ModelLogo from './ModelLogo';
@@ -13,7 +13,7 @@ const ui={zh:{total:'总量趋势',compare:'模型对比',period:'时间范围',
 const periods=['1w','1m','3m','6m','1y','custom'];
 const short=n=>new Intl.NumberFormat('en',{notation:'compact',maximumFractionDigits:1}).format(n);
 const display=r=>r.name+(r.id.includes(':free')?' · Free':'');
-export default function UsageExplorer({trends,lang,globalPrices,chinaPrices,currency,onCurrency}){
+export default function UsageExplorer({capabilityData,trends,lang,globalPrices,chinaPrices,currency,onCurrency}){
  const [profileModel,setProfileModel]=useState(null);
  const t=ui[lang];const [preset,setPreset]=useState('1w'),[custom,setCustom]=useState(()=>{const d=usageWindow(trends);return {from:d.from,to:d.to}}),[mode,setMode]=useState('total'),[theme]=useState('light');
  const data=useMemo(()=>usageWindow(trends,preset,custom),[trends,preset,custom]);
@@ -68,6 +68,6 @@ export default function UsageExplorer({trends,lang,globalPrices,chinaPrices,curr
   {exportError&&<p className="export-error" role="alert">{exportError}</p>}
   <div className="export-actions">{exportImage?(inWeChat?<p>{lang==='zh'?'长按图片 → 保存图片 → 相册':'Touch and hold → Save image → Photos'}</p>:<><button className="solid" onClick={downloadImage}><DownloadSimpleIcon size={18}/>{lang==='zh'?'下载高清图片':'Download PNG'}</button>{canShare&&<button className="export-share" onClick={shareImage}>{lang==='zh'?'分享 / 保存到相册':'Share / Save to Photos'}</button>}</>):!exportBusy&&<button className="solid" onClick={saveImage}>{lang==='zh'?'重新生成':'Try again'}</button>}</div>
  </dialog>
- {profileModel&&(()=>{const priceModel=findMatchingPriceModel(profileModel,[...(globalPrices?.models||[]),...(chinaPrices?.models||[])]),priceMeta=priceModel?.price_scope==='global'?globalPrices:chinaPrices;return <ModelProfileDialog usageModel={profileModel} priceModel={priceModel} initialTab="usage" trends={trends} lang={lang} currency={currency} onCurrency={onCurrency} priceMeta={priceMeta} onClose={()=>setProfileModel(null)}/>})()}
+ {profileModel&&(()=>{const priceModel=findMatchingPriceModel(profileModel,[...(globalPrices?.models||[]),...(chinaPrices?.models||[])]),priceMeta=priceModel?.price_scope==='global'?globalPrices:chinaPrices;return <ModelProfileDialog capabilityModel={findMatchingCapabilityModel(profileModel,capabilityData?.models||[])} benchmarks={capabilityData?.benchmarks} usageModel={profileModel} priceModel={priceModel} initialTab="usage" trends={trends} lang={lang} currency={currency} onCurrency={onCurrency} priceMeta={priceMeta} onClose={()=>setProfileModel(null)}/>})()}
  </section>;
 }

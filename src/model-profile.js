@@ -19,3 +19,11 @@ export function findMatchingUsageModel(priceModel,usageModels=[]){
   ||usageModels.find(model=>modelKey(model)===name)
   ||null;
 }
+
+// 调用榜 / 价格榜模型 → 能力榜模型：按模型名匹配，优先同厂商；只返回有评测记录的模型。
+export function findMatchingCapabilityModel(model,capabilityModels=[]){
+ if(!model)return null;
+ const name=modelKey(model),provider=providerKey(model);
+ const candidates=capabilityModels.filter(item=>item.records&&Object.values(item.records).some(list=>list?.length)&&modelKey(item)===name);
+ return candidates.find(item=>tidy(item.organization)===provider)||candidates[0]||null;
+}
