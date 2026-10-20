@@ -10,6 +10,13 @@ import PricePagination from './PricePagination';
 import DataNotes from './DataNotes';
 import UsageExplorer from './UsageExplorer';
 import PageHeading from './PageHeading';
+import {initReport,buildPgid} from './utils/report';
+// 大同上报统一 projectId（qqnews-utils 规则生成，后续拉端 / 上报必须复用，不要重新生成）
+const REPORT_PROJECT_ID='penguinTrend_qv7c';
+// TODO: pgid 由 AI 按 `pg_{projectId}_{page}` 兜底生成，请按实际页面登记调整
+const reportPgid=(page,channel)=>buildPgid('pg',REPORT_PROJECT_ID,page==='opensource'?`opensource_${channel}`:page);
+// 仅在腾讯域名（testqqnews / h5.news）上报，GitHub Pages 与本地预览不上报
+const reportEnabled=()=>/(^|\.)qq\.com$/.test(location.hostname);
 import BenchmarkExplorer from './BenchmarkExplorer';
 import SkillhubExplorer,{categoryNames as skillhubCategoryNames} from './SkillhubExplorer';
 import {orderBenchmarks} from './benchmark-data';
@@ -38,6 +45,7 @@ export default function App(){
  useEffect(()=>{navRef.current?.querySelector('[aria-current=page]')?.scrollIntoView({block:'nearest',inline:'nearest'})},[page,channel,lang]);
  useEffect(()=>{const back=()=>{setState(readState());setModal(null)};window.addEventListener('popstate',back);return()=>window.removeEventListener('popstate',back)},[]);
  useEffect(()=>{try{localStorage.setItem('penguin-saved',JSON.stringify(saved))}catch{}},[saved]);
+ useEffect(()=>{if(reportEnabled())initReport({publicParams:{project_id:REPORT_PROJECT_ID}})},[]);
  useEffect(()=>{if(modal&&modal.type!=='price')dialog.current?.showModal();else dialog.current?.close()},[modal]);
  const ranked=useMemo(()=>rankProjects(projects.data||[]),[projects.data]);
  const projectRows=ranked.filter(r=>(!query||(r.name+' '+r.fullName+' '+r.language).toLowerCase().includes(query.toLowerCase()))&&(projectLang==='all'||r.language===projectLang)&&(!savedOnly||saved.includes(r.repositoryId)));
@@ -64,7 +72,7 @@ export default function App(){
  const renderProjects=()=> <ProjectList {...{page,projects,t,period,query,setQuery,projectLang,setProjectLang,savedOnly,setSavedOnly,ranked,projectRows,lang,setModal,saved,toggleSave}} onPeriod={period=>change({period})}/>;
  function toggleSave(id){setSaved(s=>s.includes(id)?s.filter(x=>x!==id):[...s,id])}
  return <><a className="skip" href="#main">{t.skip}</a><header className="site-header"><div className="frame masthead"><div className="brand-group">{link('home',t.brand,'site-name')}<div className="publisher-lockup"><img className="publisher-logo" src={assetUrl('assets/tencent-technology.png')} alt="腾讯科技 Tencent Technology"/>{link('home',<><img className="brand-logo" src={assetUrl('assets/penguin-logo-supplied.png')} alt="企鹅智库"/></>,'brand')}</div></div><nav ref={navRef} aria-label={lang==='en'?'Main navigation':'主导航'}>{navigation.map(item=><a key={item.channel||item.page} href={href(item.page,item.channel)} aria-current={page===item.page&&(!item.channel||channel===item.channel)?'page':undefined} onClick={e=>{if(e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;e.preventDefault();change({page:item.page,...(item.channel?{channel:item.channel}:{})})}}>{t[item.label]}</a>)}</nav><div className="locale" aria-label="Language / 语言"><button onClick={()=>change({lang:'en'})} aria-label="English" aria-pressed={lang==='en'}>EN</button><button onClick={()=>change({lang:'zh'})} aria-label="简体中文" aria-pressed={lang==='zh'}>中</button></div></div></header>
- <main id="main" className={'frame '+(page==='home'?'home':'inner-page')}>
+ <main id="main" key={reportPgid(page,channel)} dt-pgid={reportPgid(page,channel)} className={'frame '+(page==='home'?'home':'inner-page')}>
  {page==='home'?<>
  <h1 className="visually-hidden">{t.brand}</h1>
  <div className="home-layout"><HomeBenchmarkCard lang={lang} change={change}/>
