@@ -120,6 +120,10 @@ function ResultLine({benchmark,result,zh,highlight,muted}){
 const COMPOSITE=COMPOSITE_COLUMN_ID;
 // 综合分单元格只放大号指数和「#名次」，其余信息（名次范围、评测项数、领域、缺测、逐项核对）点击后在详情里看；未进入排名显示「—」
 function CompositeResult({row,zh,highlight,onOpen}){
+ if(row&&!row.rank&&Number.isFinite(row.score))return <span className="benchmark-result composite-result composite-unranked">
+  <button type="button" className="composite-score" aria-haspopup="dialog" title={zh?`评测 ${row.benchmarks}/5，暂不排名，分数仅供参考`:`${row.benchmarks}/5 benchmarks; not ranked yet, score for reference only`} aria-label={zh?`查看综合分详情，指数 ${row.score.toFixed(1)}，暂不排名`:`View composite details, index ${row.score.toFixed(1)}, not ranked`} onClick={onOpen}>{row.score.toFixed(1)}</button>
+  <span className="composite-unranked-tag">{zh?`评测 ${row.benchmarks}/5 · 暂不排名`:`${row.benchmarks}/5 · unranked`}</span>
+ </span>;
  if(!row||!row.rank)return <span className="benchmark-na" title={zh?'评测不足或未达排名门槛，不显示综合分':'Not enough benchmarks to be ranked'}>—</span>;
  return <span className="benchmark-result composite-result">
   <button type="button" className="composite-score" aria-haspopup="dialog" aria-label={zh?`查看综合分详情，指数 ${row.score.toFixed(1)}`:`View composite details, index ${row.score.toFixed(1)}`} onClick={onOpen}>{row.score.toFixed(1)}</button>
@@ -145,6 +149,7 @@ function CompositeDialog({summary,model,names,zh,onClose}){
    <button type="button" className="benchmark-mobile-profile-close" aria-label={zh?'关闭详情':'Close details'} onClick={onClose}><XIcon size={18}/></button>
    <p className="composite-dialog-eyebrow">{zh?'综合分 · 综合表现指数':'COMPOSITE · PERFORMANCE INDEX'}</p>
    <h3>{model?model.name:(zh?'综合表现指数怎么算':'How the composite index works')}</h3>
+   {model&&row&&!row.rank&&<p className="composite-dialog-unranked">{zh?`该模型有 ${row.benchmarks} 项入选评测、覆盖 ${row.domains} 个领域，未达到排名门槛（至少 5 项评测且覆盖 3 个领域），所以只给分数、暂不排名。评测较少时分数的不确定性更大，仅供参考。`:`This model has ${row.benchmarks} included benchmarks across ${row.domains} domains, below the rank threshold (5 benchmarks across 3 domains), so only a score is shown. With few benchmarks the score is less certain; treat it as a reference.`}</p>}
    {model&&row&&<section className="composite-dialog-model">
     <div className="composite-dialog-stats">
      <div><small>{zh?'指数':'Index'}</small><strong>{row.score.toFixed(1)}</strong></div>
@@ -169,7 +174,7 @@ function CompositeDialog({summary,model,names,zh,onClose}){
      <li>{zh?'指数 = 50 + 15 × z，z 以参照组的均值和标准差计算。参照组是首次计算时进入排名的模型，刻度固定；指数会随新评测结果更新，但不是「永不变化」。':'Index = 50 + 15 × z, with z based on the mean and standard deviation of a reference group (the models ranked in the first calculation). The scale is fixed, but indices still update with new results.'}</li>
     </ul></section>
     <section><h4>{zh?'出分与排名门槛':'Thresholds'}</h4><ul>
-     <li>{zh?'至少 2 项入选评测才出分；至少 5 项且覆盖 3 个领域才进入排名，其余显示「—」。':'A score needs at least 2 included benchmarks; a rank needs at least 5 across 3 domains, otherwise a dash is shown.'}</li>
+     <li>{zh?'至少 2 项入选评测才出分；至少 5 项且覆盖 3 个领域才进入排名。出分但未达排名门槛的模型显示分数和「评测 n/5 · 暂不排名」，分数仅供参考；不足 2 项显示「—」。':'A score needs at least 2 included benchmarks; a rank needs at least 5 across 3 domains. Scored models below the rank threshold show their score marked unranked, for reference only; a dash means no score.'}</li>
      <li>{zh?'没测过的领域按整体水平估计，不是实测，会标出「缺测」。':'Untested domains are estimated from overall level and marked as not tested.'}</li>
      <li>{zh?`模型不足 ${summary.params.MIN_MODELS_PER_BENCHMARK} 个的评测不计入；AA Index、LiveBench 等汇总类指数不计入，避免重复计分。`:`Benchmarks with fewer than ${summary.params.MIN_MODELS_PER_BENCHMARK} models and aggregate indices such as AA Index and LiveBench are excluded to avoid double counting.`}</li>
     </ul></section>
